@@ -13,7 +13,7 @@ const AbcTicket = () => {
   }, []);
 
   const fetchData = async () => {
-    const response = await apiInstance.get('/user/dropdown', {
+    const response = await apiInstance.get('/upload/filesByDate', {
       params: {roleId: userData.userId},
     });
     console.log('abc', response);

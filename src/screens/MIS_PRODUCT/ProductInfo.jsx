@@ -50,20 +50,14 @@ const ProductInfo = () => {
           product.map((ele, index) => (
             <View key={index} style={styles.card}>
               <View style={styles.row}>
-                {images &&
-                  images.map((img, index) => {
-                    console.log(img)
-                    // return (
-                    //   <Image
-                    //     key={index} // Make sure to add a unique key for each image
-                    //     source={{
-                    //       uri: `https://image.rdvision.in/images/image/${img}`,
-                    //     }}
-                    //     style={{width: 70, height: 70}}
-                    //   />
-                    // );
-                  })}
-
+               
+                      <Image                     
+                        source={{
+                          uri: `https://cdn-icons-png.flaticon.com/128/4223/4223429.png`,
+                        }}
+                        style={{width: 70, height: 70}}
+                      />
+                 
                 <View style={styles.tableContainer}>
                   {/* Table Data */}
                   <View style={styles.tableRow}>

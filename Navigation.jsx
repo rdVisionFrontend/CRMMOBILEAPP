@@ -37,25 +37,25 @@ const openGmail = () => {
 
 const EmailScreen = () => (
   <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-    <TouchableOpacity onPress={openGmail} style={{borderWidth:1, padding:10 ,borderRadius:2}}>
+    <TouchableOpacity
+      onPress={openGmail}
+      style={{borderWidth: 1, padding: 10, borderRadius: 2}}>
       <View
         style={{
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          gap:10
+          gap: 10,
         }}>
-        
-          <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/128/5968/5968534.png',
-            }}
-            style={{width: 20, height: 20}}
-          />
-          <Text>OPEN GMAIL</Text>
-        </View>
-      
+        <Image
+          source={{
+            uri: 'https://cdn-icons-png.flaticon.com/128/5968/5968534.png',
+          }}
+          style={{width: 20, height: 20}}
+        />
+        <Text>OPEN GMAIL</Text>
+      </View>
     </TouchableOpacity>
   </View>
 );
@@ -77,7 +77,19 @@ const DrawerNavigator = () => (
         headerStyle: {
           backgroundColor: '#b1a7a6', // Change header background color
         },
-        headerTintColor: '0b2545', // Optional: Change text color in header
+        headerTintColor: '#0b2545', // Change text color in header
+        drawerIcon: ({focused, size}) => (
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/432/432312.png',
+            }}
+            style={{
+              width: size, // Set the icon size
+              height: size, // Set the icon size
+
+            }}
+          />
+        ),
       }}
     />
     <Drawer.Screen
@@ -88,7 +100,19 @@ const DrawerNavigator = () => (
         headerStyle: {
           backgroundColor: '#b1a7a6', // Change header background color
         },
-        headerTintColor: '0b2545', // Optional: Change text color in header
+        headerTintColor: '0b2545', 
+        drawerIcon: ({focused, size}) => (
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/1006/1006657.png',
+            }}
+            style={{
+              width: size, // Set the icon size
+              height: size, // Set the icon size
+
+            }}
+          />
+        ),
       }}
     />
 
@@ -100,7 +124,19 @@ const DrawerNavigator = () => (
         headerStyle: {
           backgroundColor: '#b1a7a6', // Change header background color
         },
-        headerTintColor: '0b2545', // Optional: Change text color in header
+        headerTintColor: '0b2545',
+        drawerIcon: ({focused, size}) => (
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/11052/11052937.png',
+            }}
+            style={{
+              width: size, // Set the icon size
+              height: size, // Set the icon size
+
+            }}
+          />
+        ),
       }}
     />
 
@@ -112,7 +148,19 @@ const DrawerNavigator = () => (
         headerStyle: {
           backgroundColor: '#b1a7a6', // Change header background color
         },
-        headerTintColor: '0b2545', // Optional: Change text color in header
+        headerTintColor: '0b2545', 
+        drawerIcon: ({focused, size}) => (
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/16859/16859716.png',
+            }}
+            style={{
+              width: size, // Set the icon size
+              height: size, // Set the icon size
+
+            }}
+          />
+        ),
       }}
     />
     <Drawer.Screen
@@ -123,7 +171,19 @@ const DrawerNavigator = () => (
         headerStyle: {
           backgroundColor: '#b1a7a6', // Change header background color
         },
-        headerTintColor: '0b2545', // Optional: Change text color in header
+        headerTintColor: '0b2545', 
+        drawerIcon: ({focused, size}) => (
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/3031/3031708.png',
+            }}
+            style={{
+              width: 20, 
+              height: 20, 
+
+            }}
+          />
+        ),
       }}
     />
     <Drawer.Screen
@@ -134,7 +194,19 @@ const DrawerNavigator = () => (
         headerStyle: {
           backgroundColor: '#b1a7a6', // Change header background color
         },
-        headerTintColor: '0b2545', // Optional: Change text color in header
+        headerTintColor: '0b2545', 
+        drawerIcon: ({focused, size}) => (
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/27/27130.png',
+            }}
+            style={{
+              width: 20, 
+              height: 20, 
+
+            }}
+          />
+        ),
       }}
     />
 
@@ -146,7 +218,19 @@ const DrawerNavigator = () => (
         headerStyle: {
           backgroundColor: '#b1a7a6', // Change header background color
         },
-        headerTintColor: '0b2545', // Optional: Change text color in header
+        headerTintColor: '0b2545',
+        drawerIcon: ({focused, size}) => (
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/10608/10608943.png',
+            }}
+            style={{
+              width: 20, 
+              height: 20, 
+
+            }}
+          />
+        ),
       }}
     />
 
@@ -157,6 +241,18 @@ const DrawerNavigator = () => (
         headerShown: true,
         headerStyle: {backgroundColor: '#b1a7a6'},
         headerTintColor: '#0b2545',
+        drawerIcon: ({focused, size}) => (
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/5968/5968534.png',
+            }}
+            style={{
+              width: 20, 
+              height: 20, 
+
+            }}
+          />
+        ),
       }}
     />
   </Drawer.Navigator>
@@ -195,8 +291,8 @@ const Navigation = () => {
             let iconUrl;
             if (route.name === 'Login') {
               iconUrl =
-                'https://cdn-icons-png.flaticon.com/128/1946/1946488.png'; // Login icon URL
-            } else if (route.name === 'Profile') {
+                'https://cdn-icons-png.flaticon.com/128/8323/8323511.png'; // Login icon URL
+            } else if (route.name === 'Dashboard') {
               iconUrl =
                 'https://cdn-icons-png.flaticon.com/128/1077/1077063.png'; // Profile icon URL
             } else if (route.name === 'Ticket') {
@@ -216,32 +312,46 @@ const Navigation = () => {
           tabBarActiveTintColor: 'black', // Active icon color
           tabBarInactiveTintColor: 'red', // Inactive icon color
           tabBarStyle: {
-            backgroundColor: '#ffffff', // Change navbar background color
+            backgroundColor: '#edede9', // Change navbar background color
             height: 60, // Adjust height if needed
           },
         })}>
         <Tab.Screen
-          name={jwtToken ? 'Logout' : 'Login'}
-          options={{headerShown: false}}
+          name={jwtToken ? 'Logout' : 'Login'}          
           component={Login}
+          options={{
+            headerShown: false,
+            tabBarLabelStyle: {
+              fontSize: 16, // Increase the font size
+              fontWeight:300 // Optional: Make it bold
+              
+            },
+          }}
         />
         <Tab.Screen
-          name="Profile"
+          name="Dashboard"
           component={ProfileScreen}
-          options={{headerShown: false}}
+          options={{
+            headerShown: false,
+            tabBarLabelStyle: {
+              fontSize: 16, // Increase the font size
+              fontWeight:300 // Optional: Make it bold
+              
+            },
+          }}
         />
-        {/* <Tab.Screen
-                    name="Profile"
-                    component={ProfileScreen}
-                    options={{
-                        headerShown: false,
-                        tabBarButton: (props) => null, // This will disable the tab by not rendering the tab button
-                    }}
-                /> */}
+        
         <Tab.Screen
           name="Ticket"
           component={DrawerNavigator}
-          options={{headerShown: false}}
+          options={{
+            headerShown: false,
+            tabBarLabelStyle: {
+              fontSize: 16, // Increase the font size
+              fontWeight:300 // Optional: Make it bold
+              
+            },
+          }}
         />
       </Tab.Navigator>
     </NavigationContainer>
