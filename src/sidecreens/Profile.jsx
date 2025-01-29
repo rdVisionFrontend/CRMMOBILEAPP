@@ -10,8 +10,9 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Toast} from 'toastify-react-native';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import Nodata from '../screens/NoData';
+import { logout } from '../Redux/features/crmSlice';
 
 const User = ({navigation}) => {
   const [user, setUser] = useState(null);
@@ -21,6 +22,7 @@ const User = ({navigation}) => {
   const {userData, jwtToken, refreshToken} = useSelector(
     state => state.crmUser,
   );
+  const dispatch = useDispatch()
 
   const formatTime = timeInSeconds => {
     const hours = Math.floor(timeInSeconds / 3600);
@@ -36,12 +38,20 @@ const User = ({navigation}) => {
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = async ({navigation}) => {
     try {
       // Clear specific keys from AsyncStorage
       await AsyncStorage.removeItem('jwtToken');
       await AsyncStorage.removeItem('refreshToken');
       await AsyncStorage.removeItem('user');
+      dispatch(logout())
+      .then(res=>{
+        Alert.alert("You are Logout successfully")
+        navigation.navigate('Login');
+      })
+      .cath(err=>{
+        Alert.alert("Please  try again")
+      })
       Toast.success('You have logged out successfully');
       navigation.navigate('Login');
     } catch (error) {

@@ -1,10 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image } from 'react-native';
-import { useSelector } from 'react-redux';
+import React, {useEffect, useState} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  FlatList,
+  Image,
+} from 'react-native';
+import {useSelector} from 'react-redux';
 import apiInstance from '../../../api';
 
 const InvoiceInfoTab = () => {
-  const { userData } = useSelector((state) => state.crmUser);
+  const {userData} = useSelector(state => state.crmUser);
   const [invoiceDataTab, setInvoiceDataTab] = useState([]);
   const [expandedIndex, setExpandedIndex] = useState(null); // For managing accordion state
 
@@ -15,7 +22,7 @@ const InvoiceInfoTab = () => {
   const fetchInvoices = async () => {
     try {
       const response = await apiInstance.get(
-        `/invoice/getAssInvoice/${userData.userId}`
+        `/invoice/getAssInvoice/${userData.userId}`,
       );
       setInvoiceDataTab(response.data);
     } catch (error) {
@@ -23,18 +30,18 @@ const InvoiceInfoTab = () => {
     }
   };
 
-  const formatDate = (dateArray) => {
+  const formatDate = dateArray => {
     const [year, month, day] = dateArray;
     const formattedMonth = month < 10 ? `0${month}` : month;
     const formattedDay = day < 10 ? `0${day}` : day;
     return `${formattedDay}-${formattedMonth}-${year}`;
   };
 
-  const toggleAccordion = (index) => {
+  const toggleAccordion = index => {
     setExpandedIndex(expandedIndex === index ? null : index); // Toggle the accordion
   };
 
-  const renderInvoiceCard = ({ item, index }) => {
+  const renderInvoiceCard = ({item, index}) => {
     const isExpanded = expandedIndex === index;
     return (
       <View style={styles.card}>
@@ -50,17 +57,48 @@ const InvoiceInfoTab = () => {
           <View style={styles.accordionContent}>
             <View style={styles.accordionInner}>
               <View>
-                <Text>Total Amount: {item.orderAmount}</Text>
-                <Text>Tracking Number: {item.orderDto.trackingNumber}</Text>
+                <Text style={{marginVertical:5, fontSize:15}}>Total Amount -: INR {item.orderAmount}</Text>
+                <Text style={{marginVertical:5, fontSize:15}}>Tracking Number -: {item.orderDto.trackingNumber}</Text>
               </View>
-              <View style={{marginRight:15}}>
+              <View style={{marginRight: 15}}>
                 <Image
                   source={{
                     uri: 'https://cdn-icons-png.flaticon.com/128/455/455705.png',
                   }}
-                  style={{height:15,width:15}}
+                  style={{height: 15, width: 15}}
                 />
               </View>
+            </View>
+            <View style={{backgroundColor:'#fef9ef', borderRadius:5, marginTop:5, padding:5}}>
+            {item.orderDto.productOrders[0].product.map((product, index) => (
+                <View
+                  key={index}
+                  style={[styles.productDetailContainer, {width: '100%'}]}>
+                  <View style={[styles.row, {borderBottomWidth: 1}]}>
+                    <Text style={[styles.tableHeader, {flex: 1}]}>
+                      Product Name:
+                    </Text>
+                    <Text style={[styles.tableCell, {flex: 2}]}>
+                      {product.name}
+                    </Text>
+                  </View>
+                  <View style={[styles.row, {borderBottomWidth: 1}]}>
+                    <Text style={[styles.tableHeader, {flex: 1}]}>
+                      Quantity:
+                    </Text>
+                    <Text style={[styles.tableCell, {flex: 2}]}>
+                      {item.orderDto.productOrders[0].quantity || 0}
+                    </Text>
+                  </View>
+                  <View style={[styles.row, {borderBottomWidth: 1}]}>
+                    <Text style={[styles.tableHeader, {flex: 1}]}>Price:</Text>
+                    <Text style={[styles.tableCell, {flex: 2}]}>
+                      {item.orderDto.productOrders[0].totalAmount || 0}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+
             </View>
           </View>
         )}
@@ -72,7 +110,7 @@ const InvoiceInfoTab = () => {
     <View style={styles.container}>
       <FlatList
         data={invoiceDataTab}
-        keyExtractor={(item) => item.invoiceId.toString()}
+        keyExtractor={item => item.invoiceId.toString()}
         renderItem={renderInvoiceCard}
         contentContainerStyle={styles.listContent}
       />
@@ -101,16 +139,15 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     elevation: 2,
   },
   cardHeader: {
-    width:'99%',
+    width: '99%',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between', // Space between elements
     alignItems: 'center',
-    
   },
   cardTitle: {
     fontSize: 18,
@@ -124,15 +161,16 @@ const styles = StyleSheet.create({
     borderTopColor: '#ddd',
     backgroundColor: '#adc178',
     padding: 5,
+    borderRadius:5
   },
   accordionInner: {
-    width:'99%',
+    width: '99%',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between', // Space elements evenly
     alignItems: 'center',
   },
-  
+
   imageIcon: {
     width: 30,
     height: 30,
@@ -149,5 +187,21 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     backgroundColor: '#4c956c',
     color: '#fff',
+  },
+  productDetailContainer: {
+    padding: 10,
+    width: '100%',
+  },
+  row: {
+    flexDirection: 'row',
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  tableHeader: {
+    fontWeight: 'bold',
+    paddingRight: 10,
+  },
+  tableCell: {
+    paddingLeft: 10,
   },
 });

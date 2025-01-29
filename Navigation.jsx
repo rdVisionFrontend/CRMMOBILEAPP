@@ -1,5 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, AsyncStorage, Image} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  AsyncStorage,
+  Image,
+  Button,
+  TouchableOpacity,
+} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createDrawerNavigator} from '@react-navigation/drawer';
@@ -13,8 +21,44 @@ import Invoice from './src/screens/invoice/Invoice';
 import TodaySalesRepost from './src/screens/todaySales/TodaySalesRepost';
 import AbcTicket from './src/screens/ABC/AbcTicket';
 import InvoiceInfo from './src/screens/ASS/InvoiceInfo';
+import ProductInfo from './src/screens/MIS_PRODUCT/ProductInfo';
+import {Linking, Platform} from 'react-native';
 
 const Drawer = createDrawerNavigator();
+const openGmail = () => {
+  if (Platform.OS === 'android') {
+    Linking.openURL('googlegmail://compose').catch(() =>
+      Linking.openURL('mailto:'),
+    ); // Fallback to default mail app
+  } else {
+    Linking.openURL('mailto:');
+  }
+};
+
+const EmailScreen = () => (
+  <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+    <TouchableOpacity onPress={openGmail} style={{borderWidth:1, padding:10 ,borderRadius:2}}>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap:10
+        }}>
+        
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/5968/5968534.png',
+            }}
+            style={{width: 20, height: 20}}
+          />
+          <Text>OPEN GMAIL</Text>
+        </View>
+      
+    </TouchableOpacity>
+  </View>
+);
 
 const DrawerNavigator = () => (
   <Drawer.Navigator
@@ -94,7 +138,27 @@ const DrawerNavigator = () => (
       }}
     />
 
-    
+    <Drawer.Screen
+      name="Product Information"
+      component={ProductInfo}
+      options={{
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: '#b1a7a6', // Change header background color
+        },
+        headerTintColor: '0b2545', // Optional: Change text color in header
+      }}
+    />
+
+    <Drawer.Screen
+      name="Email"
+      component={EmailScreen}
+      options={{
+        headerShown: true,
+        headerStyle: {backgroundColor: '#b1a7a6'},
+        headerTintColor: '#0b2545',
+      }}
+    />
   </Drawer.Navigator>
 );
 // Bottom Tab Navigator

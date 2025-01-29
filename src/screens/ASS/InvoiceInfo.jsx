@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     width: '100%',
+    position:'fixed'
   },
   card: {
     width: '22%', // Slightly less than 25% to allow spacing
