@@ -8,6 +8,7 @@ import WelcomePage from '../../WelcomePage';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../Redux/features/crmSlice';
 import apiInstance from '../../api';
+import { useAuth } from '../Authorization/AuthContext';
 
 
 const Login = ({ navigation }) => {
@@ -19,13 +20,13 @@ const Login = ({ navigation }) => {
   const [resendOtp, setResendOtp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState(null)
-  const {jwtToken} = useSelector((state)=>state.crmUser)
+  const { jwtToken } = useSelector((state) => state.crmUser)
   const dispatch = useDispatch()
-
+  const { setIsAuthenticated } = useAuth()
 
   useEffect(() => {
     fetchToken()
-  },[token,jwtToken])
+  }, [token, jwtToken])
   const fetchToken = async () => {
     const token = await AsyncStorage.getItem('jwtToken');
     setToken(token)
@@ -67,17 +68,17 @@ const Login = ({ navigation }) => {
       // Send login request
       const response = await apiInstance.post(`/auth/login`, { email, password, logInOtp: otp });
       console.log('OTP verified:', response);
-  
+
       // Navigate and show success message
       navigation.navigate('Profile');
       Toast.success('Login successful');
-  
+      setIsAuthenticated(true)
       // Destructure the response data
       const { jwtToken, refreshToken, user } = response.data;
-  
+
       // Dispatch user data to redux store
       dispatch(setUser({ jwtToken, refreshToken, user }));
-  
+
       // Store data in AsyncStorage
       await AsyncStorage.setItem('jwtToken', jwtToken);
       await AsyncStorage.setItem('refreshToken', refreshToken);
@@ -91,87 +92,87 @@ const Login = ({ navigation }) => {
       setLoading(false); // Stop loading indicator
     }
   };
-  
+
 
   return (
     <>
-          {
-            token ? (
-              <WelcomePage/>
-            ): (
-              <ImageBackground
-            source = {{ uri: 'https://img.freepik.com/free-photo/3d-vertical-background-with-abstract-style_23-2150641317.jpg?ga=GA1.1.59646563.1734164377&semt=ais_hybrid' }} // Replace with your image URL or local image file
-          style={styles.container}
+      {
+        token ? (
+          <WelcomePage />
+        ) : (
+          <ImageBackground
+            source={{ uri: 'https://img.freepik.com/free-photo/3d-vertical-background-with-abstract-style_23-2150641317.jpg?ga=GA1.1.59646563.1734164377&semt=ais_hybrid' }} // Replace with your image URL or local image file
+            style={styles.container}
           >
-          <View style={styles.overlay}>
+            <View style={styles.overlay}>
 
-            {/* Login Icon */}
-            <Image
-              source={{ uri: 'https://cdn-icons-png.flaticon.com/128/295/295128.png' }}
-              style={styles.icon}
-            />
+              {/* Login Icon */}
+              <Image
+                source={{ uri: 'https://cdn-icons-png.flaticon.com/128/295/295128.png' }}
+                style={styles.icon}
+              />
 
-            {/* Email and Password Input */}
-            {reqOtpForm && (
-              <View style={{ padding: 10 }}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter your email"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
-                <TouchableOpacity
-                  style={styles.otpBtn}
+              {/* Email and Password Input */}
+              {reqOtpForm && (
+                <View style={{ padding: 10 }}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your email"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                  />
+                  <TouchableOpacity
+                    style={styles.otpBtn}
+                    onPress={handleRequestOtp}
+                    disabled={loading}
+                  >
+                    <Text style={{ textAlign: 'center', color: "#fff", fontSize: 16 }}>
+                      {loading ? 'Requesting...' : 'Request OTP'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* OTP Input */}
+              {otpSent && (
+                <View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter OTP"
+                    keyboardType="number-pad"
+                    value={otp}
+                    onChangeText={setOtp}
+                  />
+                  <TouchableOpacity
+                    style={styles.otpBtn}
+                    onPress={handleFinalLogin}
+                    disabled={loading}
+                  >
+                    <Text style={{ textAlign: 'center', color: "#fff", fontSize: 16 }}>{loading ? 'Wait...' : 'Login'}</Text>
+                  </TouchableOpacity >
+                </View>
+              )}
+
+              {/* Resend OTP */}
+              {resendOtp && (
+                <Text
                   onPress={handleRequestOtp}
-                  disabled={loading}
+                  style={{ color: '#fff', textAlign: 'center', marginTop: 20 }}
                 >
-                  <Text style={{ textAlign: 'center', color: "#fff", fontSize: 16 }}>
-                    {loading ? 'Requesting...' : 'Request OTP'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {/* OTP Input */}
-            {otpSent && (
-              <View>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter OTP"
-                  keyboardType="number-pad"
-                  value={otp}
-                  onChangeText={setOtp}
-                />
-                <TouchableOpacity
-                  style={styles.otpBtn}
-                  onPress={handleFinalLogin}
-                  disabled={loading}
-                >
-                  <Text style={{ textAlign: 'center', color: "#fff", fontSize: 16 }}>{loading ? 'Wait...' : 'Login'}</Text>
-                </TouchableOpacity >
-              </View>
-            )}
-
-            {/* Resend OTP */}
-            {resendOtp && (
-              <Text
-                onPress={handleRequestOtp}
-                style={{ color: '#fff', textAlign: 'center', marginTop: 20 }}
-              >
-                Resend OTP
-              </Text>
-            )}
-          </View>
-        </ImageBackground >
+                  Resend OTP
+                </Text>
+              )}
+            </View>
+          </ImageBackground >
         )
       }
     </>

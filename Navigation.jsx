@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,13 +8,13 @@ import {
   Button,
   TouchableOpacity,
 } from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {createDrawerNavigator} from '@react-navigation/drawer';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import Login from './src/screens/Login';
 import ProfileScreen from './src/sidecreens/Profile';
 import Ticket from './src/screens/Ticket';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import In_Nagociation from './src/screens/nagotiation/In_Nagociation';
 import EmailModal from './src/screens/nagotiation/EmailModal';
 import Invoice from './src/screens/invoice/Invoice';
@@ -22,7 +22,9 @@ import TodaySalesRepost from './src/screens/todaySales/TodaySalesRepost';
 import AbcTicket from './src/screens/ABC/AbcTicket';
 import InvoiceInfo from './src/screens/ASS/InvoiceInfo';
 import ProductInfo from './src/screens/MIS_PRODUCT/ProductInfo';
-import {Linking, Platform} from 'react-native';
+import { Linking, Platform } from 'react-native';
+import { useAuth } from './src/Authorization/AuthContext';
+import { createStackNavigator } from '@react-navigation/stack';
 
 const Drawer = createDrawerNavigator();
 const openGmail = () => {
@@ -36,10 +38,10 @@ const openGmail = () => {
 };
 
 const EmailScreen = () => (
-  <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
     <TouchableOpacity
       onPress={openGmail}
-      style={{borderWidth: 1, padding: 10, borderRadius: 2}}>
+      style={{ borderWidth: 1, padding: 10, borderRadius: 2 }}>
       <View
         style={{
           display: 'flex',
@@ -52,7 +54,7 @@ const EmailScreen = () => (
           source={{
             uri: 'https://cdn-icons-png.flaticon.com/128/5968/5968534.png',
           }}
-          style={{width: 20, height: 20}}
+          style={{ width: 20, height: 20 }}
         />
         <Text>OPEN GMAIL</Text>
       </View>
@@ -78,7 +80,7 @@ const DrawerNavigator = () => (
           backgroundColor: '#b1a7a6', // Change header background color
         },
         headerTintColor: '#0b2545', // Change text color in header
-        drawerIcon: ({focused, size}) => (
+        drawerIcon: ({ focused, size }) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/432/432312.png',
@@ -100,8 +102,8 @@ const DrawerNavigator = () => (
         headerStyle: {
           backgroundColor: '#b1a7a6', // Change header background color
         },
-        headerTintColor: '0b2545', 
-        drawerIcon: ({focused, size}) => (
+        headerTintColor: '0b2545',
+        drawerIcon: ({ focused, size }) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/1006/1006657.png',
@@ -125,7 +127,7 @@ const DrawerNavigator = () => (
           backgroundColor: '#b1a7a6', // Change header background color
         },
         headerTintColor: '0b2545',
-        drawerIcon: ({focused, size}) => (
+        drawerIcon: ({ focused, size }) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/11052/11052937.png',
@@ -148,8 +150,8 @@ const DrawerNavigator = () => (
         headerStyle: {
           backgroundColor: '#b1a7a6', // Change header background color
         },
-        headerTintColor: '0b2545', 
-        drawerIcon: ({focused, size}) => (
+        headerTintColor: '0b2545',
+        drawerIcon: ({ focused, size }) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/16859/16859716.png',
@@ -171,15 +173,15 @@ const DrawerNavigator = () => (
         headerStyle: {
           backgroundColor: '#b1a7a6', // Change header background color
         },
-        headerTintColor: '0b2545', 
-        drawerIcon: ({focused, size}) => (
+        headerTintColor: '0b2545',
+        drawerIcon: ({ focused, size }) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/3031/3031708.png',
             }}
             style={{
-              width: 20, 
-              height: 20, 
+              width: 20,
+              height: 20,
 
             }}
           />
@@ -194,15 +196,15 @@ const DrawerNavigator = () => (
         headerStyle: {
           backgroundColor: '#b1a7a6', // Change header background color
         },
-        headerTintColor: '0b2545', 
-        drawerIcon: ({focused, size}) => (
+        headerTintColor: '0b2545',
+        drawerIcon: ({ focused, size }) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/27/27130.png',
             }}
             style={{
-              width: 20, 
-              height: 20, 
+              width: 20,
+              height: 20,
 
             }}
           />
@@ -219,14 +221,14 @@ const DrawerNavigator = () => (
           backgroundColor: '#b1a7a6', // Change header background color
         },
         headerTintColor: '0b2545',
-        drawerIcon: ({focused, size}) => (
+        drawerIcon: ({ focused, size }) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/10608/10608943.png',
             }}
             style={{
-              width: 20, 
-              height: 20, 
+              width: 20,
+              height: 20,
 
             }}
           />
@@ -239,16 +241,16 @@ const DrawerNavigator = () => (
       component={EmailScreen}
       options={{
         headerShown: true,
-        headerStyle: {backgroundColor: '#b1a7a6'},
+        headerStyle: { backgroundColor: '#b1a7a6' },
         headerTintColor: '#0b2545',
-        drawerIcon: ({focused, size}) => (
+        drawerIcon: ({ focused, size }) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/5968/5968534.png',
             }}
             style={{
-              width: 20, 
-              height: 20, 
+              width: 20,
+              height: 20,
 
             }}
           />
@@ -264,7 +266,7 @@ const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState();
   const [token, setToken] = useState(null);
 
-  const {jwtToken} = useSelector(state => state.crmUser);
+  const { jwtToken } = useSelector(state => state.crmUser);
 
   useEffect(() => {
     FetchToken();
@@ -282,12 +284,26 @@ const Navigation = () => {
       console.log('error', error);
     }
   };
+  const Stack = createStackNavigator();
+  const { isAuthenticated, setIsAuthenticated } = useAuth()
+
+  const LoginNavigator = () => {
+    return (
+      <Stack.Navigator>
+        <Stack.Screen
+          name='Login'
+          component={Login}
+          options={{headerShown:false}}
+        />
+      </Stack.Navigator>
+    )
+  }
 
   return (
     <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={({route}) => ({
-          tabBarIcon: ({color, size}) => {
+     {isAuthenticated? <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ color, size }) => {
             let iconUrl;
             if (route.name === 'Login') {
               iconUrl =
@@ -304,8 +320,8 @@ const Navigation = () => {
 
             return (
               <Image
-                source={{uri: iconUrl}}
-                style={{width: size, height: size, tintColor: color}}
+                source={{ uri: iconUrl }}
+                style={{ width: size, height: size, tintColor: color }}
               />
             );
           },
@@ -317,14 +333,14 @@ const Navigation = () => {
           },
         })}>
         <Tab.Screen
-          name={jwtToken ? 'Logout' : 'Login'}          
+          name={jwtToken ? 'Logout' : 'Login'}
           component={Login}
           options={{
             headerShown: false,
             tabBarLabelStyle: {
               fontSize: 16, // Increase the font size
-              fontWeight:300 // Optional: Make it bold
-              
+              fontWeight: 300 // Optional: Make it bold
+
             },
           }}
         />
@@ -335,12 +351,12 @@ const Navigation = () => {
             headerShown: false,
             tabBarLabelStyle: {
               fontSize: 16, // Increase the font size
-              fontWeight:300 // Optional: Make it bold
-              
+              fontWeight: 300 // Optional: Make it bold
+
             },
           }}
         />
-        
+
         <Tab.Screen
           name="Ticket"
           component={DrawerNavigator}
@@ -348,12 +364,12 @@ const Navigation = () => {
             headerShown: false,
             tabBarLabelStyle: {
               fontSize: 16, // Increase the font size
-              fontWeight:300 // Optional: Make it bold
-              
+              fontWeight: 300 // Optional: Make it bold
+
             },
           }}
         />
-      </Tab.Navigator>
+      </Tab.Navigator>:<LoginNavigator/>}
     </NavigationContainer>
   );
 };
