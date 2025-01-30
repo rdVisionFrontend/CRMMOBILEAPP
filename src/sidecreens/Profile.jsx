@@ -13,6 +13,7 @@ import {Toast} from 'toastify-react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import Nodata from '../screens/NoData';
 import { logout } from '../Redux/features/crmSlice';
+import { useAuth } from '../Authorization/AuthContext';
 
 const User = ({navigation}) => {
   const [user, setUser] = useState(null);
@@ -23,6 +24,7 @@ const User = ({navigation}) => {
     state => state.crmUser,
   );
   const dispatch = useDispatch()
+  const {setIsAuthenticated}=useAuth()
 
   const formatTime = timeInSeconds => {
     const hours = Math.floor(timeInSeconds / 3600);
@@ -48,6 +50,7 @@ const User = ({navigation}) => {
       .then(res=>{
         Alert.alert("You are Logout successfully")
         navigation.navigate('Login');
+        setIsAuthenticated(false)
       })
       .cath(err=>{
         Alert.alert("Please  try again")
