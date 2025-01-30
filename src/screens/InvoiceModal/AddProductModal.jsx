@@ -7,25 +7,62 @@ import {
   StyleSheet,
   TextInput,
   FlatList,
+  Alert,
+  Image,
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import apiInstance from '../../../api';
-const MyModal = () => {
+import {useSelector} from 'react-redux';
+import AddressForm from './AddressForm';
+import {useAuth} from '../../Authorization/AuthContext';
+import Icon from 'react-native-vector-icons/FontAwesome';
+
+const MyModal = ({ticketId}) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState('INR');
+  const [selectedCurrency, setSelectedCurrency] = useState();
   const [products, setProducts] = useState([]);
   const [error, setError] = useState();
-  const [values, setValues] = useState({}); // State to store input values
+  const [productStates, setProductStates] = useState({}); // State to store input values for each product
+  const {userData} = useSelector(state => state.crmUser);
 
-  const handleInputChange = (text, index, field) => {
-    setValues((prev) => ({
-      ...prev,
-      [index]: { ...prev[index], [field]: text },
-    }));
-  };
+  const [addressForm, setAddressForm] = useState(false);
+  const {setApiCall} = useAuth();
+
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const handleAddProduct = async (productId) => {
+    if(!selectedCurrency){
+      Alert.alert("Please select Currency")
+      return;
+    }
+    const productState = productStates[productId];
+    if (!productState || !productState.qty || !productState.price) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+    const orderData = {
+      quantity: productState.qty,
+      productId: productId,
+      ticketId: ticketId,
+      userId: userData.userId,
+      price: productState.price,
+      currency: selectedCurrency,
+    };
+
+    try {
+      const response = await apiInstance.post('/order/addToOrder', orderData);
+      Alert.alert('Added to order successfully!');
+      console.log('qty,price updated', response);
+      setApiCall(true);
+      setModalVisible(false);
+      setAddressForm(true);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      Alert.alert('Error', 'Failed to add order');
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -39,15 +76,18 @@ const MyModal = () => {
       }
     } catch (err) {
       setError(err.message || 'Error fetching products');
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleAddProduct=()=>{
-    
-    setModalVisible(false)
-  }
+  const handleInputChange = (productId, field, value) => {
+    setProductStates(prevState => ({
+      ...prevState,
+      [productId]: {
+        ...prevState[productId],
+        [field]: value,
+      },
+    }));
+  };
 
   return (
     <View style={styles.container}>
@@ -57,6 +97,11 @@ const MyModal = () => {
         onPress={() => setModalVisible(true)}>
         <Text style={styles.buttonText}>Add Product</Text>
       </TouchableOpacity>
+      {/* <TouchableOpacity
+        style={styles.openButton}
+        onPress={() => setModalVisible(true)}>
+        <Text style={styles.buttonText}>Add Address</Text>
+      </TouchableOpacity> */}
 
       {/* Modal Component */}
       <Modal
@@ -68,11 +113,20 @@ const MyModal = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalBody}>
-              <View style={{}}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter Product Name"
-                />
+              <View>
+                <View style={styles.inputContainer}>
+                  <Image
+                    source={{
+                      uri: 'https://cdn-icons-png.flaticon.com/128/954/954591.png',
+                    }} // URL of the search icon
+                    style={styles.icon}
+                  />
+                  <TextInput
+                    style={styles.inputSearch}
+                    placeholder="Enter Product Name"
+                    placeholderTextColor="#999"
+                  />
+                </View>
                 <Text style={styles.label}>Select Currency</Text>
 
                 <View style={styles.pickerContainer}>
@@ -80,6 +134,7 @@ const MyModal = () => {
                     selectedValue={selectedCurrency}
                     onValueChange={itemValue => setSelectedCurrency(itemValue)}
                     style={styles.picker}>
+                    <Picker.Item label="Select currency"  />
                     <Picker.Item label="INR - Indian Rupee" value="INR" />
                     <Picker.Item label="USD - US Dollar" value="USD" />
                     <Picker.Item label="GBP - British Pound" value="GBP" />
@@ -90,33 +145,39 @@ const MyModal = () => {
 
               <FlatList
                 data={products} // Pass products as data
-                keyExtractor={(item, index) => index.toString()} // Ensure each item has a unique key
-                renderItem={({item, index}) => (
+                keyExtractor={item => item.productId.toString()} // Ensure each item has a unique key
+                renderItem={({item}) => (
                   <View style={styles.card}>
                     <Text style={styles.productName}>{item.name}</Text>
 
-                    {/* First Input Field */}
+                    {/* Quantity Input Field */}
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter first value"
-                      value={values[index]?.first || ''}
+                      placeholder="Enter Quantity"
+                      value={productStates[item.productId]?.qty || ''}
+                      keyboardType="numeric"
                       onChangeText={text =>
-                        handleInputChange(text, index, 'first')
+                        handleInputChange(item.productId, 'qty', text)
                       }
                     />
 
-                    {/* Second Input Field */}
+                    {/* Price Input Field */}
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter second value"
-                      value={values[index]?.second || ''}
+                      placeholder="Enter Price"
+                      value={productStates[item.productId]?.price || ''}
+                      keyboardType="numeric"
                       onChangeText={text =>
-                        handleInputChange(text, index, 'second')
+                        handleInputChange(item.productId, 'price', text)
                       }
                     />
 
-                    <TouchableOpacity style={{backgroundColor:'green', padding:5}} onPress={()=>handleAddProduct()}>
-                        <Text style={{textAlign:'center' ,color:'#fff'}}>Add</Text>
+                    <TouchableOpacity
+                      style={{backgroundColor: 'green', padding: 5}}
+                      onPress={() => handleAddProduct(item.productId)}>
+                      <Text style={{textAlign: 'center', color: '#fff'}}>
+                        Add
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -127,11 +188,12 @@ const MyModal = () => {
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setModalVisible(false)}>
-              <Text style={styles.buttonText}>Close Modal</Text>
+              <Text style={styles.buttonText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
+      <View>{addressForm && <AddressForm ticketId={ticketId} />}</View>
     </View>
   );
 };
@@ -140,15 +202,16 @@ export default MyModal;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width:'100%',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f9f9f9',
   },
   openButton: {
-    backgroundColor: '#4CAF50',
-    padding: 15,
+    backgroundColor: 'blue',
+    padding: 10,
     borderRadius: 5,
+    marginVertical: 5,
   },
   buttonText: {
     color: 'white',
@@ -163,50 +226,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    width: '95%',
+    width: '100%',
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  closeButton: {
-    backgroundColor: '#e74c3c',
-    padding: 15,
-    borderRadius: 5,
-  },
-  input: {
-    backgroundColor: 'white',
-    width: '100%%',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
   modalBody: {
-    width: '80%',
+    width: '100%',
   },
   card: {
-    backgroundColor: '#fff',
-    padding: 15,
+    width:'95%',
+    backgroundColor: '#f5ebe0',
+    padding: 10,
     marginVertical: 8,
     marginHorizontal: 10,
     borderRadius: 8,
     elevation: 3, // For shadow effect
     shadowColor: '#000',
-    shadowOffset: { width: 1, height: 2 },
+    shadowOffset: {width: 1, height: 2},
     shadowOpacity: 0.2,
     shadowRadius: 4,
+    
   },
   productName: {
     fontSize: 18,
@@ -220,5 +261,42 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  picker: {
+    width: '100%',
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  closeButton: {
+    backgroundColor: '#e74c3c',
+    padding: 15,
+    borderRadius: 5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+  },
+  inputSearch: {
+    flex: 1,
+    height: 40,
+    marginLeft: 10,
+  },
+  icon: {
+    width: 20, // Set the width of the icon
+    height: 20, // Set the height of the icon
+    resizeMode: 'contain', // Ensure the image scales properly
   },
 });

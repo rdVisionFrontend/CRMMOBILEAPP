@@ -70,7 +70,7 @@ const Login = ({ navigation }) => {
       console.log('OTP verified:', response);
 
       // Navigate and show success message
-      navigation.navigate('Profile');
+      navigation.navigate('MainScreen');
       Toast.success('Login successful');
       setIsAuthenticated(true)
       // Destructure the response data

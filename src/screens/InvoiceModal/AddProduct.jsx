@@ -2,38 +2,27 @@ import {StyleSheet, Text, View, TouchableOpacity, Alert} from 'react-native';
 import React, { useState } from 'react';
 import AddProductModal from './AddProductModal';
 import apiInstance from '../../../api';
+import AddressForm from './AddressForm';
 
-const AddProduct = () => {
+const AddProduct = ({ticketId }) => {
 
     const [addproductModal,setAddProductModal] = useState(false)
     const [products,setProducts] = useState([])
     const [error,setError] = useState()
 
-
-
     
-
-  const handleAddProduct = () => {
-    setAddProductModal(true)
-  };
+ 
 
   const closeProductModal = () => {
     setAddProductModal(false)
   };
   return (
-    <View style={styles.container}>
-      <View style={{paddingVertical:5}}>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => handleAddProduct()}>
-          <Text style={{color: '#fff', fontSize: 15}}>Add Product</Text>
-        </TouchableOpacity>
-      </View>
-
-
+    <View style={styles.container}>   
+       <AddProductModal/> 
       <View style={styles.emailModal}>
-        {addproductModal && <AddProductModal closeModal={closeProductModal} />}
+        {addproductModal && <AddProductModal  ticketId={ticketId} closeModal={closeProductModal} />}
       </View>
+      {/* <AddressForm/> */}
     </View>
   );
 };
@@ -41,15 +30,10 @@ const AddProduct = () => {
 export default AddProduct;
 
 const styles = StyleSheet.create({
-  container: {},
-  addButton: {
-    backgroundColor: 'blue',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    color: '#fff',
-    borderRadius:5,
-    paddingVertical:8
+  container: {
+    backgroundColor:'#fff'
   },
+  
   emailModal: {
     position: 'absolute',
     top: 0,

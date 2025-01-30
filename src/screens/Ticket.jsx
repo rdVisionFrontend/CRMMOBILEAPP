@@ -105,7 +105,7 @@ const Ticket = () => {
   const getStatusColor = status => {
     switch (status) {
       case 'New':
-        return '#38a4a5';
+        return '#57cc99';
       case 'Follow':
         return '#ffb3c1';
       case 'Sale':

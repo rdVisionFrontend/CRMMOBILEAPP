@@ -9,8 +9,10 @@ import {
   Alert,
 } from 'react-native';
 import CheckBox from 'react-native-checkbox';
+import apiInstance from '../../../api';
+import { useAuth } from '../../Authorization/AuthContext';
 
-const AddressForm = () => {
+const AddressForm = ({ticketId}) => {
   const [shipping, setShipping] = useState({
     name: '',
     street: '',
@@ -23,41 +25,58 @@ const AddressForm = () => {
 
   const [billing, setBilling] = useState({...shipping});
   const [sameAsShipping, setSameAsShipping] = useState(false);
+  const [name,setName] = useState()
+  const [house, setHouse] = useState();
+  const [landmark, setLandMark] = useState();
+  const [city, setCity] = useState();
+  const [zip, setZip] = useState();
+  const [state, setState] = useState();
+  const [country, setCountry] = useState();
+  const [loading,setLoading] = useState(false)
+  const [error,setError] = useState()
+  const [submit,setSubmit] = useState(true)
 
-  // Handle input changes
-  const handleInputChange = (field, value, type = 'shipping') => {
-    if (type === 'shipping') {
-      setShipping({...shipping, [field]: value});
-      if (sameAsShipping) {
-        setBilling({...billing, [field]: value});
+  const handleshipSubmit = async () => {
+    const {setRaiseInvoice} = useAuth()
+
+    console.log(name,house,landmark,city,zip,state,country)
+    // setLoading(true);
+
+    try {
+      if (!house || !landmark || !city || !zip || !name || !country || !state) {
+        Alert.alert("Please fill all fields");
       }
-    } else {
-      setBilling({...billing, [field]: value});
+      
+      const response = await apiInstance.post('/address/createAddress', {
+        houseNumber: house,
+        landmark: landmark,
+        city: city,
+        zipCode: zip,
+        state: state,
+        country: country,
+        ticketId: ticketId
+      });
+      console.log(response.data);   
+      setSubmit(false)
+      setRaiseInvoice(false)
+      // fetchAddressDetails();
+    } catch (err) {
+      setError(err);
+      Alert.alert('Failed to add address');
+    } finally {
+      setLoading(false);
     }
-  };
-
-  // Handle checkbox toggle
-  const toggleSameAsShipping = () => {
-    setSameAsShipping(!sameAsShipping);
-    if (!sameAsShipping) {
-      setBilling({...shipping});
-    }
-  };
-
-  // Handle form submission
-  const handleSubmit = () => {
-    Alert.alert('Submitted!', JSON.stringify({shipping, billing}, null, 2));
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+   submit && <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Shipping to</Text>
 
       <TextInput
         style={styles.input}
         placeholder="Eg. Jane kapoor"
-        value={shipping.name}
-        onChangeText={text => handleInputChange('name', text)}
+        value={name}
+        onChangeText={text => setName(text)}
       />
 
       {/* Billing Address - Only shown if not same as shipping */}
@@ -66,62 +85,71 @@ const AddressForm = () => {
           <Text style={styles.title}>Shipping Address</Text>
           <TextInput
             style={styles.input}
-            placeholder="Full Name"
-            value={billing.name}
-            onChangeText={text => handleInputChange('name', text, 'billing')}
+            placeholder="Eg. Jane kapoor"
+            value={name}
+            onChangeText={text => setName(text)}
           />
           <TextInput
             style={styles.input}
             placeholder="House No./ Street"
-            value={billing.street}
-            onChangeText={text => handleInputChange('street', text, 'billing')}
+            value={house}
+            onChangeText={text => setHouse(text)}
           />
           <TextInput
             style={styles.input}
             placeholder="Landmark"
-            value={billing.landmark}
-            onChangeText={text =>
-              handleInputChange('landmark', text, 'billing')
-            }
+            value={landmark}
+            onChangeText={text =>setLandMark(text) }
           />
-          <View style={{display:'flex', flexDirection:'row', justifyContent:'space-between', width:'99%'}}>
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              width: '99%',
+            }}>
             <TextInput
               style={styles.input1}
               placeholder="City"
-              value={billing.city}
-              onChangeText={text => handleInputChange('city', text, 'billing')}
+              value={city}
+              onChangeText={text => setCity(text)}
             />
             <TextInput
               style={styles.input1}
               placeholder="Zip Code"
               keyboardType="numeric"
-              value={billing.zip}
-              onChangeText={text => handleInputChange('zip', text, 'billing')}
+              value={zip}
+              onChangeText={text => setZip(text)}
             />
           </View>
-          <View style={{display:'flex', flexDirection:'row', justifyContent:'space-between', width:'99%'}}>
-          <TextInput
-            style={styles.input1}
-            placeholder="State"
-            value={billing.state}
-            onChangeText={text => handleInputChange('state', text, 'billing')}
-          />
-          <TextInput
-            style={styles.input1}
-            placeholder="Country"
-            value={billing.country}
-            onChangeText={text => handleInputChange('country', text, 'billing')}
-          />
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              width: '99%',
+            }}>
+            <TextInput
+              style={styles.input1}
+              placeholder="State"
+              value={state}
+              onChangeText={text => setState(text)}
+            />
+            <TextInput
+              style={styles.input1}
+              placeholder="Country"
+              value={country}
+              onChangeText={text => setCountry(text) }
+            />
           </View>
-
-          
         </>
       )}
 
       {/* Submit Button */}
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+      <TouchableOpacity style={styles.button} 
+      onPress={handleshipSubmit}
+      >
         <Text style={styles.buttonText}>Submit</Text>
-        <Text style={styles.buttonText}>Close</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -132,7 +160,7 @@ export default AddressForm;
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
   },
   title: {
     fontSize: 18,
@@ -155,7 +183,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: '#ddd',
-    width:'48%'
+    width: '48%',
   },
   checkboxContainer: {
     flexDirection: 'row',
