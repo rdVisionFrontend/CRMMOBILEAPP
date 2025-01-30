@@ -45,13 +45,15 @@ const Login = ({ navigation }) => {
     apiInstance.post(`/auth/generateOtp`, { email, password })
       .then((response) => {
         console.log('OTP generated:', response.data);
-        Toast.success(response.data);
+        Alert.alert(response.data)
+        // Toast.success(response.data);
         setOtpSent(true);
         setRequestOtpForm(false);
         setResendOtp(true);
       })
       .catch((error) => {
         console.log('Error:', error);
+        Alert.alert("OTP Generation Failed")
         Toast.error('OTP Generation Failed');
       })
       .finally(() => {
