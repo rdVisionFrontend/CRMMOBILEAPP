@@ -14,6 +14,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import Nodata from '../screens/NoData';
 import { logout } from '../Redux/features/crmSlice';
 import { useAuth } from '../Authorization/AuthContext';
+import LiveClander from '../screens/LiveClander';
+import BestSellingCloser from '../screens/BestSellingCloser';
 
 const User = ({navigation}) => {
   const [user, setUser] = useState(null);
@@ -49,8 +51,8 @@ const User = ({navigation}) => {
       dispatch(logout())
       .then(res=>{
         Alert.alert("You are Logout successfully")
-        navigation.navigate('Login');
         setIsAuthenticated(false)
+        navigation.navigate('Login');
       })
       .cath(err=>{
         Alert.alert("Please  try again")
@@ -91,7 +93,7 @@ const User = ({navigation}) => {
       setTimer(prevTimer => prevTimer + 1);
     }, 1000);
     return () => clearInterval(interval);
-  }, [token, userData, jwtToken]);
+  },[token]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -271,19 +273,18 @@ const User = ({navigation}) => {
             </View>
 
           </View>
-
-
-
-
         </View>
       )}
+
+      <LiveClander/>
+      <BestSellingCloser/>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    
     justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 10,

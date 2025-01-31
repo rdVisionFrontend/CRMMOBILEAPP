@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Button, Alert, Image, ActivityIndicator, TouchableOpacity, ImageBackground } from 'react-native';
 import { Toast } from 'toastify-react-native';
-import MainScreen from './MainScreen';
+import Profile from '../sidecreens/Profile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import WelcomePage from '../../WelcomePage';
 import { useDispatch, useSelector } from 'react-redux';
@@ -55,7 +55,7 @@ const Login = ({ navigation }) => {
       .catch((error) => {
         console.log('Error:', error);
         Alert.alert("OTP Generation Failed")
-        Toast.error('OTP Generation Failed');
+        
       })
       .finally(() => {
         setLoading(false);
@@ -70,8 +70,8 @@ const Login = ({ navigation }) => {
       console.log('OTP verified:', response);
 
       // Navigate and show success message
-      navigation.navigate('MainScreen');
-      Toast.success('Login successful');
+      navigation.navigate('Profile');
+      // Toast.success('Login successful');
       setIsAuthenticated(true)
       // Destructure the response data
       const { jwtToken, refreshToken, user } = response.data;

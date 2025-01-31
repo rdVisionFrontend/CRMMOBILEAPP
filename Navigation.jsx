@@ -62,7 +62,14 @@ const EmailScreen = () => (
   </View>
 );
 
+
+
+
+
 const DrawerNavigator = () => (
+
+  
+  
   <Drawer.Navigator
     screenOptions={{
       drawerType: 'front',
@@ -258,7 +265,18 @@ const DrawerNavigator = () => (
       }}
     />
   </Drawer.Navigator>
+
+  // Admin Login menu
+
 );
+
+
+
+
+
+
+
+
 // Bottom Tab Navigator
 const Tab = createBottomTabNavigator();
 
@@ -299,6 +317,9 @@ const Navigation = () => {
     )
   }
 
+  const {userData} = useSelector(state => state.crmUser);
+console.log(userData)
+
   return (
     <NavigationContainer>
      {isAuthenticated? <Tab.Navigator
@@ -307,17 +328,17 @@ const Navigation = () => {
             let iconUrl;
             if (route.name === 'Login') {
               iconUrl =
-                'https://cdn-icons-png.flaticon.com/128/8323/8323511.png'; // Login icon URL
+                'https://cdn-icons-png.flaticon.com/128/8323/8323511.png'; 
             } else if (route.name === 'Dashboard') {
               iconUrl =
-                'https://cdn-icons-png.flaticon.com/128/1077/1077063.png'; // Profile icon URL
+                'https://cdn-icons-png.flaticon.com/128/1077/1077063.png'; 
             } else if (route.name === 'Ticket') {
-              iconUrl = 'https://cdn-icons-png.flaticon.com/128/389/389801.png'; // Ticket icon URL
+              iconUrl = 'https://cdn-icons-png.flaticon.com/128/389/389801.png'; 
             } else if (route.name === 'Logout') {
               iconUrl =
-                'https://cdn-icons-png.flaticon.com/128/9208/9208320.png'; // Logout icon URL (add your own if you need)
+                'https://cdn-icons-png.flaticon.com/128/9208/9208320.png'; 
             }
-
+        
             return (
               <Image
                 source={{ uri: iconUrl }}
@@ -325,13 +346,21 @@ const Navigation = () => {
               />
             );
           },
-          tabBarActiveTintColor: 'black', // Active icon color
-          tabBarInactiveTintColor: 'red', // Inactive icon color
+          tabBarActiveTintColor: 'black', 
+          tabBarInactiveTintColor: 'red', 
           tabBarStyle: {
-            backgroundColor: '#edede9', // Change navbar background color
-            height: 60, // Adjust height if needed
+            backgroundColor: '#8d99ae',
+            height: 60,
+            borderTopLeftRadius: 20, // Apply top-left border radius
+            borderTopRightRadius: 20, // Apply top-right border radius
+            position: 'absolute', // Required to make border radius work
+            left: 0,
+            right: 0,
+            bottom: 0,
+           
           },
-        })}>
+        })}
+        >
         <Tab.Screen
           name={jwtToken ? 'Logout' : 'Login'}
           component={Login}

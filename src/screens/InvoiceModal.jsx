@@ -37,6 +37,8 @@ const InvoiceModal = ({data, closeModal}) => {
   const [zip, setZip] = useState();
   const [state, setState] = useState();
   const [country, setCountry] = useState();
+  const [search, setSearch] = useState('');
+  
 
   console.log('invoice', data);
   useEffect(() => {
@@ -50,7 +52,21 @@ const InvoiceModal = ({data, closeModal}) => {
     if (apicall) {
       fetchAddressDetails();
     }
-  }, [apicall, raiseInoice]);
+  }, [ ]);
+
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleInputChange = (productId, field, value) => {
+    setProductStates(prevState => ({
+      ...prevState,
+      [productId]: {
+        ...prevState[productId],
+        [field]: value,
+      },
+    }));
+  };
 
   const fatchaddedproduct = () => {
     if (data.uniqueQueryId) {
@@ -104,15 +120,7 @@ const InvoiceModal = ({data, closeModal}) => {
       setError(err.message || 'Error fetching products');
     }
   };
-  const handleInputChange = (productId, field, value) => {
-    setProductStates(prevState => ({
-      ...prevState,
-      [productId]: {
-        ...prevState[productId],
-        [field]: value,
-      },
-    }));
-  };
+ 
 
   const handleAddProduct = async productId => {
     console.log(productId, data.uniqueQueryId, userData && userData.userId);
@@ -229,7 +237,9 @@ const InvoiceModal = ({data, closeModal}) => {
               </View>
               <View style={{display: 'flex', flexDirection: 'row'}}>
                 <Text style={{fontWeight: 'bold'}}>Mobile :</Text>
-                <Text style={{paddingHorizontal: 11}}>{data.senderMobile || data.mobileNumber}</Text>
+                <Text style={{paddingHorizontal: 11}}>
+                  {data.senderMobile || data.mobileNumber}
+                </Text>
               </View>
             </View>
             <View style={{borderWidth: 1, padding: 5, width: '50%'}}>
@@ -360,6 +370,8 @@ const InvoiceModal = ({data, closeModal}) => {
                         style={styles.inputSearch}
                         placeholder="Enter Product Name"
                         placeholderTextColor="#999"
+                        value={search}
+                        onChangeText={text => setSearch(text)} // Update search query
                       />
                     </View>
                     <Text style={styles.label}>Select Currency</Text>
@@ -380,9 +392,10 @@ const InvoiceModal = ({data, closeModal}) => {
                     </View>
                   </View>
 
+                  {/* FlatList to display filtered products */}
                   <FlatList
-                    data={products} // Pass products as data
-                    keyExtractor={item => item.productId.toString()} // Ensure each item has a unique key
+                    data={filteredProducts} // Use filtered products based on the search query
+                    keyExtractor={item => item.productId.toString()}
                     renderItem={({item}) => (
                       <View style={styles.card}>
                         <Text style={styles.productName}>{item.name}</Text>
