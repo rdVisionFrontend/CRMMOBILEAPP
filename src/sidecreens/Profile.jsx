@@ -12,10 +12,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Toast} from 'toastify-react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import Nodata from '../screens/NoData';
-import { logout } from '../Redux/features/crmSlice';
-import { useAuth } from '../Authorization/AuthContext';
+import {logout} from '../Redux/features/crmSlice';
+import {useAuth} from '../Authorization/AuthContext';
 import LiveClander from '../screens/LiveClander';
 import BestSellingCloser from '../screens/BestSellingCloser';
+import DashBoardChart from '../screens/DashBoardChart';
 
 const User = ({navigation}) => {
   const [user, setUser] = useState(null);
@@ -25,8 +26,8 @@ const User = ({navigation}) => {
   const {userData, jwtToken, refreshToken} = useSelector(
     state => state.crmUser,
   );
-  const dispatch = useDispatch()
-  const {setIsAuthenticated}=useAuth()
+  const dispatch = useDispatch();
+  const {setIsAuthenticated} = useAuth();
 
   const formatTime = timeInSeconds => {
     const hours = Math.floor(timeInSeconds / 3600);
@@ -42,27 +43,27 @@ const User = ({navigation}) => {
     }
   };
 
-  const handleLogout = async ({navigation}) => {
-    try {
-      // Clear specific keys from AsyncStorage
-      await AsyncStorage.removeItem('jwtToken');
-      await AsyncStorage.removeItem('refreshToken');
-      await AsyncStorage.removeItem('user');
-      dispatch(logout())
-      .then(res=>{
-        Alert.alert("You are Logout successfully")
-        setIsAuthenticated(false)
-        navigation.navigate('Login');
-      })
-      .cath(err=>{
-        Alert.alert("Please  try again")
-      })
-      Toast.success('You have logged out successfully');
-      navigation.navigate('Login');
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
-  };
+  // const handleLogout = async ({navigation}) => {
+  //   try {
+  //     // Clear specific keys from AsyncStorage
+  //     await AsyncStorage.removeItem('jwtToken');
+  //     await AsyncStorage.removeItem('refreshToken');
+  //     await AsyncStorage.removeItem('user');
+  //     dispatch(logout())
+  //       .then(res => {
+  //         Alert.alert('You are Logout successfully');
+  //         setIsAuthenticated(false);
+  //         navigation.navigate('Login');
+  //       })
+  //       .cath(err => {
+  //         Alert.alert('Please  try again');
+  //       });
+  //     Toast.success('You have logged out successfully');
+  //     navigation.navigate('Login');
+  //   } catch (error) {
+  //     console.error('Error during logout:', error);
+  //   }
+  // };
 
   useEffect(() => {
     console.log('redux', userData, jwtToken, refreshToken);
@@ -93,7 +94,7 @@ const User = ({navigation}) => {
       setTimer(prevTimer => prevTimer + 1);
     }, 1000);
     return () => clearInterval(interval);
-  },[token]);
+  }, [token]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -173,9 +174,9 @@ const User = ({navigation}) => {
                 </Text>
               </View>
             </View>
-            <TouchableOpacity onPress={handleLogout} style={styles.logout}>
+            {/* <TouchableOpacity onPress={handleLogout} style={styles.logout}>
               <Text style={styles.logoutText}>Logout</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </>
         </View>
       ) : (
@@ -192,7 +193,9 @@ const User = ({navigation}) => {
           marginBottom: 5,
           borderRadius: 5,
         }}>
-        <Text style={{color: '#fff'}}>{moreinfo ? "View Less" : "View More Information"}</Text>
+        <Text style={{color: '#fff'}}>
+          {moreinfo ? 'View Less' : 'View More Information'}
+        </Text>
       </TouchableOpacity>
 
       {/* More informaion */}
@@ -207,9 +210,9 @@ const User = ({navigation}) => {
             alignItems: 'center',
             padding: 10,
             backgroundColor: '#fffafb',
-            flexDirection:'column ',
-            gap:10,
-            justifyContent:'flex-start'
+            flexDirection: 'column ',
+            gap: 10,
+            justifyContent: 'flex-start',
           }}>
           <Image
             source={{
@@ -219,72 +222,142 @@ const User = ({navigation}) => {
             }}
             style={styles.image}
           />
-          <Text style={{fontSize:15, fontWeight:'bold'}}>{user.roleDto.roleName}</Text>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems:'center', gap:50 , width:'100%'}}>
+          <Text style={{fontSize: 15, fontWeight: 'bold'}}>
+            {user.roleDto.roleName}
+          </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 50,
+              width: '100%',
+            }}>
             <Image
-              style={{height:40, width:40}}
+              style={{height: 40, width: 40}}
               source={{
                 uri: 'https://cdn-icons-png.flaticon.com/128/506/506185.png',
               }}
             />
-            <Text style={{fontSize:20, textTransform:'uppercase'}}>
+            <Text style={{fontSize: 20, textTransform: 'uppercase'}}>
               {user.firstName} {user.lastName}
             </Text>
           </View>
 
-          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems:'center', gap:50 , width:'100%'}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 50,
+              width: '100%',
+            }}>
             <Image
-              style={{height:20, width:20}}
+              style={{height: 20, width: 20}}
               source={{
                 uri: 'https://cdn-icons-png.flaticon.com/128/2875/2875435.png',
               }}
             />
-            <Text style={{fontSize:12, textTransform:'lowercase', marginLeft:7}}>
-              {user.email} 
+            <Text
+              style={{fontSize: 12, textTransform: 'lowercase', marginLeft: 7}}>
+              {user.email}
             </Text>
           </View>
 
-          <View style={{flexDirection: 'row', display:'flex', justifyContent: 'space-between', alignItems:'center', gap:90 , width:'100%'}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 90,
+              width: '100%',
+            }}>
             <Image
-              style={{height:20, width:20}}
+              style={{height: 20, width: 20}}
               source={{
                 uri: 'https://cdn-icons-png.flaticon.com/128/2482/2482985.png',
               }}
             />
-            <Text style={{fontSize:20, textTransform:'lowercase', marginLeft:7 , textAlign:'left'}}>
-              {user.phoneNumber} 
+            <Text
+              style={{
+                fontSize: 20,
+                textTransform: 'lowercase',
+                marginLeft: 7,
+                textAlign: 'left',
+              }}>
+              {user.phoneNumber}
             </Text>
           </View>
 
-          <View style={{flexDirection:'column', justifyContent:'flex-start', alignItems:'center' , width:'100%', borderWidth:0.5, padding:10, borderColor:'gray', borderRadius:5}}>
-            <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', width:'100%', marginTop:5}}>
+          <View
+            style={{
+              flexDirection: 'column',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
+              width: '100%',
+              borderWidth: 0.5,
+              padding: 10,
+              borderColor: 'gray',
+              borderRadius: 5,
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%',
+                marginTop: 5,
+              }}>
               <Text>Created Date :</Text>
-              <Text style={{marginLeft:5}} >{user.createdDate}</Text>
+              <Text style={{marginLeft: 5}}>{user.createdDate}</Text>
             </View>
 
-            <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', width:'100%', marginTop:5}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%',
+                marginTop: 5,
+              }}>
               <Text>Created By :</Text>
-              <Text style={{marginLeft:5}} >{user.createdBy}</Text>
+              <Text style={{marginLeft: 5}}>{user.createdBy}</Text>
             </View>
 
-            <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', width:'100%', marginTop:5}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%',
+                marginTop: 5,
+              }}>
               <Text>Your IP :</Text>
-              <Text style={{marginLeft:5}} >{user.systemIp}</Text>
+              <Text style={{marginLeft: 5}}>{user.systemIp}</Text>
             </View>
-
           </View>
         </View>
       )}
 
-      <LiveClander/>
-      <BestSellingCloser/>
+      <LiveClander />
+      <BestSellingCloser />
+      <View style={{paddingBottom: 20}}>
+        <DashBoardChart />
+      </View>
+      <View style={{flex: 1}}>
+        <Text>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem
+          laborum nulla atque consequuntur sint odit esse repellendus. Dicta,
+          distinctio possimus.
+        </Text>
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    
     justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 10,

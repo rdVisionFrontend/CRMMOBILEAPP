@@ -8,10 +8,11 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Tracks authentication status
   const [apicall,setApiCall] = useState(false)
   const [raiseInoice,setRaiseInvoice] = useState(true)
+  const [takingBreak, setTakingBreak] = useState(false)
 
 
   return (
-    <AuthContext.Provider value={{isAuthenticated, setIsAuthenticated,apicall,setApiCall,raiseInoice,setRaiseInvoice }}>
+    <AuthContext.Provider value={{isAuthenticated, setIsAuthenticated,apicall,setApiCall,raiseInoice,setRaiseInvoice ,takingBreak, setTakingBreak}}>
       {children}
     </AuthContext.Provider>
   );

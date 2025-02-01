@@ -68,25 +68,30 @@ const Login = ({ navigation }) => {
       // Send login request
       const response = await apiInstance.post(`/auth/login`, { email, password, logInOtp: otp });
       console.log('OTP verified:', response);
-
+      
       // Navigate and show success message
       navigation.navigate('Profile');
-      // Toast.success('Login successful');
-      setIsAuthenticated(true)
+      setIsAuthenticated(true);
+      
       // Destructure the response data
       const { jwtToken, refreshToken, user } = response.data;
-
+      
       // Dispatch user data to redux store
       dispatch(setUser({ jwtToken, refreshToken, user }));
-
+      
       // Store data in AsyncStorage
       await AsyncStorage.setItem('jwtToken', jwtToken);
       await AsyncStorage.setItem('refreshToken', refreshToken);
       await AsyncStorage.setItem('user', JSON.stringify(user));
+  
+      // Store total session duration (e.g., 60 minutes)
+      const sessionDuration = 60 * 60; // 1 hour in seconds
+      await AsyncStorage.setItem('sessionDuration', JSON.stringify(sessionDuration));
+      console.log('Session duration set:', sessionDuration);
+     
     } catch (error) {
-      // Handle errors
       console.log('Error:', error);
-      Toast.error('OTP Verification Failed');
+      ToastAndroid.show('OTP Verification Failed', ToastAndroid.SHORT);
       setOtp(''); // Reset OTP input
     } finally {
       setLoading(false); // Stop loading indicator

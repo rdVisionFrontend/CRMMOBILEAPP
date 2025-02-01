@@ -20,6 +20,7 @@ import Nodata from './NoData';
 import apiInstance from '../../api';
 import StatustModal from './StatustModal';
 import InvoiceModal from './InvoiceModal';
+import TicketHistoryModal from './TicketHistroyModal';
 
 const Ticket = () => {
   const [ticketData, setTicketData] = useState([]);
@@ -152,7 +153,7 @@ const Ticket = () => {
     setEmailModal(true);
   };
 
-  const openStatusModal = (item) => {
+  const openStatusModal = item => {
     console.log('email:', item);
     setStatusData(item);
     setStatusModal(true);
@@ -161,13 +162,13 @@ const Ticket = () => {
   const closeEmailModal = () => {
     setEmailModal(false);
     setStatusModal(false);
-    setInvoiceModal(false)
+    setInvoiceModal(false);
   };
 
-  const InvoiceCreate = (item) => {
-    console.log(item)
-    setInvoiceModal(true)
-    setInvoiceData(item)
+  const InvoiceCreate = item => {
+    console.log(item);
+    setInvoiceModal(true);
+    setInvoiceData(item);
     setStatusModal(false);
   };
   // open dialer pad
@@ -202,6 +203,21 @@ const Ticket = () => {
         }
       })
       .catch(err => console.error('Error opening WhatsApp: ', err));
+  };
+
+  // open ticket histroy
+  const [ticketHisModal, setTicketHisModal] = useState(false);
+  const [selectedTicketInfo, setSelectedTicketInfo] = useState();
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const openTicketHistroy = ticketId => {
+    console.log(ticketId);
+    setTicketHisModal(true);
+    setModalVisible(true)
+    setSelectedTicketInfo(ticketId);
+  };
+  const closeTicketJourney = () => {
+    setTicketHisModal(false);
   };
 
   return (
@@ -300,6 +316,16 @@ const Ticket = () => {
                         justifyContent: 'center',
                         alignItems: 'center',
                       }}>
+                      {/* ticket histroy */}
+                      <TouchableOpacity
+                        onPress={() => openTicketHistroy(item.uniqueQueryId)}>
+                        <Image
+                          source={{
+                            uri: 'https://cdn-icons-png.flaticon.com/128/9195/9195785.png',
+                          }}
+                          style={styles.icon}
+                        />
+                      </TouchableOpacity>
                       {/* WhatsApp */}
                       <TouchableOpacity onPress={() => openWhatsApp()}>
                         <Image
@@ -444,23 +470,29 @@ const Ticket = () => {
           )}
         </View>
       </ScrollView>
-
       {/* Email Modal */}
       <View style={styles.emailModal}>
         {emailModal && <Email data={emailData} closeModal={closeEmailModal} />}
       </View>
-
       {/* Status Modal */}
       <View style={styles.emailModal}>
         {statusmodal && (
           <StatustModal data={statusData} closeModal={closeEmailModal} />
         )}
       </View>
-
       {/* invoiceModal */}
       <View style={styles.emailModal}>
-        {invoiceModal && <InvoiceModal data={invoiceData} closeModal={closeEmailModal} />}
+        {invoiceModal && (
+          <InvoiceModal data={invoiceData} closeModal={closeEmailModal} />
+        )}
       </View>
+      {/* Ticket histroy modal */}
+      <TicketHistoryModal
+        ticketId={selectedTicketInfo}
+        isVisible={modalVisible}
+        closeTicketHisModal={() => setModalVisible(false)}
+      />
+      ;
     </>
   );
 };

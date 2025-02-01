@@ -18,6 +18,7 @@ import apiInstance from '../../../api';
 import {useSelector} from 'react-redux';
 import InvoiceModal from '../InvoiceModal';
 import Email from '../Email';
+import TicketHistoryModal from '../TicketHistroyModal';
 
 // Enable LayoutAnimation for Android
 if (
@@ -90,11 +91,25 @@ const UploadedTickets = () => {
     Linking.openURL('mailto:');
   };
 
-  const openWhatsApp = (mobileNumber) => {
+  const openWhatsApp = mobileNumber => {
     const whatsappUrl = `https://wa.me/${mobileNumber}`;
     Linking.openURL(whatsappUrl).catch(() => {
       Alert.alert('Error', 'Could not open WhatsApp');
     });
+  };
+
+  const [ticketHisModal, setTicketHisModal] = useState(false);
+  const [selectedTicketInfo, setSelectedTicketInfo] = useState();
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const openTicketHistroy = ticketId => {
+    console.log(ticketId);
+    setTicketHisModal(true);
+    setModalVisible(true);
+    setSelectedTicketInfo(ticketId);
+  };
+  const closeTicketJourney = () => {
+    setTicketHisModal(false);
   };
 
   // Example usage
@@ -144,12 +159,10 @@ const UploadedTickets = () => {
             }}
             style={{width: 18, height: 18, marginRight: 5}}
           />
-          
-           
-            <Text style={[styles.infoText, dark && styles.darkText]}>
-              {item.mobileNumber}
-            </Text>
-        
+
+          <Text style={[styles.infoText, dark && styles.darkText]}>
+            {item.mobileNumber}
+          </Text>
         </View>
       </View>
 
@@ -183,6 +196,18 @@ const UploadedTickets = () => {
           </View>
 
           <View style={styles.actionButtons}>
+            {/* ticket journey */}
+            <TouchableOpacity
+              onPress={() => openTicketHistroy(item.uniqueQueryId)}
+              style={styles.actionButton}>
+                
+              <Image
+                source={{
+                  uri: 'https://cdn-icons-png.flaticon.com/128/9195/9195785.png',
+                }}
+                style={{width: 18, height: 18, marginRight: 5}}
+              />
+            </TouchableOpacity>
             {/* email */}
             <TouchableOpacity
               style={styles.actionButton}
@@ -280,6 +305,13 @@ const UploadedTickets = () => {
       <View style={styles.emailModal}>
         {emailModal && <Email data={emailData} closeModal={closeEmailModal} />}
       </View>
+
+      {/* Ticket histroy modal */}
+      <TicketHistoryModal
+        ticketId={selectedTicketInfo}
+        isVisible={modalVisible}
+        closeTicketHisModal={() => setModalVisible(false)}
+      />
     </View>
   );
 };
@@ -364,7 +396,7 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-   borderWidth:1,
+    borderWidth: 1,
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 6,
@@ -381,6 +413,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderTopWidth: 1,
     borderTopColor: '#eee',
+    marginBottom:30
   },
   pageButton: {
     backgroundColor: '#007bff',

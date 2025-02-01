@@ -25,6 +25,7 @@ import ProductInfo from './src/screens/MIS_PRODUCT/ProductInfo';
 import { Linking, Platform } from 'react-native';
 import { useAuth } from './src/Authorization/AuthContext';
 import { createStackNavigator } from '@react-navigation/stack';
+import Note from './src/screens/Note';
 
 const Drawer = createDrawerNavigator();
 const openGmail = () => {
@@ -283,11 +284,13 @@ const Tab = createBottomTabNavigator();
 const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState();
   const [token, setToken] = useState(null);
+  const [userImage,setUserImage]=useState()
 
-  const { jwtToken } = useSelector(state => state.crmUser);
+  const { jwtToken, userData } = useSelector(state => state.crmUser);
 
   useEffect(() => {
     FetchToken();
+    setUserImage(userData.imageData)
     console.log('get', isLoggedIn);
   }, [isLoggedIn, jwtToken]);
 
@@ -317,52 +320,56 @@ const Navigation = () => {
     )
   }
 
-  const {userData} = useSelector(state => state.crmUser);
-console.log(userData)
+
 
   return (
     <NavigationContainer>
      {isAuthenticated? <Tab.Navigator
         screenOptions={({ route }) => ({
-          tabBarIcon: ({ color, size }) => {
-            let iconUrl;
+          tabBarIcon: ({ color, size }) =>{
+            let iconUrl;          
             if (route.name === 'Login') {
-              iconUrl =
-                'https://cdn-icons-png.flaticon.com/128/8323/8323511.png'; 
+              iconUrl = 'https://cdn-icons-png.flaticon.com/128/8323/8323511.png';
             } else if (route.name === 'Dashboard') {
-              iconUrl =
-                'https://cdn-icons-png.flaticon.com/128/1077/1077063.png'; 
+              iconUrl = 'https://cdn-icons-png.flaticon.com/128/1828/1828765.png';
             } else if (route.name === 'Ticket') {
-              iconUrl = 'https://cdn-icons-png.flaticon.com/128/389/389801.png'; 
+              iconUrl = 'https://cdn-icons-png.flaticon.com/128/389/389801.png';
             } else if (route.name === 'Logout') {
-              iconUrl =
-                'https://cdn-icons-png.flaticon.com/128/9208/9208320.png'; 
+              iconUrl = 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png';
+            } else if (route.name === 'Note') {
+              iconUrl = 'https://cdn-icons-png.flaticon.com/128/3561/3561424.png';
+            } else {
+              // Fallback for other routes or when userImage is available
+              iconUrl = userImage ? userImage : 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png';
             }
-        
+          
             return (
               <Image
-                source={{ uri: iconUrl }}
+                source={{ uri: iconUrl.startsWith('data:image') ? iconUrl : iconUrl }}
                 style={{ width: size, height: size, tintColor: color }}
               />
             );
           },
-          tabBarActiveTintColor: 'black', 
-          tabBarInactiveTintColor: 'red', 
+          tabBarActiveTintColor: '#fff', 
+          tabBarInactiveTintColor: '#2b2d42', 
           tabBarStyle: {
             backgroundColor: '#8d99ae',
-            height: 60,
-            borderTopLeftRadius: 20, // Apply top-left border radius
-            borderTopRightRadius: 20, // Apply top-right border radius
-            position: 'absolute', // Required to make border radius work
+            height: 55,
+            borderTopLeftRadius: 5,
+            borderTopRightRadius: 5,
+            position: 'absolute',
             left: 0,
             right: 0,
-            bottom: 0,
-           
-          },
+            bottom: 0,          
+            borderTopWidth: 0,  // Remove thin border
+            shadowColor: 'transparent',  // Remove shadow on iOS
+            elevation: 0,  // Remove shadow on Android
+          }
+          
         })}
         >
         <Tab.Screen
-          name={jwtToken ? 'Logout' : 'Login'}
+          name={jwtToken ? `${userData.firstName}` : 'Login'}
           component={Login}
           options={{
             headerShown: false,
@@ -389,6 +396,18 @@ console.log(userData)
         <Tab.Screen
           name="Ticket"
           component={DrawerNavigator}
+          options={{
+            headerShown: false,
+            tabBarLabelStyle: {
+              fontSize: 16, // Increase the font size
+              fontWeight: 300 // Optional: Make it bold
+
+            },
+          }}
+        />
+          <Tab.Screen
+          name="Note"
+          component={Note}
           options={{
             headerShown: false,
             tabBarLabelStyle: {
