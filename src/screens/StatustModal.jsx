@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, TextInput, Button,Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -51,9 +51,8 @@ const Email = ({ data, closeModal }) => {
                 followUpDateTime: formattedDateTime, // Pass null if no date is selected
                 call_id: callid,
             };
-
             console.log("params:", params);
-            closeModal()
+            // closeModal()
             setLoading(true)
             const res = await apiInstance.post( `/third_party_api/ticket/updateTicketResponse/${data.uniqueQueryId}`,
                 {},
@@ -66,7 +65,7 @@ const Email = ({ data, closeModal }) => {
             console.log('Response', res);
             setLoading(false)
             // Show success toast
-            Toast.success("Status Updated");
+            Alert.alert("Status Updated");
             closeModal(); // Close the modal
         } catch (error) {
             console.error('Error:', error);

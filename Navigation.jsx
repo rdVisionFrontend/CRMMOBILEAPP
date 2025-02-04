@@ -26,6 +26,7 @@ import { Linking, Platform } from 'react-native';
 import { useAuth } from './src/Authorization/AuthContext';
 import { createStackNavigator } from '@react-navigation/stack';
 import Note from './src/screens/Note';
+import Clock from './src/screens/Clock';
 
 const Drawer = createDrawerNavigator();
 const openGmail = () => {
@@ -338,6 +339,9 @@ const Navigation = () => {
               iconUrl = 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png';
             } else if (route.name === 'Note') {
               iconUrl = 'https://cdn-icons-png.flaticon.com/128/3561/3561424.png';
+            }
+            else if (route.name === 'Time') {
+              iconUrl = 'https://cdn-icons-png.flaticon.com/128/2784/2784459.png';
             } else {
               // Fallback for other routes or when userImage is available
               iconUrl = userImage ? userImage : 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png';
@@ -408,6 +412,18 @@ const Navigation = () => {
           <Tab.Screen
           name="Note"
           component={Note}
+          options={{
+            headerShown: false,
+            tabBarLabelStyle: {
+              fontSize: 16, // Increase the font size
+              fontWeight: 300 // Optional: Make it bold
+
+            },
+          }}
+        />
+        <Tab.Screen
+          name="Time"
+          component={Clock}
           options={{
             headerShown: false,
             tabBarLabelStyle: {

@@ -214,6 +214,7 @@ const Ticket = () => {
     console.log(ticketId);
     setTicketHisModal(true);
     setModalVisible(true)
+    fetchTicket()
     setSelectedTicketInfo(ticketId);
   };
   const closeTicketJourney = () => {

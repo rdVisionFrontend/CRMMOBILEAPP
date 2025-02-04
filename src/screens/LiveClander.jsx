@@ -18,20 +18,20 @@ const LiveCalendar = () => {
   const [calendarDataUploaded, setCalendarDataUploaded] = useState([]);
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState('');
-  const [selectedEvents, setSelectedEvents] = useState([]);
+  const [selectedEvents, setSelectedEvents] = useState([]); // Holds selected events
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const {userData} = useSelector(state => state.crmUser);
 
   useEffect(() => {
     if (userData && userData.userId) {
-      console.log('User ID available:', userData.userId); // Debug log to check userData
+      console.log('User ID available:', userData.userId);
       fetchData();
       fetchUploadedData();
     } else {
-      console.log('User ID is not available.'); // Debug log if userData is missing
+      console.log('User ID is not available.');
     }
-  }, []); // Ensure the effect runs when userData changes
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -39,7 +39,7 @@ const LiveCalendar = () => {
         `/third_party_api/ticket/followUpByDate/${userData.userId}`,
       );
       setCalendarData(response.data.response);
-      console.log('Calendar Data 1:', response.data.response); // Debug log for calendar data
+      console.log('Calendar Data 1:', response.data.response);
     } catch (error) {
       console.error('Error fetching calendar data:', error);
     }
@@ -51,7 +51,7 @@ const LiveCalendar = () => {
         `/upload/followUpByDate/${userData.userId}`,
       );
       setCalendarDataUploaded(response.data.response);
-      console.log('Calendar Data 2:', response.data.response); // Debug log for uploaded data
+      console.log('Calendar Data 2:', response.data.response);
     } catch (error) {
       console.error('Error fetching uploaded calendar data:', error);
     }
@@ -59,41 +59,25 @@ const LiveCalendar = () => {
 
   useEffect(() => {
     const markedDates = {};
-    const combinedEvents = {};
     const today = moment().format('YYYY-MM-DD');
 
-    // Process calendar events
     [...calendarData, ...calendarDataUploaded].forEach(item => {
       const date = moment(item.date).format('YYYY-MM-DD');
       const type = item.hasOwnProperty('comments') ? 'live' : 'uploaded';
 
-      if (!combinedEvents[date]) {
-        combinedEvents[date] = [];
+      if (!markedDates[date]) {
+        markedDates[date] = { dots: [] };
       }
 
-      combinedEvents[date].push({
-        title:
-          type === 'live'
-            ? `Live Follow-up: ${item['no of tickets']}`
-            : `ABC Follow-up: ${item['no of tickets']}`,
-        comments: item.comments?.split(',') || [],
-        type,
+      markedDates[date].dots.push({
+        color: type === 'live' ? '#f44336' : '#ff9800',
+        size: 15,
       });
 
-      markedDates[date] = {
-        dots: [
-          {
-            color: type === 'live' ? '#f44336' : '#ff9800',
-            size: 15, // Increase the dot size
-          }
-        ],
-        selected: date === today,
-        selectedColor: '#2196F3',
-      };
-      
+      markedDates[date].selected = date === today;
+      markedDates[date].selectedColor = '#2196F3';
     });
 
-    // Always highlight today's date
     markedDates[today] = {
       ...markedDates[today],
       selected: true,
@@ -113,30 +97,24 @@ const LiveCalendar = () => {
     setEvents(markedDates);
   }, [calendarData, calendarDataUploaded]);
 
-  const handleDayPress = day => {
+  const handleDayPress = (day) => {
     console.log('Selected day:', day);
 
-    // Filter events for the selected date
-    const selectedEvents = calendarData.filter(
-      event => moment(event.date).format('YYYY-MM-DD') === day.dateString,
+    const selectedLiveEvents = calendarData.filter(
+      event => moment(event.date).format('YYYY-MM-DD') === day.dateString
+    );
+
+    const selectedUploadedEvents = calendarDataUploaded.filter(
+      event => moment(event.date).format('YYYY-MM-DD') === day.dateString
     );
 
     setSelectedDate(day.dateString);
-    setSelectedEvents(!selectedEvents);
+    setSelectedEvents([...selectedLiveEvents, ...selectedUploadedEvents]);
   };
 
   const handleEventPress = event => {
     setSelectedEvent(event);
     setIsModalVisible(true);
-  };
-
-  const handleNavigate = () => {
-    setIsModalVisible(false);
-    // if () {
-    //   navigation.navigate('InNegotiation', {
-    //     date: moment(selectedDate).format('YYYY-MM-DD')
-    //   });
-    // }
   };
 
   const theme = {
@@ -156,44 +134,31 @@ const LiveCalendar = () => {
     <View style={styles.container}>
       <Calendar
         markingType={'multi-dot'}
-        markedDates={events} // Use dynamically generated events
-        onDayPress={handleDayPress} // Directly pass the function
+        markedDates={events}
+        onDayPress={handleDayPress}
         theme={theme}
         style={styles.calendar}
         current={moment().format('YYYY-MM-DD')}
       />
 
-      <ScrollView style={styles.eventsContainer}>
-        {calendarData.map((event, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.eventItem,
-              {backgroundColor: event.type === 'live' ? '#f44336' : '#463f3a'},
-            ]}>
-            <Text style={styles.eventTitle}>{`➤ ${event.comments}`}</Text>
-            <Text style={styles.eventTitle}>{`➤ ${event.date}`}</Text>
-            <Text
-              style={styles.eventTitle}>{`➤ ${event['no of tickets']}`}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <ScrollView style={styles.eventsContainer}>
-        {calendarDataUploaded.map((event, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.eventItem,
-              {backgroundColor: event.type === 'live' ? '#f44336' : '#ff7d00'},
-            ]}>
-            <Text style={styles.eventTitle}>{`➤ ${event.comments}`}</Text>
-            <Text style={styles.eventTitle}>{`➤ ${event.date}`}</Text>
-            <Text
-              style={styles.eventTitle}>{`➤ ${event['no of tickets']}`}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      {selectedEvents.length > 0 && (
+        <ScrollView style={styles.eventsContainer}>
+          {selectedEvents.map((event, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.eventItem,
+                {backgroundColor: event.type === 'live' ? '#f44336' : '#ff7d00'},
+              ]}
+              onPress={() => handleEventPress(event)}
+            >
+              <Text style={styles.eventTitle}>{`➤ ${event.comments}`}</Text>
+              <Text style={styles.eventTitle}>{`➤ ${event.date}`}</Text>
+              <Text style={styles.eventTitle}>{`➤ ${event['no of tickets']}`}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
 
       <Modal
         visible={isModalVisible}
@@ -234,7 +199,7 @@ const LiveCalendar = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.buttonPrimary}
-                onPress={handleNavigate}>
+                onPress={() => setIsModalVisible(false)}>
                 <Text style={styles.buttonText}>Go to Tickets</Text>
               </TouchableOpacity>
             </View>
@@ -246,98 +211,20 @@ const LiveCalendar = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'transparent',
-    width: '100%',
-  },
-  calendar: {
-    borderRadius: 10,
-    overflow: 'hidden',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  eventsContainer: {
-    marginTop: 20,
-    flex: 1,
-  },
-  eventItem: {
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  eventTitle: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    width: '90%',
-    maxHeight: '80%',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
-  },
-  commentsContainer: {
-    marginBottom: 15,
-  },
-  commentItem: {
-    marginBottom: 15,
-  },
-  commentName: {
-    fontWeight: 'bold',
-    color: '#2196F3',
-    marginBottom: 5,
-  },
-  commentBubble: {
-    backgroundColor: '#f0f0f0',
-    padding: 10,
-    borderRadius: 8,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  buttonPrimary: {
-    backgroundColor: '#2196F3',
-    padding: 12,
-    borderRadius: 8,
-    flex: 1,
-    marginLeft: 10,
-    alignItems: 'center',
-  },
-  buttonSecondary: {
-    backgroundColor: '#6c757d',
-    padding: 12,
-    borderRadius: 8,
-    flex: 1,
-    marginRight: 10,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: '500',
-  },
+  container: { backgroundColor: 'transparent', width: '100%' },
+  calendar: { borderRadius: 10, elevation: 3 },
+  eventsContainer: { marginTop: 20, flex: 1 },
+  eventItem: { padding: 15, borderRadius: 8, marginBottom: 10 },
+  eventTitle: { color: 'white', fontSize: 16, fontWeight: '500' },
+  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  modalContent: { backgroundColor: 'white', padding: 20, borderRadius: 10 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15 },
+  commentItem: { marginBottom: 15 },
+  commentName: { fontWeight: 'bold', color: '#2196F3', marginBottom: 5 },
+  commentBubble: { backgroundColor: '#f0f0f0', padding: 10, borderRadius: 8 },
+  buttonPrimary: { backgroundColor: '#2196F3', padding: 12, borderRadius: 8 },
+  buttonSecondary: { backgroundColor: '#6c757d', padding: 12, borderRadius: 8 },
+  buttonText: { color: 'white', fontWeight: '500' },
 });
 
 export default LiveCalendar;

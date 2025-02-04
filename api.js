@@ -16,18 +16,22 @@ const apiInstance = axios.create({
 apiInstance.interceptors.request.use(
   async (config) => {
     try {
-      // Retrieve the token from AsyncStorage
       const token = await AsyncStorage.getItem('jwtToken');
-      if (token) {
+      console.log("Retrieved Token:", token); // Debugging
+
+      if (!token) {
+        console.error("⚠️ No Token Found in Storage!");
+      } else {
         config.headers.Authorization = `Bearer ${token}`;
       }
     } catch (error) {
-      console.error('Error fetching token from AsyncStorage:', error);
+      console.error('🚨 Error fetching token from AsyncStorage:', error);
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
+
 
 // Add a response interceptor
 apiInstance.interceptors.response.use(

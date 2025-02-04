@@ -63,21 +63,24 @@ const Stage1 = () => {
   };
 
   const fetchStage1Data = async () => {
-    try {
-      const response = await apiInstance.post(
-        `/third_party_api/ticket/negotiationstagebased`,
-        {
-          user: userData.userId,
-          stage: stageAPI2,
-        },
-      );
-      console.log('Stage 2');
-      console.log(response);
-      setSomeDataArray(response.data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
+    // console.log("id",userData.userId)
+  try {  
+    const response = await apiInstance.post(
+      `/third_party_api/ticket/negotiationstagebased`,
+      {
+        user: userData.userId,
+        stage: stageAPI2,
+      }
+     
+    );
+
+    console.log("Stage 2 Data:", response.data);
+    setSomeDataArray(response.data);
+  } catch (error) {
+    console.error("Error fetching data:", error.response?.data || error.message);
+  }
+};
+
 
   const toggleAccordion = index => {
     setExpandedCardId(expandedCardId === index ? null : index);
@@ -165,6 +168,7 @@ const Stage1 = () => {
     console.log(ticketId);
     setTicketHisModal(true);
     setModalVisible(true);
+    fetchStage1Data()
     setSelectedTicketInfo(ticketId);
   };
   const closeTicketJourney = () => {
