@@ -19,6 +19,7 @@ import {useSelector} from 'react-redux';
 import InvoiceModal from '../InvoiceModal';
 import Email from '../Email';
 import TicketHistoryModal from '../TicketHistroyModal';
+import StatusModal from '../StatustModal';
 
 // Enable LayoutAnimation for Android
 if (
@@ -39,21 +40,28 @@ const UploadedTickets = () => {
   const [emailModal, setEmailModal] = useState(false);
   const [invoiceData, setInvoiceData] = useState();
   const [statusmodal, setStatusModal] = useState(false);
+  const [statusmodaldata, setStatusModalData] = useState();
   const [emailData, setEmailData] = useState();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await apiInstance.get('/upload/getAssignedTickets', {
-          params: {userId: userData.userId, page: currentPage, size: 10},
+          params: {
+            userId: userData.userId,
+            page: currentPage,
+            size: 4,
+            ticketStatus: 'New',
+          },
         });
         setData(response.data.dtoList);
+        console.log('ABC', response);
       } catch (error) {
         Alert.alert('Error', 'Failed to fetch tickets');
       }
     };
     fetchData();
-  }, [currentPage]);
+  }, [emailModal, currentPage, invoiceModal]);
 
   const toggleAccordion = ticketId => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -68,9 +76,11 @@ const UploadedTickets = () => {
   };
 
   const closeEmailModal = () => {
+    // fetchData();
     setEmailModal(false);
     setStatusModal(false);
     setInvoiceModal(false);
+    setStatusModal(false);
   };
   const InvoiceCreate = item => {
     console.log('ABC', item);
@@ -98,6 +108,12 @@ const UploadedTickets = () => {
     });
   };
 
+  const openTicketStatus = item => {
+    console.log('status', item);
+    setStatusModal(true);
+    setStatusModalData(item);
+  };
+
   const [ticketHisModal, setTicketHisModal] = useState(false);
   const [selectedTicketInfo, setSelectedTicketInfo] = useState();
   const [modalVisible, setModalVisible] = useState(false);
@@ -118,6 +134,7 @@ const UploadedTickets = () => {
 
   // Inside JSX
   <Text>{formattedDate}</Text>;
+  const [ticketSts, setTicketSts] = useState();
 
   const renderItem = ({item}) => (
     <TouchableOpacity
@@ -172,9 +189,18 @@ const UploadedTickets = () => {
             <Text style={[styles.detailLabel, dark && styles.darkText]}>
               Status:
             </Text>
-            <Text style={[styles.detailValue, dark && styles.darkText]}>
-              {item.ticketstatus}
-            </Text>
+            <TouchableOpacity
+              style={{backgroundColor: '#f4acb7'}}
+              onPress={() => openTicketStatus(item)}>
+              <Text
+                style={{
+                  paddingVertical: 2,
+                  paddingHorizontal: 7,
+                  fontWeight: 600,
+                }}>
+                {item.ticketstatus}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.detailRow}>
@@ -200,7 +226,6 @@ const UploadedTickets = () => {
             <TouchableOpacity
               onPress={() => openTicketHistroy(item.uniqueQueryId)}
               style={styles.actionButton}>
-                
               <Image
                 source={{
                   uri: 'https://cdn-icons-png.flaticon.com/128/9195/9195785.png',
@@ -272,30 +297,49 @@ const UploadedTickets = () => {
   return (
     <View style={[styles.container, dark && styles.darkContainer]}>
       <FlatList
-        data={data}
+        data={data} // ✅ Filter items with 'New' status
         renderItem={renderItem}
         keyExtractor={item => item.uniqueQueryId}
         contentContainerStyle={styles.listContent}
       />
 
       {/* Pagination Controls */}
-      <View style={styles.pagination}>
-        <TouchableOpacity
-          style={styles.pageButton}
-          onPress={() => setCurrentPage(Math.max(0, currentPage - 1))}>
-          <Text style={styles.pageText}>Previous</Text>
-        </TouchableOpacity>
+      {!statusmodal && (
+        <View style={styles.pagination}>
+          {!statusmodal && (
+            <TouchableOpacity
+              style={[
+                styles.pageButton,
+                currentPage === 0 && styles.disabledButton, // Apply disabled style
+              ]}
+              onPress={() => {
+                if (currentPage > 0) {
+                  setCurrentPage(currentPage - 1); // Only decrement if currentPage > 0
+                }
+              }}
+              disabled={currentPage === 0} // Disable the button when currentPage is 0
+            >
+              <Text
+                style={[
+                  styles.pageText,
+                  currentPage === 0 && styles.disabledText, // Apply disabled text style
+                ]}>
+                Previous
+              </Text>
+            </TouchableOpacity>
+          )}
 
-        <Text style={[styles.pageText, dark && styles.darkText]}>
-          Page {currentPage + 1}
-        </Text>
+          <Text style={styles.pageText}>Page {currentPage + 1}</Text>
 
-        <TouchableOpacity
-          style={styles.pageButton}
-          onPress={() => setCurrentPage(currentPage + 1)}>
-          <Text style={styles.pageText}>Next</Text>
-        </TouchableOpacity>
-      </View>
+          {!statusmodal && (
+            <TouchableOpacity
+              style={styles.pageButton}
+              onPress={() => setCurrentPage(currentPage + 1)}>
+              <Text style={styles.pageText}>Next</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
       <View style={styles.emailModal}>
         {invoiceModal && (
           <InvoiceModal data={data} closeModal={closeEmailModal} />
@@ -312,6 +356,11 @@ const UploadedTickets = () => {
         isVisible={modalVisible}
         closeTicketHisModal={() => setModalVisible(false)}
       />
+      <View >
+        {statusmodal && (
+          <StatusModal data={statusmodaldata} closeModal={closeEmailModal} />
+        )}
+      </View>
     </View>
   );
 };
@@ -368,8 +417,8 @@ const styles = StyleSheet.create({
   },
   expandedContent: {
     marginTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopWidth: 2,
+    borderTopColor: '#f4a261',
     paddingTop: 12,
   },
   detailRow: {
@@ -388,6 +437,7 @@ const styles = StyleSheet.create({
     color: '#444',
     width: '65%',
   },
+
   actionButtons: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -413,7 +463,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderTopWidth: 1,
     borderTopColor: '#eee',
-    marginBottom:30
+    marginBottom: 30,
   },
   pageButton: {
     backgroundColor: '#007bff',
@@ -423,7 +473,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   pageText: {
-    color: '#fff',
+    color: '#000000',
     fontSize: 14,
   },
   // emailModal: {
@@ -433,6 +483,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
+  },
+  disabledButton: {
+    backgroundColor: '#ccc', // Grayed-out background
+  },
+  disabledText: {
+    color: '#888', // Grayed-out text
   },
 });
 

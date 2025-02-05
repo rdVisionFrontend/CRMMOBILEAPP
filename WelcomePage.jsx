@@ -14,11 +14,15 @@ const WelcomePage = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false); // State for modal visibility
   const [selectedReason, setSelectedReason] = useState(''); // State for selected logout reason
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.crmUser);
+  const { userData } = useSelector((state) => state.crmUser);
 
   useEffect(() => {
-    console.log('Welcome Page', user);
-  }, [user, navigation]);
+    console.log('Welcome Page', userData);
+    if(!userData){
+      navigation.navigate('Login')
+    }
+
+  }, [userData, navigation]);
 
   const handleLogout = () => {
     setIsModalVisible(true); // Show the modal
@@ -74,7 +78,7 @@ const WelcomePage = ({ navigation }) => {
     <>
       {welPage && (
         <ImageBackground
-          source={{ uri: 'https://img.freepik.com/free-photo/abstract-gradient-colorful-background_23-2149025199.jpg?size=626&ext=jpg' }}
+          source={{ uri: 'https://i.pinimg.com/236x/0c/36/21/0c36213045b6a97dc2e0c0b66e0a8b92.jpg' }}
           style={styles.container}
         >
           <View style={styles.overlay}>

@@ -9,14 +9,11 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Toast} from 'toastify-react-native';
-import {useDispatch, useSelector} from 'react-redux';
+import { useSelector} from 'react-redux';
 import Nodata from '../screens/NoData';
-import {logout} from '../Redux/features/crmSlice';
-import {useAuth} from '../Authorization/AuthContext';
 import LiveClander from '../screens/LiveClander';
 import BestSellingCloser from '../screens/BestSellingCloser';
-import DashBoardChart from '../screens/DashBoardChart';
+import UserWorkTracker from '../screens/UserWorkTracker'
 
 const User = ({navigation}) => {
   const [user, setUser] = useState(null);
@@ -26,8 +23,8 @@ const User = ({navigation}) => {
   const {userData, jwtToken, refreshToken} = useSelector(
     state => state.crmUser,
   );
-  const dispatch = useDispatch();
-  const {setIsAuthenticated} = useAuth();
+
+  
 
   const formatTime = timeInSeconds => {
     const hours = Math.floor(timeInSeconds / 3600);
@@ -43,27 +40,7 @@ const User = ({navigation}) => {
     }
   };
 
-  // const handleLogout = async ({navigation}) => {
-  //   try {
-  //     // Clear specific keys from AsyncStorage
-  //     await AsyncStorage.removeItem('jwtToken');
-  //     await AsyncStorage.removeItem('refreshToken');
-  //     await AsyncStorage.removeItem('user');
-  //     dispatch(logout())
-  //       .then(res => {
-  //         Alert.alert('You are Logout successfully');
-  //         setIsAuthenticated(false);
-  //         navigation.navigate('Login');
-  //       })
-  //       .cath(err => {
-  //         Alert.alert('Please  try again');
-  //       });
-  //     Toast.success('You have logged out successfully');
-  //     navigation.navigate('Login');
-  //   } catch (error) {
-  //     console.error('Error during logout:', error);
-  //   }
-  // };
+  
 
   useEffect(() => {
     console.log('redux', userData, jwtToken, refreshToken);
@@ -170,15 +147,18 @@ const User = ({navigation}) => {
                   <Text style={styles.infoPhone}> {user.phoneNumber}</Text>
                 </View>
                 <Text style={styles.timerText}>
-                  Logged In {formatTime(timer)}{' '}
+                  Worked On - {formatTime(timer)}{' '}
                 </Text>
+                <UserWorkTracker/>
               </View>
+              
             </View>
             {/* <TouchableOpacity onPress={handleLogout} style={styles.logout}>
               <Text style={styles.logoutText}>Logout</Text>
             </TouchableOpacity> */}
           </>
         </View>
+        
       ) : (
         <Nodata />
       )}
@@ -341,17 +321,7 @@ const User = ({navigation}) => {
       )}
 
       <LiveClander />
-      <BestSellingCloser />
-      <View style={{paddingBottom: 20}}>
-        <DashBoardChart />
-      </View>
-      <View style={{flex: 1}}>
-        <Text>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem
-          laborum nulla atque consequuntur sint odit esse repellendus. Dicta,
-          distinctio possimus.
-        </Text>
-      </View>
+      <BestSellingCloser />   
     </ScrollView>
   );
 };
@@ -412,6 +382,8 @@ const styles = StyleSheet.create({
   },
   timerText: {
     marginTop: 5,
+    marginBottom:5,
+    color:'green'
   },
   logout: {
     alignSelf: 'center',

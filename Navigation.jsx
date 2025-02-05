@@ -325,7 +325,7 @@ const Navigation = () => {
 
   return (
     <NavigationContainer>
-     {isAuthenticated? <Tab.Navigator
+     {isAuthenticated && isAuthenticated ? <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ color, size }) =>{
             let iconUrl;          

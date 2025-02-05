@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Toast } from 'toastify-react-native';
 import apiInstance from '../../api';
+import { useSelector } from 'react-redux';
 
 const Email = ({ data, closeModal }) => {
     const { width, height } = Dimensions.get('window'); // Get full screen dimensions
@@ -14,6 +15,7 @@ const Email = ({ data, closeModal }) => {
     const [selectedTheme, setSelectedTheme] = useState(null);
     const [token, setToken] = useState(null)
     const [loading, setLoading] = useState(false)
+    const {userData} = useSelector(state => state.crmUser);
 
     useEffect(() => {
         console.log("New Email:", data);
@@ -75,34 +77,33 @@ const Email = ({ data, closeModal }) => {
             Alert.alert("Error: User ID is required.");
             return;
         }
-
+    
         try {
             setLoading(true); // Set loading to true when sending email
-
+    
             if (!token) {
                 Alert.alert("Authentication Error", "You are not authenticated. Please login again.");
                 return;
             }
-
-            const response = await apiInstance.post(
-                "/email/sendsugetionmail",
+    
+            console.log("uniqueQueryId",data.uniqueQueryId);
+            console.log("text",text);
+            console.log("selectedTheme",selectedTheme); // Fix here
+            console.log("productsIds",selectedProducts);
+            console.log("userId",userId);
+    
+            const response = await apiInstance.post("/email/sendsugetionmail",
                 {
                     ticket: {
                         uniqueQueryId: data.uniqueQueryId,
                     },
                     text: text,
-                    temp: selectedTheme,
+                    temp: selectedTheme, // Use selectedTheme instead of temp
                     productsIds: selectedProducts,
                     userId: userId,
                 },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
             );
             console.log("Email sent successfully:", response);
-            Toast.success("Email sent successfully");
             setLoading(false); // Set loading to false when email is sent
             closeModal();
         } catch (error) {
@@ -110,6 +111,7 @@ const Email = ({ data, closeModal }) => {
             setLoading(false); // Set loading to false in case of an error
         }
     };
+    
 
     return (
         <View style={[styles.container, { width: width, height: height }]}>

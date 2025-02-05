@@ -6,6 +6,7 @@ import { Picker } from '@react-native-picker/picker'; // Import Picker
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Toast from 'react-native-toast-message'
 import apiInstance from '../../api';
+import { useSelector } from 'react-redux';
 
 
 const Email = ({ data, closeModal }) => {
@@ -19,7 +20,8 @@ const Email = ({ data, closeModal }) => {
     const [show, setShow] = useState(false);
     const [mode, setMode] = useState('date');
     const [selectedDate, setSelectedDate] = useState(null);
-    const [callid, setCallId] = useState(12)
+    const [callId, setCallId] = useState(0);
+    const {userData} = useSelector(state => state.crmUser);
 
     useEffect(() => {
         fetchToken();
@@ -39,38 +41,51 @@ const Email = ({ data, closeModal }) => {
 
     const updateEmail = async () => {
         try {
-            // Check if selectedDate is valid
+            if (!token) {
+                console.error("Token is missing");
+                Alert.alert("Authentication Error", "Token is missing");
+                return;
+            }
+    
+            // Format the date properly or pass null
             const formattedDateTime = selectedDate ? selectedDate.toISOString().replace('Z', '') : null;
-
-            console.log(formattedDateTime); // Log the formatted or null value
-
+            
             const params = {
-                userId: user,
+                userId: userData.userId,
                 ticketStatus: selectedOption,
                 comment: text,
                 followUpDateTime: formattedDateTime, // Pass null if no date is selected
-                call_id: callid,
-            };
-            console.log("params:", params);
-            // closeModal()
-            setLoading(true)
-            const res = await apiInstance.post( `/third_party_api/ticket/updateTicketResponse/${data.uniqueQueryId}`,
-                {},
+                call_id: callId,
+            };  
+             
+            console.log("Request Body:", params);
+            console.log("Token:", token);
+            console.log("uniqueQueryId:", data.uniqueQueryId);    
+            console.log("userid:", userData.userId);    
+            setLoading(true);
+            const apiPath =data.uniqueQueryId.length < 15 ? "third_party_api/ticket" : "upload";
+            console.log("path",apiPath)
+            const res = await axios.post(
+                `https://uatbackend.rdvision.tech/${apiPath}/updateTicketResponse/${data.uniqueQueryId}`,
+                {params}, 
                 {
-                    params,
-                  
+                    headers: {
+                        Authorization: `Bearer ${token}`, 
+                        "Content-Type": "application/json",
+                    },
                 }
-            );
-
-            console.log('Response', res);
-            setLoading(false)
-            // Show success toast
+            );    
+            console.log('Response:', res.data);
+            setLoading(false);            
             Alert.alert("Status Updated");
-            closeModal(); // Close the modal
+            closeModal();
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error:', error.response ? error.response.data : error.message);
+            setLoading(false);
+            Alert.alert("Error", "Failed to update status. Please try again.");
         }
     };
+    
 
     const statuses = [
         'New',
@@ -93,7 +108,7 @@ const Email = ({ data, closeModal }) => {
         if (currentDate > new Date()) {
             setSelectedDate(currentDate);
         } else {
-            alert('Please select a future date.');
+            Alert.alert('Please select a future date.');
         }
     };
 

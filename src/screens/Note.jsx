@@ -69,40 +69,35 @@ const Enotebook = () => {
     }
   };
 
-  const deleteNote = async noteId => {
-    try {
-      // Show confirmation dialog
-      Alert.alert(
-        'Are you sure?',
-        'Do you really want to delete this note?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-          {
-            text: 'Delete',
-            onPress: async () => {
-              try {
-                const response = await apiInstance.delete(
-                  `/enote/delete/${noteId}`,
-                );
-                if (response.data === 'Deleted') {
-                  Alert.alert('Note Deleted');
-                  fetchNotes(); // Refresh the notes list
-                }
-              } catch (error) {
-                Alert.alert('Error', error.message);
+  const deleteNote = async (noteId) => {
+    Alert.alert(
+      'Delete Confirmation',
+      'Are you sure you want to delete this note?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const response = await apiInstance.delete(`/enote/delete/${noteId}`);
+              if (response.data === 'Deleted') {
+                Alert.alert('Success', 'Note deleted successfully');
+                fetchNotes(); // Refresh the notes list
               }
-            },
+            } catch (error) {
+              Alert.alert('Error', error.message);
+            }
           },
-        ],
-        {cancelable: true}, // Allows the user to tap outside the alert to cancel
-      );
-    } catch (error) {
-      Alert.alert('Error', error.message);
-    }
+        },
+      ],
+      { cancelable: true }
+    );
   };
+  
 
   const formatLocalDateTime = dateArray => {
     const [year, month, day, hours, minutes] = dateArray;

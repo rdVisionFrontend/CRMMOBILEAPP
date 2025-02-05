@@ -1,17 +1,22 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, Alert, Image, ActivityIndicator, TouchableOpacity, ImageBackground } from 'react-native';
-import { Toast } from 'toastify-react-native';
-import Profile from '../sidecreens/Profile';
+import React, {useEffect, useState} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  Alert,
+  Image,
+  TouchableOpacity,
+  ImageBackground,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import WelcomePage from '../../WelcomePage';
-import { useDispatch, useSelector } from 'react-redux';
-import { setUser } from '../Redux/features/crmSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {setUser} from '../Redux/features/crmSlice';
 import apiInstance from '../../api';
-import { useAuth } from '../Authorization/AuthContext';
+import {useAuth} from '../Authorization/AuthContext';
+import WelcomePage from '../../WelcomePage';
 
-
-const Login = ({ navigation }) => {
+const Login = ({navigation}) => {
   const [email, setEmail] = useState('rajanprajapati743@gmail.com');
   const [password, setPassword] = useState('9795189922');
   const [otp, setOtp] = useState('');
@@ -19,23 +24,23 @@ const Login = ({ navigation }) => {
   const [reqOtpForm, setRequestOtpForm] = useState(true);
   const [resendOtp, setResendOtp] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [token, setToken] = useState(null)
-  const { jwtToken } = useSelector((state) => state.crmUser)
-  const dispatch = useDispatch()
-  const { setIsAuthenticated } = useAuth()
+  const [token, setToken] = useState(null);
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const {jwtToken} = useSelector(state => state.crmUser);
+  const dispatch = useDispatch();
+  const {setIsAuthenticated} = useAuth();
 
   useEffect(() => {
-    fetchToken()
-  }, [token, jwtToken])
+    fetchToken();
+  }, [token, jwtToken]);
+
   const fetchToken = async () => {
     const token = await AsyncStorage.getItem('jwtToken');
-    setToken(token)
+    setToken(token);
     if (token) {
       navigation.navigate('login');
     }
-  }
-
-
+  };
 
   const handleRequestOtp = () => {
     if (!email || !password) {
@@ -43,19 +48,18 @@ const Login = ({ navigation }) => {
       return;
     }
     setLoading(true);
-    apiInstance.post(`/auth/generateOtp`, { email, password })
-      .then((response) => {
+    apiInstance
+      .post(`/auth/generateOtp`, {email, password})
+      .then(response => {
         console.log('OTP generated:', response.data);
-        Alert.alert(response.data)
-        // Toast.success(response.data);
+        Alert.alert(response.data);
         setOtpSent(true);
         setRequestOtpForm(false);
         setResendOtp(true);
       })
-      .catch((error) => {
+      .catch(error => {
         console.log('Error:', error);
-        Alert.alert("OTP Generation Failed")
-        
+        Alert.alert('OTP Generation Failed');
       })
       .finally(() => {
         setLoading(false);
@@ -65,61 +69,60 @@ const Login = ({ navigation }) => {
   const handleFinalLogin = async () => {
     setLoading(true);
     try {
-      // Send login request
-      const response = await apiInstance.post(`/auth/login`, { email, password, logInOtp: otp });
+      const response = await apiInstance.post(`/auth/login`, {
+        email,
+        password,
+        logInOtp: otp,
+      });
       console.log('OTP verified:', response);
-      
-      // Navigate and show success message
       navigation.navigate('Profile');
       setIsAuthenticated(true);
-      
-      // Destructure the response data
-      const { jwtToken, refreshToken, user } = response.data;
-      
-      // Dispatch user data to redux store
-      dispatch(setUser({ jwtToken, refreshToken, user }));
-      
-      // Store data in AsyncStorage
+      const {jwtToken, refreshToken, user} = response.data;
+      dispatch(setUser({jwtToken, refreshToken, user}));
       await AsyncStorage.setItem('jwtToken', jwtToken);
       await AsyncStorage.setItem('refreshToken', refreshToken);
       await AsyncStorage.setItem('user', JSON.stringify(user));
-  
-      // Store total session duration (e.g., 60 minutes)
       const sessionDuration = 60 * 60; // 1 hour in seconds
-      await AsyncStorage.setItem('sessionDuration', JSON.stringify(sessionDuration));
+      await AsyncStorage.setItem(
+        'sessionDuration',
+        JSON.stringify(sessionDuration),
+      );
       console.log('Session duration set:', sessionDuration);
-     
     } catch (error) {
       console.log('Error:', error);
-      ToastAndroid.show('OTP Verification Failed', ToastAndroid.SHORT);
-      setOtp(''); // Reset OTP input
+      setOtp('');
     } finally {
-      setLoading(false); // Stop loading indicator
+      setLoading(false);
     }
   };
 
-
   return (
     <>
-      {
-        token ? (
-          <WelcomePage />
-        ) : (
-          <ImageBackground
-            source={{ uri: 'https://img.freepik.com/free-photo/3d-vertical-background-with-abstract-style_23-2150641317.jpg?ga=GA1.1.59646563.1734164377&semt=ais_hybrid' }} // Replace with your image URL or local image file
-            style={styles.container}
-          >
-            <View style={styles.overlay}>
+      {token ? (
+        <WelcomePage />
+      ) : (
+        <View style={styles.container}>
+          <Text style={styles.LoginText}>
+            {otpSent ? 'Verify Otp' : 'Login'}
+          </Text>
+          <View style={styles.circle}></View>
+          <View style={styles.circle2}></View>
 
-              {/* Login Icon */}
-              <Image
-                source={{ uri: 'https://cdn-icons-png.flaticon.com/128/295/295128.png' }}
-                style={styles.icon}
-              />
+          <View style={styles.overlay}>
+            {/* Login Icon */}
 
-              {/* Email and Password Input */}
-              {reqOtpForm && (
-                <View style={{ padding: 10 }}>
+            {/* Email and Password Input */}
+            {reqOtpForm && (
+              <View style={{padding: 10}}>
+                <View style={styles.emailContainer}>
+                  {/* Email Icon */}
+                  <Image
+                    source={{
+                      uri: 'https://cdn-icons-png.flaticon.com/128/646/646094.png',
+                    }}
+                    style={styles.emailIcon}
+                  />
+                  {/* Email Input */}
                   <TextInput
                     style={styles.input}
                     placeholder="Enter your email"
@@ -128,58 +131,99 @@ const Login = ({ navigation }) => {
                     keyboardType="email-address"
                     autoCapitalize="none"
                   />
+                </View>
+
+                {/* Password Input */}
+                <View style={styles.passwordContainer}>
+                  <Image
+                    source={{
+                      uri: 'https://cdn-icons-png.flaticon.com/128/2889/2889676.png',
+                    }}
+                    style={styles.PasswordIcon}
+                  />
                   <TextInput
-                    style={styles.input}
+                    style={styles.passwordInput}
                     placeholder="Enter your password"
                     value={password}
                     onChangeText={setPassword}
-                    secureTextEntry
+                    secureTextEntry={!showPassword} // Toggle secureTextEntry
                   />
                   <TouchableOpacity
-                    style={styles.otpBtn}
-                    onPress={handleRequestOtp}
-                    disabled={loading}
-                  >
-                    <Text style={{ textAlign: 'center', color: "#fff", fontSize: 16 }}>
-                      {loading ? 'Requesting...' : 'Request OTP'}
-                    </Text>
+                    style={styles.eyeIcon}
+                    onPress={() => setShowPassword(!showPassword)}>
+                    <Image
+                      source={
+                        showPassword
+                          ? {
+                              uri: 'https://cdn-icons-png.flaticon.com/128/709/709612.png',
+                            }
+                          : {
+                              uri: 'https://cdn-icons-png.flaticon.com/128/2767/2767146.png',
+                            }
+                      }
+                      style={{height: 20, width: 20}}
+                    />
                   </TouchableOpacity>
                 </View>
-              )}
-
-              {/* OTP Input */}
-              {otpSent && (
-                <View>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter OTP"
-                    keyboardType="number-pad"
-                    value={otp}
-                    onChangeText={setOtp}
-                  />
-                  <TouchableOpacity
-                    style={styles.otpBtn}
-                    onPress={handleFinalLogin}
-                    disabled={loading}
-                  >
-                    <Text style={{ textAlign: 'center', color: "#fff", fontSize: 16 }}>{loading ? 'Wait...' : 'Login'}</Text>
-                  </TouchableOpacity >
-                </View>
-              )}
-
-              {/* Resend OTP */}
-              {resendOtp && (
-                <Text
+                <TouchableOpacity
+                  style={styles.otpBtn}
                   onPress={handleRequestOtp}
-                  style={{ color: '#fff', textAlign: 'center', marginTop: 20 }}
-                >
-                  Resend OTP
-                </Text>
-              )}
-            </View>
-          </ImageBackground >
-        )
-      }
+                  disabled={loading}>
+                  <Text
+                    style={{textAlign: 'center', color: '#fff', fontSize: 20, fontWeight:600}}>
+                    {loading ? 'Requesting...' : 'Request OTP'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* OTP Input */}
+            {otpSent && (
+              <View style={{position: 'relative'}}>
+                <Image
+                  source={{
+                    uri: 'https://cdn-icons-png.flaticon.com/128/159/159478.png',
+                  }}
+                  style={{
+                    position: 'absolute',
+                    left: 12,
+                    top: '20%',
+                    transform: [{translateY: -10}],
+                    width: 20,
+                    height: 20,
+                    zIndex: 20,
+                  }}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter OTP"
+                  keyboardType="number-pad"
+                  value={otp}
+                  onChangeText={setOtp}
+                />
+                <TouchableOpacity
+                  style={styles.otpBtn}
+                  onPress={handleFinalLogin}
+                  disabled={loading}>
+                  <Text
+                    style={{textAlign: 'center', color: '#fff', fontSize: 20, fontWeight:600}}>
+                    {loading ? 'Wait...' : 'Login'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Resend OTP */}
+            {resendOtp && (
+              <Text
+                onPress={handleRequestOtp}
+                style={{color: '#1d3557', textAlign: 'center', marginTop: 20}}>
+                Resend OTP
+              </Text>
+            )}
+          </View>
+        </View>
+      )}
     </>
   );
 };
@@ -191,40 +235,120 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
+    backgroundColor: '#DAE4E8',
+    position: 'relative',
   },
   overlay: {
-    flex: 1,
+    backgroundColor: '#fff',
     justifyContent: 'center',
     padding: 20,
     borderRadius: 10,
+    backdropFilter: 'blur(10px)',
+    borderRadius: 15,
+    paddingVertical: 50,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 40,
+  emailContainer: {
+    position: 'relative',
+    width: '100%',
+  },
+  LoginText: {
+    position: 'absolute',
+    top: 50,
+    left: 60,
+    zIndex: 10,
+    fontSize: 35,
+    fontWeight: 600,
+    color: '#fff',
+  },
+  circle: {
+    width: 600,
+    height: 600,
+    backgroundColor: '#0088FF',
+    borderRadius: 600,
+    position: 'absolute',
+    top: -420,
+    left: -160,
+    zIndex: 5,
+  },
+  circle2: {
+    width: 600,
+    height: 600,
+    backgroundColor: '#0088FF',
+    borderRadius: 600,
+    position: 'absolute',
+    bottom: -430,
+    right: -152,
+  },
+  emailIcon: {
+    position: 'absolute',
+    left: 10,
+    top: '40%',
+    transform: [{translateY: -10}], // Center vertically
+    width: 20,
+    height: 20,
+    zIndex: 20,
+  },
+  PasswordIcon: {
+    position: 'absolute',
+    left: 10,
+    top: '50%',
+    transform: [{translateY: -10}], // Center vertically
+    width: 20,
+    height: 20,
+    zIndex: 20,
   },
   input: {
     height: 50,
     borderColor: '#ccc',
     borderWidth: 1,
-    paddingLeft: 10,
+    paddingLeft: 40, // Space for the icon
     marginBottom: 15,
     backgroundColor: '#fff',
     fontSize: 18,
-    borderRadius: 5
+    borderRadius: 40,
+    color: '#415a77',
+    paddingHorizontal: 5,
+    paddingVertical:10,
+
+    // Shadow for iOS
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4}, // Horizontal & Vertical shadow
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+
+    // Shadow for Android
+    elevation: 5, // Controls shadow intensity on Android
+  },
+
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 40,
+    backgroundColor: '#fff',
+    marginBottom: 15,
+  },
+  passwordInput: {
+    flex: 1,
+    height: 50,
+    paddingLeft: 10,
+    fontSize: 18,
+    color: '#415a77',
+    paddingHorizontal: 5,
+    marginLeft: 40,
+  },
+  eyeIcon: {
+    padding: 10,
   },
   otpBtn: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     height: 50,
-    backgroundColor: '#8338ec',
-    textAlign: 'center'
-  },
-  loading: {
-    marginBottom: 20,
-    alignSelf: 'center',
+    backgroundColor: '#0088FF',
+    textAlign: 'center',
+    borderRadius: 40,
   },
   icon: {
     width: 80,
