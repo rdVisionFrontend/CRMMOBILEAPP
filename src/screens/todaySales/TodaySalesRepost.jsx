@@ -185,6 +185,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal:5
   },
   nameText: {
     width: '42%',
@@ -198,6 +199,7 @@ const styles = StyleSheet.create({
     width: '42%',
     color: '#2f195f',
     fontWeight: '600',
+    paddingRight:5
   },
   expandedContent: {
     padding: 10,

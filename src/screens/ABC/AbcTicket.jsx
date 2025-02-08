@@ -379,7 +379,7 @@ const UploadedTickets = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    
     padding: 16,
     backgroundColor: '#f5f5f5',
   },
@@ -494,7 +494,8 @@ const styles = StyleSheet.create({
   emailModal: {
     position: 'absolute',
     top: 0,
-    left: 0,
+    left: 15,
+    width:'100%'
   },
   disabledButton: {
     backgroundColor: '#ccc', // Grayed-out background

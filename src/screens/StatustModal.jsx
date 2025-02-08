@@ -39,19 +39,17 @@ const Email = ({data,closeModal }) => {
       const token = await AsyncStorage.getItem('jwtToken');
       setToken(token);
       const user = await AsyncStorage.getItem('user');
-      const parsedUser = JSON.parse(user);
+      const parsedUser = parse.JSON(user);
       setUser(parsedUser);
     } catch (error) {
       console.log(error);
     }
   };
-
   const updateTicketResponse = async () => {
     console.log("Try to updated asdas")
-
     try {    
-     const storedUser = await AsyncStorage.getItem('user')
-     const userData = parse.JSON(storedUser)
+      const storedUser = await AsyncStorage.getItem('user');
+      const userData = JSON.parse(storedUser);
       const formattedDateTime = selectedDate
         ? selectedDate.toISOString().replace('Z', '')
         : null;

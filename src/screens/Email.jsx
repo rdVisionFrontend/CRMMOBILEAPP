@@ -42,7 +42,8 @@ const Email = ({data, closeModal}) => {
       console.log('email token:', token);
       setToken(token);
       const user = await AsyncStorage.getItem('user');
-      const parsedUser = JSON.parse(user);
+      const parsedUser = JSON.parse(user); // ✅ Corrected parsing
+      
       setUserId(parsedUser.userId);
       const response = await apiInstance.get('/product/getAllProducts');
       console.log('Products:', response);
@@ -60,11 +61,11 @@ const Email = ({data, closeModal}) => {
     }
   };
 
-  const fetchEmail = async () => {
+  const sendEmail = async () => {
     try {
       setLoading(true); 
-      const storedUser = AsyncStorage.getItem('user');
-      const user = parse.JSON(storedUser);
+      const storedUser = await  AsyncStorage.getItem('user');
+      const user = JSON.parse(user);
 
       const response = await apiInstance.post('/email/sendsugetionmail', {
         ticket: {
@@ -188,7 +189,7 @@ const Email = ({data, closeModal}) => {
           <TouchableOpacity onPress={() => closeModal()}>
             <Text style={styles.closeButton}>Close</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={fetchEmail}>
+          <TouchableOpacity onPress={sendEmail}>
             <Text style={styles.emailButton}>
               {loading ? 'Sending...' : 'Send Email'}
             </Text>

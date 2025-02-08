@@ -38,7 +38,6 @@ const InvoiceModal = ({data, closeModal}) => {
   const [state, setState] = useState();
   const [country, setCountry] = useState();
   const [search, setSearch] = useState('');
-  
 
   console.log('invoice', data);
   useEffect(() => {
@@ -52,10 +51,10 @@ const InvoiceModal = ({data, closeModal}) => {
     if (apicall) {
       fetchAddressDetails();
     }
-  }, [ ]);
+  }, []);
 
   const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(search.toLowerCase())
+    product.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleInputChange = (productId, field, value) => {
@@ -76,6 +75,7 @@ const InvoiceModal = ({data, closeModal}) => {
             `/order/getOrder/${data.uniqueQueryId}`,
           );
           setOrderDetails(response.data.dtoList);
+
           console.log('update product', response);
         } catch (err) {
           console.error('Error fetching order details:', err);
@@ -100,6 +100,7 @@ const InvoiceModal = ({data, closeModal}) => {
       );
       setAddressData(response.data.dto);
       console.log('Addredd 2', response);
+      fatchaddedproduct();
       setRaiseInvoice(false);
     } catch (err) {
       console.error('Error fetching address details:', err);
@@ -120,7 +121,6 @@ const InvoiceModal = ({data, closeModal}) => {
       setError(err.message || 'Error fetching products');
     }
   };
- 
 
   const handleAddProduct = async productId => {
     console.log(productId, data.uniqueQueryId, userData && userData.userId);
@@ -146,8 +146,12 @@ const InvoiceModal = ({data, closeModal}) => {
       const response = await apiInstance.post('/order/addToOrder', orderData);
       Alert.alert('Added to order successfully!');
       console.log('qty,price updated', response);
-      fetchAddressDetails();
-      fatchaddedproduct();
+
+      if (response.data.success.message == 'success') {
+        fetchAddressDetails();
+        fatchaddedproduct();
+      }
+
       setModalVisible(false);
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -201,7 +205,7 @@ const InvoiceModal = ({data, closeModal}) => {
           }}>
           <TouchableOpacity disabled={true}>
             <Text style={styles.emailButton}>
-              {loading ? 'Updating...' : 'Update'}
+              Update
             </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={closeModal}>
@@ -216,7 +220,7 @@ const InvoiceModal = ({data, closeModal}) => {
               justifyContent: 'space-between',
               gap: 5,
             }}>
-            <View style={{borderWidth: 1, padding: 5, width: '50%'}}>
+            <View style={{borderWidth: 1, padding: 5, width: '45%'}}>
               <Text>Customer details</Text>
               <View style={{display: 'flex', flexDirection: 'row'}}>
                 <Text style={{fontWeight: 'bold'}}>Name :</Text>
@@ -242,7 +246,8 @@ const InvoiceModal = ({data, closeModal}) => {
                 </Text>
               </View>
             </View>
-            <View style={{borderWidth: 1, padding: 5, width: '50%'}}>
+            <View style={{borderWidth: 1, padding: 5, width: '45%', marginRight:25}}>
+            <Text>Address details</Text>
               <View style={{display: 'flex', flexDirection: 'column'}}>
                 <Text
                   style={{
@@ -252,7 +257,7 @@ const InvoiceModal = ({data, closeModal}) => {
                   }}>
                   {data.queryMcatName || data.productEnquiry}
                 </Text>
-                {addressData && (
+                {addressData ? (
                   <View
                     style={{
                       flexDirection: 'row',
@@ -273,13 +278,13 @@ const InvoiceModal = ({data, closeModal}) => {
                       </Text>
                     </View>
                   </View>
-                )}
+                ):(<Text>No address</Text>)}
               </View>
             </View>
           </View>
         </View>
         {/* all added product */}
-        <View style={{width: '100%'}}>
+        <View style={{width: '80%'}}>
           <View style={styles.tableHeader}>
             <Text style={styles.headerCell}>Name</Text>
             <Text style={styles.headerCell}>Brand</Text>
@@ -445,7 +450,7 @@ const InvoiceModal = ({data, closeModal}) => {
           </Modal>
 
           {/* Adrress form */}
-          <View>
+          <View style={{marginRight:20}}>
             <Text style={styles.title}>Shipping to</Text>
             <TextInput
               style={styles.input}
@@ -532,12 +537,13 @@ export default InvoiceModal;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#ffffff',
-    padding: 10,
-    width: '100%',
+    backgroundColor: '#ffff',
+    paddingHorizontal:10,
+    width: '99%',
     justifyContent: 'start',
     alignItems: 'center',
-    flex: 1,
+    marginRight:5
+   
   },
   SubmitButton: {
     backgroundColor: 'green',
@@ -691,4 +697,5 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     width: '48%',
   },
+  
 });
