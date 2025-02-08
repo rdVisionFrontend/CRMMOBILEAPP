@@ -7,14 +7,13 @@ import {
   Alert,
   Image,
   TouchableOpacity,
-  ImageBackground,
+
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
-import {setUser} from '../Redux/features/crmSlice';
 import apiInstance from '../../api';
 import {useAuth} from '../Authorization/AuthContext';
-import WelcomePage from '../../WelcomePage';
+
 
 const Login = ({navigation}) => {
   const [email, setEmail] = useState('rajanprajapati743@gmail.com');
@@ -26,21 +25,11 @@ const Login = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState(null);
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
-  const {jwtToken} = useSelector(state => state.crmUser);
-  const dispatch = useDispatch();
+
   const {setIsAuthenticated} = useAuth();
 
-  useEffect(() => {
-    fetchToken();
-  }, [token, jwtToken]);
-
-  const fetchToken = async () => {
-    const token = await AsyncStorage.getItem('jwtToken');
-    setToken(token);
-    if (token) {
-      navigation.navigate('login');
-    }
-  };
+ 
+  
 
   const handleRequestOtp = () => {
     if (!email || !password) {
@@ -49,17 +38,19 @@ const Login = ({navigation}) => {
     }
     setLoading(true);
     apiInstance
-      .post(`/auth/generateOtp`, {email, password})
+      .post(`/auth/generateOtp`, { email, password })
       .then(response => {
         console.log('OTP generated:', response.data);
-        Alert.alert(response.data);
+        // Extract the message from the response
+        const message = response.data.message || 'OTP sent successfully';
+        Alert.alert('Success', message); // Pass the message as a string
         setOtpSent(true);
         setRequestOtpForm(false);
         setResendOtp(true);
       })
       .catch(error => {
         console.log('Error:', error);
-        Alert.alert('OTP Generation Failed');
+        Alert.alert('Error', 'OTP Generation Failed'); // Provide a fallback message
       })
       .finally(() => {
         setLoading(false);
@@ -74,14 +65,10 @@ const Login = ({navigation}) => {
         password,
         logInOtp: otp,
       });
-      console.log('OTP verified:', response);
-      navigation.navigate('Profile');
-      setIsAuthenticated(true);
-      const {jwtToken, refreshToken, user} = response.data;
-      dispatch(setUser({jwtToken, refreshToken, user}));
-      await AsyncStorage.setItem('jwtToken', jwtToken);
-      await AsyncStorage.setItem('refreshToken', refreshToken);
-      await AsyncStorage.setItem('user', JSON.stringify(user));
+      console.log('OTP verified:', response);    
+      setIsAuthenticated(true);   
+      await AsyncStorage.setItem('jwtToken', response.data.jwtToken);   
+      await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
       const sessionDuration = 60 * 60; // 1 hour in seconds
       await AsyncStorage.setItem(
         'sessionDuration',
@@ -97,10 +84,7 @@ const Login = ({navigation}) => {
   };
 
   return (
-    <>
-      {token ? (
-        <WelcomePage />
-      ) : (
+    <>    
         <View style={styles.container}>
           <Text style={styles.LoginText}>
             {otpSent ? 'Verify Otp' : 'Login'}
@@ -223,7 +207,7 @@ const Login = ({navigation}) => {
             )}
           </View>
         </View>
-      )}
+   
     </>
   );
 };
@@ -308,16 +292,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     color: '#415a77',
     paddingHorizontal: 5,
-    paddingVertical:10,
-
-    // Shadow for iOS
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4}, // Horizontal & Vertical shadow
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-
-    // Shadow for Android
-    elevation: 5, // Controls shadow intensity on Android
+    paddingVertical:10, 
   },
 
   passwordContainer: {
@@ -337,6 +312,8 @@ const styles = StyleSheet.create({
     color: '#415a77',
     paddingHorizontal: 5,
     marginLeft: 40,
+    shadowColor: '#000',
+   
   },
   eyeIcon: {
     padding: 10,

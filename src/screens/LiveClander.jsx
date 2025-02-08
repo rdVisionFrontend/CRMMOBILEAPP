@@ -6,54 +6,76 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Calendar} from 'react-native-calendars';
 import moment from 'moment';
 import apiInstance from '../../api';
-import {useSelector} from 'react-redux';
 
 const LiveCalendar = () => {
   const [calendarData, setCalendarData] = useState([]);
   const [calendarDataUploaded, setCalendarDataUploaded] = useState([]);
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState('');
-  const [selectedEvents, setSelectedEvents] = useState([]); // Holds selected events
+  const [selectedEvents, setSelectedEvents] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const {userData} = useSelector(state => state.crmUser);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [live, setLive] = useState(false);
 
   useEffect(() => {
-    if (userData && userData.userId) {
-      console.log('User ID available:', userData.userId);
-      fetchData();
-      fetchUploadedData();
-    } else {
-      console.log('User ID is not available.');
-    }
+    let isMounted = true; // Prevents state update after unmount
+
+    const fetchTokenAndData = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem('jwtToken');
+        const storedUser = await AsyncStorage.getItem('user');
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+
+        if (isMounted) {
+          setToken(storedToken);
+          setUser(parsedUser);
+        }
+
+        if (parsedUser) {
+          await fetchData(parsedUser.userId);
+          await fetchUploadedData(parsedUser.userId);
+        }
+      } catch (error) {
+        console.error('Error fetching token/user:', error);
+      }
+    };
+
+    fetchTokenAndData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async userId => {
     try {
       const response = await apiInstance.get(
-        `/third_party_api/ticket/followUpByDate/${userData.userId}`,
+        `/third_party_api/ticket/followUpByDate/${userId}`,
       );
       setCalendarData(response.data.response);
-      console.log('Calendar Data 1:', response.data.response);
+      console.log('Live Events:', response.data.response);
+      setLive(true)
     } catch (error) {
       console.error('Error fetching calendar data:', error);
     }
   };
 
-  const fetchUploadedData = async () => {
+  const fetchUploadedData = async userId => {
     try {
       const response = await apiInstance.get(
-        `/upload/followUpByDate/${userData.userId}`,
+        `/upload/followUpByDate/${userId}`,
       );
       setCalendarDataUploaded(response.data.response);
-      console.log('Calendar Data 2:', response.data.response);
+      console.log('Uploaded Events:', response.data.response);
     } catch (error) {
-      console.error('Error fetching uploaded calendar data:', error);
+      console.error('Error fetching uploaded data:', error);
     }
   };
 
@@ -66,7 +88,7 @@ const LiveCalendar = () => {
       const type = item.hasOwnProperty('comments') ? 'live' : 'uploaded';
 
       if (!markedDates[date]) {
-        markedDates[date] = { dots: [] };
+        markedDates[date] = {dots: []};
       }
 
       markedDates[date].dots.push({
@@ -83,38 +105,26 @@ const LiveCalendar = () => {
       selected: true,
       selectedColor: '#2196F3',
       customStyles: {
-        container: {
-          backgroundColor: '#2196F3',
-          borderRadius: 8,
-        },
-        text: {
-          color: 'white',
-          fontWeight: 'bold',
-        },
+        container: {backgroundColor: '#2196F3', borderRadius: 8},
+        text: {color: 'white', fontWeight: 'bold'},
       },
     };
 
     setEvents(markedDates);
   }, [calendarData, calendarDataUploaded]);
 
-  const handleDayPress = (day) => {
+  const handleDayPress = day => {
     console.log('Selected day:', day);
-
     const selectedLiveEvents = calendarData.filter(
-      event => moment(event.date).format('YYYY-MM-DD') === day.dateString
+      event => moment(event.date).format('YYYY-MM-DD') === day.dateString,
     );
 
     const selectedUploadedEvents = calendarDataUploaded.filter(
-      event => moment(event.date).format('YYYY-MM-DD') === day.dateString
+      event => moment(event.date).format('YYYY-MM-DD') === day.dateString,
     );
 
     setSelectedDate(day.dateString);
     setSelectedEvents([...selectedLiveEvents, ...selectedUploadedEvents]);
-  };
-
-  const handleEventPress = event => {
-    setSelectedEvent(event);
-    setIsModalVisible(true);
   };
 
   const theme = {
@@ -148,18 +158,27 @@ const LiveCalendar = () => {
               key={index}
               style={[
                 styles.eventItem,
-                {backgroundColor: event.type === 'live' ? '#f44336' : '#ff7d00'},
+                {
+                  backgroundColor: event.hasOwnProperty('comments')
+                    ? '#f44336'
+                    : '#ff9800',
+                },
               ]}
-              onPress={() => handleEventPress(event)}
-            >
+              onPress={() => {
+                setSelectedEvent(event);
+                setIsModalVisible(true);
+              }}>
+                <Text style={{textAlign:'center', fontWeight:600, fontSize:20}}>{live?"Live Followup":""}</Text>
               <Text style={styles.eventTitle}>{`➤ ${event.comments}`}</Text>
               <Text style={styles.eventTitle}>{`➤ ${event.date}`}</Text>
-              <Text style={styles.eventTitle}>{`➤ ${event['no of tickets']}`}</Text>
+              <Text
+                style={styles.eventTitle}>{`➤ ${event['no of tickets']}`}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
       )}
 
+      {/* Event Modal */}
       <Modal
         visible={isModalVisible}
         animationType="slide"
@@ -167,42 +186,13 @@ const LiveCalendar = () => {
         onRequestClose={() => setIsModalVisible(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {selectedEvent?.title || 'Ticket Journey'}
-            </Text>
-
-            <ScrollView style={styles.commentsContainer}>
-              {selectedEvent?.comments?.length > 0 ? (
-                selectedEvent.comments.map((comment, index) => {
-                  const [text, name] = comment.split('(');
-                  const formattedName = name ? name.split(')')[0] : 'Unknown';
-
-                  return (
-                    <View key={index} style={styles.commentItem}>
-                      <Text style={styles.commentName}>{formattedName}:</Text>
-                      <View style={styles.commentBubble}>
-                        <Text>{text.trim()}</Text>
-                      </View>
-                    </View>
-                  );
-                })
-              ) : (
-                <Text>No comments available.</Text>
-              )}
-            </ScrollView>
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.buttonSecondary}
-                onPress={() => setIsModalVisible(false)}>
-                <Text style={styles.buttonText}>Close</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.buttonPrimary}
-                onPress={() => setIsModalVisible(false)}>
-                <Text style={styles.buttonText}>Go to Tickets</Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={styles.modalTitle}>Ticket Journey</Text>
+            <Text>{selectedEvent?.comments || 'No comments available'}</Text>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setIsModalVisible(false)}>
+              <Text style={styles.buttonText}>Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -211,20 +201,21 @@ const LiveCalendar = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: 'transparent', width: '100%' },
-  calendar: { borderRadius: 10, elevation: 3 },
-  eventsContainer: { marginTop: 20, flex: 1 },
-  eventItem: { padding: 15, borderRadius: 8, marginBottom: 10 },
-  eventTitle: { color: 'white', fontSize: 16, fontWeight: '500' },
-  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  modalContent: { backgroundColor: 'white', padding: 20, borderRadius: 10 },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15 },
-  commentItem: { marginBottom: 15 },
-  commentName: { fontWeight: 'bold', color: '#2196F3', marginBottom: 5 },
-  commentBubble: { backgroundColor: '#f0f0f0', padding: 10, borderRadius: 8 },
-  buttonPrimary: { backgroundColor: '#2196F3', padding: 12, borderRadius: 8 },
-  buttonSecondary: { backgroundColor: '#6c757d', padding: 12, borderRadius: 8 },
-  buttonText: { color: 'white', fontWeight: '500' },
+  container: {backgroundColor: 'transparent', width: '100%'},
+  calendar: {borderRadius: 10, elevation: 3},
+  eventsContainer: {marginTop: 20, paddingHorizontal:5},
+  eventItem: {padding: 15, borderRadius: 8, marginBottom: 10},
+  eventTitle: {color: 'white', fontSize: 16, fontWeight: '500'},
+  modalContainer: {flex: 1, justifyContent: 'center', alignItems: 'center'},
+  modalContent: {backgroundColor: 'white', padding: 20, borderRadius: 10},
+  modalTitle: {fontSize: 20, fontWeight: 'bold', marginBottom: 15},
+  button: {
+    backgroundColor: '#2196F3',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  buttonText: {color: 'white', fontWeight: '500'},
 });
 
 export default LiveCalendar;

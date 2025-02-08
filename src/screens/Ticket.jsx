@@ -160,6 +160,7 @@ const Ticket = () => {
   };
 
   const closeEmailModal = () => {
+    fetchTicket();
     setEmailModal(false);
     setStatusModal(false);
     setInvoiceModal(false);
@@ -213,8 +214,8 @@ const Ticket = () => {
   const openTicketHistroy = ticketId => {
     console.log(ticketId);
     setTicketHisModal(true);
-    setModalVisible(true)
-    fetchTicket()
+    setModalVisible(true);
+    fetchTicket();
     setSelectedTicketInfo(ticketId);
   };
   const closeTicketJourney = () => {
@@ -222,10 +223,10 @@ const Ticket = () => {
   };
 
   return (
-    <>
+    <View>
       <ScrollView>
         <View style={styles.container}>
-          <Text style={{textAlign: 'center'}}>{loading ? 'Loading' : ' '}</Text>
+          <Text>{loading ? 'Loading' : ' '}</Text>
           {ticketData && ticketData.length > 0 ? (
             ticketData?.map((item, index) => (
               <View key={index} style={styles.item}>
@@ -293,7 +294,16 @@ const Ticket = () => {
                     </View>
 
                     {/* Main item which toggles the dropdown menu */}
-                    <TouchableOpacity onPress={() => openStatusModal(item)}>
+                    <TouchableOpacity
+                      style={{
+                        borderWidth: 1,
+                        paddingVertical: 2,
+                        paddingHorizontal: 4,
+                        borderRadius: 5,
+                        fontWeight: 800,
+                        fontSize: 18,
+                      }}
+                      onPress={() => openStatusModal(item)}>
                       <Text
                         style={[
                           styles.dropdownButton,
@@ -463,11 +473,8 @@ const Ticket = () => {
                 )}
               </View>
             ))
-          ) : (
-            <View
-              style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-              <Nodata />
-            </View>
+          ) : (            
+              <Nodata />         
           )}
         </View>
       </ScrollView>
@@ -478,7 +485,11 @@ const Ticket = () => {
       {/* Status Modal */}
       <View style={styles.emailModal}>
         {statusmodal && (
-          <StatustModal data={statusData} closeModal={closeEmailModal} />
+          <StatustModal
+            data={statusData}
+            closeModal={closeEmailModal}
+            live={'live'}
+          />
         )}
       </View>
       {/* invoiceModal */}
@@ -494,17 +505,15 @@ const Ticket = () => {
         closeTicketHisModal={() => setModalVisible(false)}
       />
       ;
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: {    
     backgroundColor: '#FFFFFF',
     position: 'relative',
-    paddingHorizontal: 5,
-    paddingVertical: 8,
+    
   },
   emailModal: {
     position: 'absolute',

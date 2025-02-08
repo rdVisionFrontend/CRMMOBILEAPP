@@ -1,46 +1,45 @@
-import { StyleSheet, Text, View, Dimensions, ScrollView, Image, TouchableOpacity, TextInput, Alert } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Dimensions,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { Toast } from 'toastify-react-native';
 import apiInstance from '../../../api';
 
-const Email = ({ data, closeModal }) => {
-  const { width, height } = Dimensions.get('window'); // Get full screen dimensions
+const Email = ({data, closeModal}) => {
+  const {width, height} = Dimensions.get('window'); // Get full screen dimensions
   const [productdata, setProductData] = useState([]);
   const [text, setText] = useState('');
   const [selectedProducts, setSelectedProducts] = useState([]); // New state for selected product IDs
-  const [userId, setUserId] = useState(null)
+  const [userId, setUserId] = useState(null);
   const [selectedTheme, setSelectedTheme] = useState(null);
-  const [token, setToken] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log("New Email:", data);
+    console.log('New Email:', data);
     fetchAllProducts();
   }, [width, height]);
 
   const fetchAllProducts = async () => {
     try {
-      const token = await AsyncStorage.getItem('jwtToken');
-      if (!token) {
-        Alert.alert("Plase Login")
-        return;
-      }
-      console.log('email token:', token)
-      setToken(token)
-      const user = await AsyncStorage.getItem('user');
-      const parsedUser = JSON.parse(user);
-      setUserId(parsedUser.userId)
       const response = await apiInstance.get('/product/getAllProducts');
-      console.log("Products:", response);
+      console.log('Products:', response);
       setProductData(response.data.dtoList);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error('Error fetching products:', error);
     }
   };
 
-  const toggleSelection = (productId) => {
+  const toggleSelection = productId => {
     if (selectedProducts.includes(productId)) {
       setSelectedProducts(selectedProducts.filter(id => id !== productId));
     } else {
@@ -48,64 +47,70 @@ const Email = ({ data, closeModal }) => {
     }
   };
 
-  const fetchEmail = async () => {
-    // Check for empty fields
-    if (!data?.uniqueQueryId) {
-      Alert.alert("Please select again");
-      return;
-    }
-    if (!text) {
-      Alert.alert("Please add some text");
-      return;
-    }
-    if (!selectedTheme) {
-      Alert.alert("Please select a theme");
-      return;
-    }
-    if (!selectedProducts || selectedProducts.length === 0) {
-      Alert.alert("Please select at least one product");
-      return;
-    }
-    if (!userId) {
-      Alert.alert("Error: User ID is required.");
-      return;
-    }
-
+  const sendEmail = async () => {
     try {
-      setLoading(true); // Set loading to true when sending email
+      setLoading(true); // Show loading indicator
+      const storedUser = await AsyncStorage.getItem('user');
+      const token = await AsyncStorage.getItem('jwtToken'); // Get token from storage
 
-      if (!token) {
-        Alert.alert("Authentication Error", "You are not authenticated. Please login again.");
+      console.log('JWT Token:', token); // Debugging: Ensure token is retrieved
+
+      if (!storedUser || !token) {
+        Alert.alert('User data or token not found');
+        setLoading(false);
         return;
       }
 
-      const response = await apiInstance.post( "/email/sendsugetionmail",
+      const user = JSON.parse(storedUser); // Correct JSON parsing
+      console.log('User Data:', user);
+
+      // API Request
+      const response = await axios.post(
+        'https://uatbackend.rdvision.tech/email/sendsugetionmail',
         {
-          ticket: {
-            uniqueQueryId: data.uniqueQueryId,
-          },
+          ticket: {uniqueQueryId: data.uniqueQueryId},
           text: text,
           temp: selectedTheme,
           productsIds: selectedProducts,
-          userId: userId,
-        }       
+          userId: user.userId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ Send token in the headers
+            'Content-Type': 'application/json',
+          },
+        },
       );
-      console.log("Email sent successfully:", response);
-      Toast.success("Email sent successfully");
-      setLoading(false); // Set loading to false when email is sent
+
+      console.log('Email sent successfully:', response);
+      Alert.alert('Email Send successfully');
       closeModal();
+      setLoading(false);
     } catch (error) {
-      console.error("Error sending email:", error.response ? error.response.data : error.message);
-      setLoading(false); // Set loading to false in case of an error
+      setLoading(false);
+      console.error(
+        'Error sending email:',
+        error.response ? error.response.data : error.message,
+      );
     }
   };
 
   return (
-    <View style={[styles.container, { width: width, height: height }]}>
-      <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5, paddingVertical: 20 }}>
+    <View style={[styles.container, {width: width, height: height}]}>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 5,
+          paddingVertical: 20,
+        }}>
         <TouchableOpacity onPress={() => setSelectedTheme('1')}>
           <Image
-            source={{ uri: 'https://img.freepik.com/free-vector/ecommerce-email-templates-with-photo_23-2148714843.jpg?semt=ais_hybrid' }}
+            source={{
+              uri: 'https://img.freepik.com/free-vector/ecommerce-email-templates-with-photo_23-2148714843.jpg?semt=ais_hybrid',
+            }}
             style={{
               height: 100,
               width: 150,
@@ -118,7 +123,9 @@ const Email = ({ data, closeModal }) => {
 
         <TouchableOpacity onPress={() => setSelectedTheme('2')}>
           <Image
-            source={{ uri: 'https://img.freepik.com/free-vector/pack-blogger-email-template-with-photos_23-2148730559.jpg' }}
+            source={{
+              uri: 'https://img.freepik.com/free-vector/pack-blogger-email-template-with-photos_23-2148730559.jpg',
+            }}
             style={{
               height: 100,
               width: 150,
@@ -131,54 +138,66 @@ const Email = ({ data, closeModal }) => {
       </View>
 
       <ScrollView>
-        <Text style={{ fontSize: 15, fontWeight: 'bold', marginVertical: 10 }}>Products:</Text>
+        <Text style={{fontSize: 15, fontWeight: 'bold', marginVertical: 10}}>
+          Products:
+        </Text>
         <View style={styles.cardContainer}>
-          {
-            productdata && productdata.map((ele, i) => (
+          {productdata &&
+            productdata.map((ele, i) => (
               <View key={i} style={styles.card}>
                 <Image
-                  source={{ uri: 'https://cdn-icons-png.flaticon.com/128/5290/5290058.png' }}
+                  source={{
+                    uri: 'https://cdn-icons-png.flaticon.com/128/5290/5290058.png',
+                  }}
                   style={styles.image}
                 />
                 <View style={styles.cardText}>
-                  <Text style={{ fontSize: 10 }}>Name: {ele.brand ? ele.brand : "NA"}</Text>
-                  <Text style={{ fontSize: 10 }}>Price: {ele.price ? ele.price : ""}</Text>
+                  <Text style={{fontSize: 10}}>
+                    Name: {ele.brand ? ele.brand : 'NA'}
+                  </Text>
+                  <Text style={{fontSize: 10}}>
+                    Price: {ele.price ? ele.price : ''}
+                  </Text>
                 </View>
                 <TouchableOpacity
                   style={[
                     styles.selectButton,
-                    { backgroundColor: selectedProducts.includes(ele.productId) ? 'green' : 'gray' },
+                    {
+                      backgroundColor: selectedProducts.includes(ele.productId)
+                        ? 'green'
+                        : 'gray',
+                    },
                   ]}
-                  onPress={() => toggleSelection(ele.productId)}
-                >
+                  onPress={() => toggleSelection(ele.productId)}>
                   <Text style={styles.selectText}>
-                    {selectedProducts.includes(ele.productId) ? 'Deselect' : 'Select'}
+                    {selectedProducts.includes(ele.productId)
+                      ? 'Deselect'
+                      : 'Select'}
                   </Text>
                 </TouchableOpacity>
               </View>
-            ))
-          }
+            ))}
         </View>
-        <Text style={{ fontSize: 15, fontWeight: 'bold', marginTop: 10 }}>Your Message :</Text>
+        <Text style={{fontSize: 15, fontWeight: 'bold', marginTop: 10}}>
+          Your Message :
+        </Text>
         <View>
           <TextInput
             multiline={true}
             numberOfLines={8}
-            onChangeText={(e) => setText(e)}
+            onChangeText={e => setText(e)}
             value={text}
             style={styles.textInput}
-            placeholder='Write something'
+            placeholder="Write something"
           />
         </View>
 
         <View style={styles.footer}>
           <TouchableOpacity onPress={() => closeModal()}>
-            <Text style={styles.closeButton} >
-              Close
-            </Text>
+            <Text style={styles.closeButton}>Close</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={fetchEmail}>
-            <Text style={styles.emailButton} >
+          <TouchableOpacity onPress={sendEmail}>
+            <Text style={styles.emailButton}>
               {loading ? 'Sending...' : 'Send Email'}
             </Text>
           </TouchableOpacity>
@@ -191,8 +210,7 @@ const Email = ({ data, closeModal }) => {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    marginTop:10
-
+    marginTop: 10,
   },
   cardContainer: {
     flexDirection: 'row',
@@ -203,7 +221,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 2,
     borderRadius: 5,
-    width: '90%'
+    width: '90%',
   },
   card: {
     width: '25%',
@@ -246,7 +264,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 3,
     height: 100,
-    width: '90%'
+    width: '90%',
   },
   footer: {
     marginTop: 5,
@@ -270,7 +288,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 100,
     paddingVertical: 10,
-  }
+  },
 });
 
 export default Email;

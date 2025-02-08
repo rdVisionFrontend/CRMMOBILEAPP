@@ -1,72 +1,131 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ScrollView } from 'react-native';
-import { useSelector } from 'react-redux';
-import apiInstance from '../../api';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const BestSellingClosers = ({ dark }) => {
   const [teammates, setTeammates] = useState([]);
   const [liveClosers, setLiveClosers] = useState([]);
-  const { userData } = useSelector(state => state.crmUser);
-  const userId = userData?.userId;
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  // Fetch token and user from AsyncStorage
   useEffect(() => {
-    const fetchBestSellingTeammates = async () => {
+    const fetchTokenAndUser = async () => {
       try {
-        const response = await apiInstance.get(`/team/bestsellingTeammates/${userId}`);
-        setTeammates(response.data);
+        const storedToken = await AsyncStorage.getItem('jwtToken');
+        const storedUser = await AsyncStorage.getItem('user');
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+
+        if (storedToken && parsedUser) {
+          setToken(storedToken);
+          setUser(parsedUser);
+        } else {
+          console.error('Token or user not found in AsyncStorage');
+        }
       } catch (error) {
-        console.error("Error fetching best selling teammates", error);
+        console.error('Error fetching data from AsyncStorage:', error);
       }
     };
 
-    const fetchLiveStatus = async () => {
-      try {
-        const response = await apiInstance.get(`/user/getLiveTeammates/${userId}`);
-        setLiveClosers(response.data);
-        console.log("live",response)
-      } catch (error) {
-        console.error("Error fetching live status", error);
-      }
-    };
-    fetchLiveStatus();
-    fetchBestSellingTeammates();
+    fetchTokenAndUser();
   }, []);
 
-  const checkuserLive = (userName) => {
-    return liveClosers.some(closer => closer.firstName === userName.split(" ")[0]);
+  // Fetch best-selling teammates and live status when token and user are available
+  useEffect(() => {
+    if (token && user) {
+      fetchBestSellingTeammates();
+      fetchLiveStatus();
+    }
+  }, [token, user]);
+
+  const fetchBestSellingTeammates = async () => {
+    try {
+      const response = await axios.get(
+        `https://uatbackend.rdvision.tech/team/bestsellingTeammates/${user.userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      setTeammates(response.data);
+    } catch (error) {
+      console.error('Error fetching best-selling teammates:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchLiveStatus = async () => {
+    try {
+      const response = await axios.get(
+        `https://uatbackend.rdvision.tech/user/getLiveTeammates/${user.userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      setLiveClosers(response.data);
+    } catch (error) {
+      console.error('Error fetching live status:', error);
+    }
+  };
+
+  const checkUserLive = (userName) => {
+    return liveClosers.some(
+      (closer) => closer.firstName === userName.split(' ')[0],
+    );
   };
 
   const renderItem = ({ item }) => (
     <View style={[styles.row, dark && styles.darkRow]}>
-      <Text style={[styles.cell, dark && styles.darkText]}>{item.userName}</Text>
+      <Text style={[styles.cell, dark && styles.darkText]}>
+        {item.userName}
+      </Text>
       <Text style={[styles.cell, dark && styles.darkText]}>{item.count}</Text>
-      <Text style={[
-        styles.cell,
-        checkuserLive(item.userName) ? styles.online : styles.offline
-      ]}>
-        {checkuserLive(item.userName) ? "Online" : "Offline"}
+      <Text
+        style={[
+          styles.cell,
+          checkUserLive(item.userName) ? styles.online : styles.offline,
+        ]}>
+        {checkUserLive(item.userName) ? 'Online' : 'Offline'}
       </Text>
     </View>
   );
 
   return (
     <View style={[styles.container, dark && styles.darkContainer]}>
-      <Text style={[styles.heading, dark && styles.darkText]}>Best Selling Closer</Text>
-      
+      <Text style={[styles.heading, dark && styles.darkText]}>
+        Best Selling Closers
+      </Text>
+
       <View style={[styles.header, dark && styles.darkHeader]}>
-        <Text style={[styles.headerText, dark && styles.darkHeaderText]}>Closer Name</Text>
-        <Text style={[styles.headerText, dark && styles.darkHeaderText]}>Sales Count</Text>
-        <Text style={[styles.headerText, dark && styles.darkHeaderText]}>Status</Text>
+        <Text style={[styles.headerText, dark && styles.darkHeaderText]}>
+          Closer Name
+        </Text>
+        <Text style={[styles.headerText, dark && styles.darkHeaderText]}>
+          Sales Count
+        </Text>
+        <Text style={[styles.headerText, dark && styles.darkHeaderText]}>
+          Status
+        </Text>
       </View>
 
-      {teammates.length > 0 ? (
+      {loading ? (
+        <Text style={[styles.noData, dark && styles.darkText]}>Loading...</Text>
+      ) : teammates.length > 0 ? (
         <FlatList
           data={teammates}
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
         />
       ) : (
-        <Text style={[styles.noData, dark && styles.darkText]}>No data available</Text>
+        <Text style={[styles.noData, dark && styles.darkText]}>
+          No data available
+        </Text>
       )}
     </View>
   );
@@ -79,7 +138,7 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#fff',
     elevation: 2,
-    width:'100%'
+    width: '99%',
   },
   darkContainer: {
     backgroundColor: '#343a40',
@@ -137,9 +196,7 @@ const styles = StyleSheet.create({
     padding: 16,
     color: '#6c757d',
   },
-  darkHeaderText:{
-
-  }
+  darkHeaderText: {},
 });
 
 export default BestSellingClosers;

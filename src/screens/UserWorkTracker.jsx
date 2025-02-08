@@ -12,6 +12,7 @@ import {useAuth} from '../Authorization/AuthContext';
 import Svg, {Circle, Line} from 'react-native-svg';
 import OnBreak from './Onbreak';
 import apiInstance from '../../api';
+import { useSelector } from 'react-redux';
 
 const ChartWorktime = () => {
   const {takingBreak, setTakingBreak} = useAuth();
@@ -24,6 +25,7 @@ const ChartWorktime = () => {
   const [breakTime, setBreakTime] = useState(0); // Break time in seconds
   const [breakStartTime, setBreakStartTime] = useState(null); // When the break started
   const loginTime = useState(Date.now())[0];
+  const {userData, jwtToken} = useSelector(state => state.crmUser);
 
   // Update the working timer only if the user is not taking a break
   useEffect(() => {

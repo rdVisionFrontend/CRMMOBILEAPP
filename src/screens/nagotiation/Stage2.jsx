@@ -7,38 +7,75 @@ import {
   Image,
   Alert,
   Linking,
+  Modal,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {Picker} from '@react-native-picker/picker';
-import {useSelector} from 'react-redux';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { Picker } from '@react-native-picker/picker';
 import Email from './EmailModal';
-import StatusModal from './StatusModal';
 import Clipboard from '@react-native-clipboard/clipboard';
-import apiInstance from '../../../api';
 import TicketHistoryModal from '../TicketHistroyModal';
+import StatusModal from './StatusModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
-const Stage1 = () => {
+const Stage2 = () => {
   const [selectedStage, setSelectedStage] = useState('All');
   const [selectedItem, setSelectedItem] = useState(4); // Default items per page
   const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
   const [expandedCardId, setExpandedCardId] = useState(null); // Track expanded card
-  const {userData, jwtToken} = useSelector(state => state.crmUser);
   const [someDataArray, setSomeDataArray] = useState([]);
   const [localdate, setLocalDate] = useState('');
   const [localtime, setLocalTime] = useState('');
   const [emailmodal, setEmailModal] = useState(false);
   const [statusmodal, setStatusModal] = useState(false);
   const [emaildata, setEmailData] = useState();
-  const [stage1, setStage1] = useState(true);
-  const [stageAPI2, setAPIStage2] = useState(2);
+  const [stage2, setStage2] = useState(true);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
 
+  // Fetch user and token on component mount
   useEffect(() => {
-    console.log('redux User:', userData.userId);
-    console.log('redux token:', jwtToken);
-    fetchStage1Data();
-    formatDate();
-  }, [stage1]);
+    const fetchUserAndToken = async () => {
+      const user = await AsyncStorage.getItem('user');
+      const token = await AsyncStorage.getItem('jwtToken');
+      setUser(JSON.parse(user));
+      setToken(token);
+    };
+    fetchUserAndToken();
+  }, []);
+
+  // Fetch Stage 2 data when token and user are available
+  useEffect(() => {
+    if (token && user) {
+      fetchStage2Data();
+    }
+  }, [token, user, emailmodal, statusmodal]);
+
+  const fetchStage2Data = async () => {
+    try {
+      const response = await axios.post(
+        `https://uatbackend.rdvision.tech/third_party_api/ticket/negotiationstagebased`,
+        {
+          user: user.userId, // Ensure user ID exists
+          stage: 2,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Use the token from state
+          },
+        },
+      );
+
+      console.log('Stage 2 Data:', response.data);
+      setSomeDataArray(response.data);
+    } catch (error) {
+      console.error(
+        'Error fetching Stage 2 data:',
+        error.response?.data || error.message,
+      );
+    }
+  };
+
   const formatDate = () => {
     console.log(someDataArray.map(ele => ele.followUpDateTime));
     const formattedDates = someDataArray.map(ele => {
@@ -56,60 +93,38 @@ const Stage1 = () => {
       const formattedTime = `${hours % 12 || 12}:${
         minutes < 10 ? '0' + minutes : minutes
       } ${ampm}`;
-      return {date: formattedDate, time: formattedTime};
+      return { date: formattedDate, time: formattedTime };
     });
     setLocalDate(formattedDates[0]?.date);
     setLocalTime(formattedDates[0]?.time);
   };
 
-  const fetchStage1Data = async () => {
-    // console.log("id",userData.userId)
-  try {  
-    const response = await apiInstance.post(
-      `/third_party_api/ticket/negotiationstagebased`,
-      {
-        user: userData.userId,
-        stage: stageAPI2,
-      }
-     
-    );
-
-    console.log("Stage 2 Data:", response.data);
-    setSomeDataArray(response.data);
-  } catch (error) {
-    console.error("Error fetching data:", error.response?.data || error.message);
-  }
-};
-
-
   const toggleAccordion = index => {
     setExpandedCardId(expandedCardId === index ? null : index);
   };
-
-  // open Email
 
   const openEmailModal = item => {
     console.log('email:', item);
     setEmailData(item);
     setEmailModal(true);
-    setStage1(false);
+    setStage2(false);
   };
 
   const closeEmailModal = () => {
     setEmailModal(false);
-    setStage1(true);
+    setStage2(true);
   };
 
   const openStatusModal = item => {
     console.log('Status:', item);
     setStatusModal(true);
     setEmailData(item);
-    setStage1(false);
+    setStage2(false);
   };
 
   const closeStatusModal = () => {
     setStatusModal(false);
-    setStage1(true);
+    setStage2(true);
   };
 
   const copyToClipboard = text => {
@@ -125,6 +140,7 @@ const Stage1 = () => {
     }
     return 'Invalid Number';
   };
+
   const formateEmail = email => {
     if (email && email.length >= 4) {
       const firstTwo = email.slice(0, 2); // First two digits
@@ -160,7 +176,6 @@ const Stage1 = () => {
     }
   };
 
-  
   const [ticketHisModal, setTicketHisModal] = useState(false);
   const [selectedTicketInfo, setSelectedTicketInfo] = useState();
   const [modalVisible, setModalVisible] = useState(false);
@@ -168,7 +183,7 @@ const Stage1 = () => {
     console.log(ticketId);
     setTicketHisModal(true);
     setModalVisible(true);
-    fetchStage1Data()
+    fetchStage2Data();
     setSelectedTicketInfo(ticketId);
   };
   const closeTicketJourney = () => {
@@ -177,8 +192,8 @@ const Stage1 = () => {
 
   return (
     <>
-      {stage1 && (
-        <ScrollView style={{position: 'relative'}}>
+      {stage2 && (
+        <ScrollView style={{ position: 'relative' }}>
           <View style={styles.filterContainer}>
             <View style={styles.row}>
               <Image
@@ -260,13 +275,13 @@ const Stage1 = () => {
                           item.ticketstatus === 'Follow'
                             ? '#fff3b0'
                             : item.ticketstatus === 'Intersted'
-                            ? 'orange'
+                            ? '#a8dadc'
                             : item.ticketstatus === 'Place_With_order'
-                            ? '#ccd5ae'
+                            ? '#3dccc7'
                             : 'white', // Default color if no condition matches
                       },
                     ]}>
-                    <View style={{flexDirection: 'column'}}>
+                    <View style={{ flexDirection: 'column' }}>
                       <View
                         style={{
                           flexDirection: 'row',
@@ -279,22 +294,23 @@ const Stage1 = () => {
                           onPress={() => openStatusModal(item)}
                           style={[
                             {
-                              borderWidth: 0.5,
+                              borderWidth: 1,
                               borderRadius: 10,
                               fontSize: 12,
-                              paddingHorizontal: 4,
+                              paddingHorizontal: 6,
+                              paddingVertical: 2,
                             },
                             item.ticketstatus === 'Follow'
-                              ? {backgroundColor: '#fff3b0', color: 'black'}
+                              ? { backgroundColor: '#fff3b0', color: 'black' }
                               : item.ticketstatus === 'Intersted'
-                              ? {backgroundColor: 'orange', color: 'black'}
+                              ? { backgroundColor: 'orange', color: 'black' }
                               : item.ticketstatus === 'Place_With_order'
-                              ? {backgroundColor: 'red', color: 'white'}
+                              ? { backgroundColor: 'red', color: 'white' }
                               : {},
                           ]}>
                           {item.ticketstatus}
                         </Text>
-                        <Text style={{fontSize: 11, marginLeft: 10}}>
+                        <Text style={{ fontSize: 11, marginLeft: 10 }}>
                           {localdate} {localtime}
                         </Text>
                       </View>
@@ -308,10 +324,10 @@ const Stage1 = () => {
                         }}>
                         <Text
                           onPress={() => toggleAccordion(index)}
-                          style={{fontSize: 16}}>
+                          style={{ fontSize: 16 }}>
                           {item.senderName}
                         </Text>
-                        <View style={{flexDirection: 'row', gap: 10}}>
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
                           <TouchableOpacity
                             onPress={() =>
                               openTicketHistroy(item.uniqueQueryId)
@@ -321,7 +337,7 @@ const Stage1 = () => {
                               source={{
                                 uri: 'https://cdn-icons-png.flaticon.com/128/9195/9195785.png',
                               }}
-                              style={{width: 20, height: 20, marginRight: 5}}
+                              style={{ width: 20, height: 20, marginRight: 5 }}
                             />
                           </TouchableOpacity>
                           <TouchableOpacity onPress={() => openWhatsApp()}>
@@ -372,7 +388,7 @@ const Stage1 = () => {
                             source={{
                               uri: 'https://cdn-icons-png.flaticon.com/128/2190/2190552.png',
                             }}
-                            style={{height: 12, width: 12}}
+                            style={{ height: 12, width: 12 }}
                           />
                           <Text>{`Comment: ${item.comment || 'N/A'}`}</Text>
                         </View>
@@ -388,7 +404,7 @@ const Stage1 = () => {
                             source={{
                               uri: 'https://cdn-icons-png.flaticon.com/128/732/732200.png',
                             }}
-                            style={{height: 10, width: 10}}
+                            style={{ height: 10, width: 10 }}
                           />
                           <View
                             style={{
@@ -396,12 +412,6 @@ const Stage1 = () => {
                               alignItems: 'center',
                             }}>
                             <Text> {formateEmail(item.email)} </Text>
-                            {/* <TouchableOpacity onPress={() => copyToClipboard(item.email)}>
-                                                        <Image
-                                                            source={{ uri: 'https://cdn-icons-png.flaticon.com/128/1827/1827923.png' }}
-                                                            style={{ height: 14, width: 14, marginLeft: 5 }}
-                                                        />
-                                                    </TouchableOpacity> */}
                           </View>
                         </View>
                         {/* mobile */}
@@ -416,7 +426,7 @@ const Stage1 = () => {
                             source={{
                               uri: 'https://cdn-icons-png.flaticon.com/128/3059/3059561.png',
                             }}
-                            style={{height: 12, width: 12}}
+                            style={{ height: 12, width: 12 }}
                           />
 
                           <View
@@ -425,12 +435,6 @@ const Stage1 = () => {
                               alignItems: 'center',
                             }}>
                             <Text> {formatMobile(item.mobileNumber)} </Text>
-                            {/* <TouchableOpacity onPress={() => copyToClipboard(item.mobileNumber)}>
-                                                        <Image
-                                                            source={{ uri: 'https://cdn-icons-png.flaticon.com/128/1827/1827923.png' }}
-                                                            style={{ height: 14, width: 14, marginLeft: 5 }}
-                                                        />
-                                                    </TouchableOpacity> */}
                           </View>
                         </View>
                       </View>
@@ -483,10 +487,21 @@ const Stage1 = () => {
         </ScrollView>
       )}
       {emailmodal && <Email closeModal={closeEmailModal} data={emaildata} />}
-      {statusmodal && (
+      {/* {statusmodal && (
         <StatusModal closeModal={closeStatusModal} data={emaildata} />
-      )}
-       <TicketHistoryModal
+      )} */}
+      <Modal
+        visible={statusmodal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={closeStatusModal}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <StatusModal closeModal={closeStatusModal} data={emaildata} />
+          </View>
+        </View>
+      </Modal>
+      <TicketHistoryModal
         ticketId={selectedTicketInfo}
         isVisible={modalVisible}
         closeTicketHisModal={() => setModalVisible(false)}
@@ -495,7 +510,7 @@ const Stage1 = () => {
   );
 };
 
-export default Stage1;
+export default Stage2;
 
 const styles = StyleSheet.create({
   filterContainer: {
@@ -583,5 +598,41 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#f0f0f0',
     borderRadius: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dim background
+  },
+
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: '90%',
+    elevation: 5, // Adds shadow (Android)
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Adds a dim effect
+  },
+  
+  modalContainer: {
+    width: '90%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5, // Adds shadow (Android)
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
 });

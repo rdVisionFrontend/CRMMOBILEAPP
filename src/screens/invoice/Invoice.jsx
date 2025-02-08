@@ -9,11 +9,11 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import {useSelector} from 'react-redux';
-import apiInstance from '../../../api';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const Invoice = () => {
-  const {userData} = useSelector(state => state.crmUser);
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedCard, setExpandedCard] = useState(null);
@@ -23,13 +23,21 @@ const Invoice = () => {
   }, []);
 
   const fetchInvoices = async () => {
+    const user = await AsyncStorage.getItem('user');
+    const token = await AsyncStorage.getItem('jwtToken');
+    const storedUser = JSON.parse(user);
+    console.log('invoice user', JSON.parse(user));
     try {
-      const response = await apiInstance.get(
-        `/invoice/getInvoiceByUser/${userData.userId}`,
+      const response = await axios.get(
+        `https://uatbackend.rdvision.tech/invoice/getInvoiceByUser/${storedUser?.userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Send token in Authorization header
+            'Content-Type': 'application/json',
+          },
+        },
       );
-      if (__DEV__) {
-        console.log('Fetched invoices:', response.data);
-      }
+      console.log('Invoice:', response.data);
       setInvoices(response.data);
     } catch (error) {
       Alert.alert('Error', 'Failed to fetch invoices. Please try again.');
@@ -68,13 +76,12 @@ const Invoice = () => {
                 style={{width: 30, height: 30, marginLeft: 50}} // Adjust width, height, and margin as needed
               />
             ) : (
-                <Image
+              <Image
                 source={{
                   uri: ' https://cdn-icons-png.flaticon.com/128/6814/6814082.png',
                 }}
                 style={{width: 30, height: 30, marginLeft: 50}} // Adjust width, height, and margin as needed
               />
-               
             )}
           </View>
 

@@ -1,403 +1,432 @@
-import React, {useEffect, useState} from 'react';
 import {
+  Image,
+  ScrollView,
   StyleSheet,
   Text,
   View,
-  ScrollView,
-  Image,
   TouchableOpacity,
+  Modal,
   Alert,
+  Dimensions,
 } from 'react-native';
+import React, {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSelector} from 'react-redux';
-import Nodata from '../screens/NoData';
-import LiveClander from '../screens/LiveClander';
-import BestSellingCloser from '../screens/BestSellingCloser';
-import UserWorkTracker from '../screens/UserWorkTracker'
+import {useAuth} from '../Authorization/AuthContext';
+import BestSellingClosers from '../screens/BestSellingCloser';
+import LiveCalendar from '../screens/LiveClander';
+import {LineChart} from 'react-native-chart-kit';
+import WorkTimeGraph from './WorktimeGraph';
 
-const User = ({navigation}) => {
+const Profile = () => {
   const [user, setUser] = useState(null);
-  const [timer, setTimer] = useState(0);
   const [token, setToken] = useState(null);
-  const [moreinfo, setMoreInfo] = useState(false);
-  const {userData, jwtToken, refreshToken} = useSelector(
-    state => state.crmUser,
-  );
+  const {isAuthenticated, setIsAuthenticated} = useAuth();
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [timerActive, setTimerActive] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [breakTime, setBreakTime] = useState(0);
+  const [onBreak, setOnBreak] = useState(false);
+  const [breakTimerActive, setBreakTimerActive] = useState(false);
 
-  
+  useEffect(() => {
+    fetchToken();
+  }, []);
 
-  const formatTime = timeInSeconds => {
-    const hours = Math.floor(timeInSeconds / 3600);
-    const minutes = Math.floor((timeInSeconds % 3600) / 60);
-    const seconds = timeInSeconds % 60;
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ${seconds}s`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${seconds}s`;
+  useEffect(() => {
+    let breakTimer;
+    if (onBreak && breakTimerActive) {
+      breakTimer = setInterval(() => {
+        setBreakTime(prevTime => prevTime + 1);
+      }, 1000);
     } else {
-      return `${seconds}s`;
+      clearInterval(breakTimer);
+    }
+    return () => clearInterval(breakTimer);
+  }, [onBreak, breakTimerActive]);
+
+  const handleEndBreak = () => {
+    setBreakTimerActive(false); // Stop break timer
+    setOnBreak(false);
+    setTimerActive(true); // Resume work timer
+    setModalVisible(false); // Close modal
+  };
+
+  const fetchToken = async () => {
+    try {
+      const storedToken = await AsyncStorage.getItem('jwtToken');
+      setToken(storedToken);
+      console.log('Token:', storedToken);
+
+      const storedUser = await AsyncStorage.getItem('user');
+      const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+      setUser(parsedUser);
+      console.log('User:', parsedUser);
+      if (isAuthenticated) {
+        setTimerActive(true); // Start the timer if authenticated
+      }
+    } catch (error) {
+      console.error('Error fetching data from AsyncStorage:', error);
     }
   };
 
+  useEffect(() => {
+    let timer;
+    if (isAuthenticated && timerActive) {
+      timer = setInterval(() => {
+        setElapsedTime(prevTime => prevTime + 1);
+      }, 1000); // Updates every second
+    } else {
+      clearInterval(timer);
+    }
+    return () => clearInterval(timer);
+  }, [isAuthenticated, timerActive]);
+
+  const handleTakeBreak = () => {
+    setTimerActive(false); // Pause work timer
+    setBreakTime(0); // Reset break timer
+    setOnBreak(true);
+    setBreakTimerActive(true); // Start break timer
+    setModalVisible(true); // Show break modal
+  };
+
+  const formatTime = seconds => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(
+      remainingSeconds,
+    ).padStart(2, '0')} Min`;
+  };
+
+  const handleLogout = async () => {
+    Alert.alert('Logout Confirmation', 'Are you sure you want to log out?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Logout',
+        onPress: async () => {
+          try {
+            await AsyncStorage.removeItem('jwtToken'); // Clear token
+            await AsyncStorage.removeItem('user'); // Clear user data
+            
+            if (elapsedTime !== undefined) {
+              await AsyncStorage.setItem('totalWorkTime', String(elapsedTime)); // Convert to string
+            }
+            console.log('totalWorkTime', String(elapsedTime))
+            setIsAuthenticated(false); // Update authentication state
+            Alert.alert('You are logged out'); // Corrected message
+          } catch (error) {
+            console.error('Error during logout:', error);
+          }
+        },
+        style: 'destructive',
+      },
+    ]);
+  };
   
 
-  useEffect(() => {
-    console.log('redux', userData, jwtToken, refreshToken);
-
-    const fetchData = async () => {
-      try {
-        const token = await AsyncStorage.getItem('jwtToken');
-        if (!token) {
-          navigation.navigate('Login');
-        }
-        setToken(token);
-        const userData = await AsyncStorage.getItem('user');
-        console.log('userDataLocal', userData);
-
-        if (userData) {
-          setUser(JSON.parse(userData));
-          console.log('fetched');
-        }
-      } catch (error) {
-        console.error('Error fetching data from AsyncStorage:', error);
-      }
-    };
-
-    fetchData();
-
-    // Start timer
-    const interval = setInterval(() => {
-      setTimer(prevTimer => prevTimer + 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [token]);
-
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {user ? (
-        <View style={styles.dataContainer}>
-          <>
-            {/* Display Current Time */}
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        {/* Profile Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.statusContainerLogout}
+            onPress={handleLogout}>
+            <Image
+              source={{
+                uri: 'https://cdn-icons-png.flaticon.com/128/18844/18844589.png',
+              }}
+              style={styles.icon}
+            />
+          </TouchableOpacity>
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png',
+            }}
+            style={styles.profileImage}
+          />
+          <Text style={styles.userName}>
+            {user?.firstName} {user?.lastName}
+          </Text>
+          <View style={styles.infoRow}>
+            <Image
+              source={{
+                uri: 'https://cdn-icons-png.flaticon.com/128/159/159832.png',
+              }}
+              style={styles.icon}
+            />
+            <Text style={styles.phoneText}>{user?.phoneNumber}</Text>
+          </View>
+          {user?.onBreak ? (
+            <View style={styles.statusContainerInActive}>
+              <Text style={styles.statusText}>In Active</Text>
+            </View>
+          ) : (
+            <View style={styles.statusContainer}>
+              <Text style={styles.statusText}>Active</Text>
+            </View>
+          )}
+        </View>
+
+        {/* User Details */}
+        <View style={styles.detailsContainer}>
+          <View style={styles.detailsWrapper}>
+            <View style={styles.detailRow}>
+              <Image
+                source={{
+                  uri: 'https://cdn-icons-png.flaticon.com/128/646/646094.png',
+                }}
+                style={styles.icon}
+              />
+              <Text style={styles.detailText}>{user?.email || 'N/A'}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Image
+                source={{
+                  uri: 'https://cdn-icons-png.flaticon.com/128/159/159832.png',
+                }}
+                style={styles.icon}
+              />
+              <Text style={styles.detailText}>
+                {user?.phoneNumber || 'N/A'}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Image
+                source={{
+                  uri: 'https://cdn-icons-png.flaticon.com/128/456/456283.png',
+                }}
+                style={styles.icon}
+              />
+              <Text style={styles.detailText}>
+                {user?.roleDto.roleName || 'N/A'}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Image
+                source={{
+                  uri: 'https://cdn-icons-png.flaticon.com/128/1006/1006771.png',
+                }}
+                style={styles.icon}
+              />
+              <Text style={styles.detailText}>{user?.systemIp || 'N/A'}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Image
+                source={{
+                  uri: 'https://cdn-icons-png.flaticon.com/128/49/49728.png',
+                }}
+                style={styles.icon}
+              />
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                <Text style={styles.detailText}>{formatTime(elapsedTime)}</Text>
+                <TouchableOpacity
+                  onPress={handleTakeBreak}
+                  style={{
+                    backgroundColor: '#ce4257',
+                    paddingVertical: 5,
+                    paddingHorizontal: 8,
+                    marginLeft: 100,
+                    borderRadius: 8,
+                  }}>
+                  <Text style={{color: '#fff', fontWeight: 600}}>
+                    Take Break
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.detailRow}>
+              <Image
+                source={{
+                  uri: 'https://cdn-icons-png.flaticon.com/128/2972/2972464.png',
+                }}
+                style={styles.icon}
+              />
+              <Text style={styles.detailText}>{formatTime(breakTime)}</Text>
+            </View>
+            <WorkTimeGraph workHours={elapsedTime / 3600} /> // Convert seconds
+            to hours
+          </View>
+        </View>
+        <BestSellingClosers />
+        <LiveCalendar/>
+        <Text style={{marginBottom:20}}></Text>
+      </ScrollView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
             <View
               style={{
                 display: 'flex',
                 flexDirection: 'row',
+                width: '90%',
                 justifyContent: 'space-between',
-                alignItems: 'flex-start',
+                alignItems: 'center',
               }}>
-              <View style={styles.imageContainer}>
-                <Image
-                  source={{
-                    uri: user.imageData
-                      ? `data:image/jpeg;base64,${user.imageData}`
-                      : 'https://rdvision.tech/src/assets/Images/RD_vision_logo.png',
-                  }}
-                  style={styles.image}
-                />
-                {/* Status Dot */}
-                <View
-                  style={[
-                    styles.statusDot,
-                    {backgroundColor: user.onBreak ? 'red' : 'green'},
-                  ]}
-                />
-              </View>
+              <Text style={styles.detailText}>
+                Work Time: {formatTime(elapsedTime)}
+              </Text>
+
+              <Text style={styles.detailText}>
+                Break Start: {formatTime(breakTime)}
+              </Text>
+            </View>
+
+            <View style={{alignContent: 'center'}}>
               <View
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'flex-end',
+                  backgroundColor: '#fff',
+                  paddingVertical: 5,
+                  borderRadius: 10,
+                  width: '100%',
+                  paddingHorizontal: 10,
                 }}>
-                <Text style={styles.infoName}>
-                  {' '}
-                  {user.firstName} {user.lastName}
-                </Text>
-                <View
+                <Text
                   style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: 10,
-                  }}>
-                  <Image
-                    style={styles.icon}
-                    source={{
-                      uri: 'https://cdn-icons-png.flaticon.com/128/732/732200.png',
-                    }}
-                  />
-                  <Text style={styles.infoEmail}>{user.email}</Text>
-                </View>
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: 10,
-                  }}>
-                  <Image
-                    style={styles.icon}
-                    source={{
-                      uri: 'https://cdn-icons-png.flaticon.com/128/5585/5585856.png',
-                    }}
-                  />
-                  <Text style={styles.infoPhone}> {user.phoneNumber}</Text>
-                </View>
-                <Text style={styles.timerText}>
-                  Worked On - {formatTime(timer)}{' '}
-                </Text>
-                <UserWorkTracker/>
+                    fontSize: 20,
+                    textAlign: 'center',
+                  }}>{`${user?.firstName} ${user?.lastName} You are on break`}</Text>
               </View>
-              
-            </View>
-            {/* <TouchableOpacity onPress={handleLogout} style={styles.logout}>
-              <Text style={styles.logoutText}>Logout</Text>
-            </TouchableOpacity> */}
-          </>
-        </View>
-        
-      ) : (
-        <Nodata />
-      )}
-
-      <TouchableOpacity
-        onPress={() => setMoreInfo(!moreinfo)}
-        style={{
-          marginTop: 10,
-          backgroundColor: '#807182',
-          paddingVertical: 5,
-          paddingHorizontal: 8,
-          marginBottom: 5,
-          borderRadius: 5,
-        }}>
-        <Text style={{color: '#fff'}}>
-          {moreinfo ? 'View Less' : 'View More Information'}
-        </Text>
-      </TouchableOpacity>
-
-      {/* More informaion */}
-
-      {moreinfo && (
-        <View
-          style={{
-            width: '100%',
-            borderWidth: 0.2,
-            height: 500,
-            borderRadius: 10,
-            alignItems: 'center',
-            padding: 10,
-            backgroundColor: '#fffafb',
-            flexDirection: 'column ',
-            gap: 10,
-            justifyContent: 'flex-start',
-          }}>
-          <Image
-            source={{
-              uri: user.imageData
-                ? `data:image/jpeg;base64,${user.imageData}`
-                : 'https://rdvision.tech/src/assets/Images/RD_vision_logo.png',
-            }}
-            style={styles.image}
-          />
-          <Text style={{fontSize: 15, fontWeight: 'bold'}}>
-            {user.roleDto.roleName}
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: 50,
-              width: '100%',
-            }}>
-            <Image
-              style={{height: 40, width: 40}}
-              source={{
-                uri: 'https://cdn-icons-png.flaticon.com/128/506/506185.png',
-              }}
-            />
-            <Text style={{fontSize: 20, textTransform: 'uppercase'}}>
-              {user.firstName} {user.lastName}
-            </Text>
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: 50,
-              width: '100%',
-            }}>
-            <Image
-              style={{height: 20, width: 20}}
-              source={{
-                uri: 'https://cdn-icons-png.flaticon.com/128/2875/2875435.png',
-              }}
-            />
-            <Text
-              style={{fontSize: 12, textTransform: 'lowercase', marginLeft: 7}}>
-              {user.email}
-            </Text>
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: 90,
-              width: '100%',
-            }}>
-            <Image
-              style={{height: 20, width: 20}}
-              source={{
-                uri: 'https://cdn-icons-png.flaticon.com/128/2482/2482985.png',
-              }}
-            />
-            <Text
-              style={{
-                fontSize: 20,
-                textTransform: 'lowercase',
-                marginLeft: 7,
-                textAlign: 'left',
-              }}>
-              {user.phoneNumber}
-            </Text>
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'column',
-              justifyContent: 'flex-start',
-              alignItems: 'center',
-              width: '100%',
-              borderWidth: 0.5,
-              padding: 10,
-              borderColor: 'gray',
-              borderRadius: 5,
-            }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                width: '100%',
-                marginTop: 5,
-              }}>
-              <Text>Created Date :</Text>
-              <Text style={{marginLeft: 5}}>{user.createdDate}</Text>
             </View>
 
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                width: '100%',
-                marginTop: 5,
-              }}>
-              <Text>Created By :</Text>
-              <Text style={{marginLeft: 5}}>{user.createdBy}</Text>
-            </View>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                width: '100%',
-                marginTop: 5,
-              }}>
-              <Text>Your IP :</Text>
-              <Text style={{marginLeft: 5}}>{user.systemIp}</Text>
-            </View>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={handleEndBreak}>
+              <Text style={{fontWeight: '600'}}>End Break</Text>
+            </TouchableOpacity>
           </View>
         </View>
-      )}
-
-      <LiveClander />
-      <BestSellingCloser />   
-    </ScrollView>
+      </Modal>
+    </View>
   );
 };
 
+export default Profile;
+
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'flex-start',
+    backgroundColor: '#FFF',
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#f8f8f8',
+    paddingBottom: 15,
   },
-  dataContainer: {
+  scrollView: {
     width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.9,
-    shadowRadius: 4,
-    elevation: 5,
   },
-  timeText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
+  header: {
+    height: 250,
+    backgroundColor: '#0088FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+    borderEndEndRadius: 60,
+    borderBottomLeftRadius: 60,
   },
-  imageContainer: {
-    position: 'relative', // Ensures the status dot can be positioned relative to the image
-  },
-  image: {
+  profileImage: {
     width: 80,
     height: 80,
-    borderRadius: 50,
-    resizeMode: 'cover',
-    borderWidth: 0.5,
-    padding: 0,
+    borderRadius: 40,
+    marginBottom: 10,
   },
-  statusDot: {
-    position: 'absolute',
-    bottom: 5,
-    right: 5,
-    width: 15,
-    height: 15,
-    borderRadius: 7.5,
-    borderWidth: 2,
-    borderColor: '#fff',
+  userName: {
+    fontSize: 32,
+    color: '#FFF',
+    fontWeight: 'bold',
   },
-  infoName: {
-    fontSize: 20,
-    marginBottom: 5,
-    color: '#555',
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 5,
+  },
+  phoneText: {
+    fontSize: 18,
+    fontWeight: '500',
+  },
+  detailsContainer: {
+    padding: 20,
+  },
+  detailsWrapper: {
+    marginLeft: 20,
+    alignItems: 'flex-start',
+  },
+  detailRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 5,
+    gap: 10,
   },
   icon: {
-    height: 20,
-    width: 20,
+    height: 30,
+    width: 30,
   },
-  timerText: {
-    marginTop: 5,
-    marginBottom:5,
-    color:'green'
+  detailText: {
+    fontSize: 16,
+    fontWeight: '500',
+    padding: 5,
   },
-  logout: {
-    alignSelf: 'center',
-    backgroundColor: 'lightRed',
-    marginTop: 10,
-  },
-  logoutText: {
-    backgroundColor: '#f15156',
-    color: '#fff',
-    fontWeight: 'semibold',
-    paddingVertical: 4,
+  statusContainerLogout: {
+    alignSelf: 'flex-start', // Aligns to the right dynamically
+    paddingVertical: 3,
     paddingHorizontal: 10,
-    fontSize: 15,
+    borderRadius: 15, // Makes it look smoother
+    marginRight: 20, // Adds some spacing from the edge
+    marginTop: 10, // Adds space from the previous element
+  },
+  statusContainer: {
+    alignSelf: 'flex-end', // Aligns to the right dynamically
+    backgroundColor: '#52BF56', // Fixed background color
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    borderRadius: 15, // Makes it look smoother
+    marginRight: 30, // Adds some spacing from the edge
+    marginTop: 5, // Adds space from the previous element
+  },
+  statusContainerInActive: {
+    alignSelf: 'flex-end', // Aligns to the right dynamically
+    backgroundColor: '#b5838d', // Fixed background color
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    borderRadius: 15, // Makes it look smoother
+    marginRight: 30, // Adds some spacing from the edge
+    marginTop: 5, // Adds space from the previous element
+  },
+  statusText: {
+    textAlign: 'center',
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.9)',
+  },
+  modalContent: {
+    backgroundColor: '#f08080',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '100%',
+  },
+  closeButton: {
+    marginTop: 10,
+    backgroundColor: '#c1121f',
+    padding: 10,
+    borderRadius: 5,
   },
 });
-
-export default User;

@@ -3,6 +3,8 @@ import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import apiInstance from '../../../api';
 import InvoiceInfoTab from './InvoiceInfoTab';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const InvoiceInfo = () => {
   const {userData} = useSelector(state => state.crmUser);
@@ -16,23 +18,43 @@ const InvoiceInfo = () => {
     fetchInvoices()
   }, []);
 
-  const fetchInvoiceData = async () => {
-    setLoading(true);
-    try {
-      const response = await apiInstance.get(
-        `/invoice/invoideCOunt/${
-          userData.roleDto.roleName === 'Closer' ? userData.userId : 0
-        }`,
-      );
-      console.log('Invoice Data:', response.data); // Log response to verify structure
-      setInvoiceData(response.data);
-    } catch (err) {
-      setError('Failed to fetch invoice data');
-      console.error(err);
-    } finally {
-      setLoading(false);
+  
+
+const fetchInvoiceData = async () => {
+  setLoading(true);
+  try {
+    // Retrieve user data and token from AsyncStorage
+    const user = await AsyncStorage.getItem('user');
+    const token = await AsyncStorage.getItem('jwtToken');
+  
+
+    if (!user || !token) {
+      throw new Error('User data or token not found');
     }
-  };
+
+    const userData = JSON.parse(user);
+
+    const response = await axios.get(`https://uatbackend.rdvision.tech/invoice/invoideCOunt/${
+        userData.roleDto.roleName === 'Closer' ? userData.userId : 0
+      }`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    console.log('Invoice Data:', response.data); // Log response to verify structure
+    setInvoiceData(response.data);
+  } catch (err) {
+    setError('Failed to fetch invoice data');
+    console.error('Fetch Error:', err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const fetchInvoices = async () => {
     try {

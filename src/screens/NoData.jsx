@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
 
 const Nodata = () => {
   return (
@@ -18,13 +18,14 @@ export default Nodata;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',    
+    flex: 1, // Takes full height & width of the screen
+    justifyContent: 'center', // Centers vertically
+    alignItems: 'center', // Centers horizontally
+    backgroundColor: '#f9f9f9', // Optional: Light background
   },
   image: {
-    width: 100,
-    height: 100,
+    width: 120, // Increased size for better visibility
+    height: 120,
     marginBottom: 20,
   },
   text: {

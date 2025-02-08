@@ -12,14 +12,14 @@ import {
   UIManager,
   Linking,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import {useAuth} from '../../Authorization/AuthContext';
-import apiInstance from '../../../api';
-import {useSelector} from 'react-redux';
 import InvoiceModal from '../InvoiceModal';
 import Email from '../Email';
 import TicketHistoryModal from '../TicketHistroyModal';
 import StatusModal from '../StatustModal';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 // Enable LayoutAnimation for Android
 if (
@@ -34,8 +34,7 @@ const UploadedTickets = () => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [expandedTicketId, setExpandedTicketId] = useState(null);
-  const [selectedTicket, setSelectedTicket] = useState(null);
-  const {userData} = useSelector(state => state.crmUser);
+  const [selectedTicket, setSelectedTicket] = useState(null); 
   const [invoiceModal, setInvoiceModal] = useState(false);
   const [emailModal, setEmailModal] = useState(false);
   const [invoiceData, setInvoiceData] = useState();
@@ -44,24 +43,37 @@ const UploadedTickets = () => {
   const [emailData, setEmailData] = useState();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await apiInstance.get('/upload/getAssignedTickets', {
-          params: {
-            userId: userData.userId,
-            page: currentPage,
-            size: 4,
-            ticketStatus: 'New',
-          },
-        });
-        setData(response.data.dtoList);
-        console.log('ABC', response);
-      } catch (error) {
-        Alert.alert('Error', 'Failed to fetch tickets');
-      }
-    };
     fetchData();
   }, [emailModal, currentPage, invoiceModal]);
+  const fetchData = async () => {
+    try {
+      const user = await AsyncStorage.getItem('user');
+      const token = await AsyncStorage.getItem('jwtToken');
+      const storedUser = JSON.parse(user);
+
+      console.log('User Data:', storedUser);
+   
+
+      const response = await axios.get('https://uatbackend.rdvision.tech/upload/getAssignedTickets', {
+        params: {
+          userId: storedUser.userId,
+          page: currentPage,
+          size: 4,
+          ticketStatus: 'New',
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+        
+      });
+      setData(response.data.dtoList);
+      console.log('ABC Data:', response.data);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to fetch tickets');
+      console.error('Fetch Error:', error);
+    }
+  };
 
   const toggleAccordion = ticketId => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -76,7 +88,7 @@ const UploadedTickets = () => {
   };
 
   const closeEmailModal = () => {
-    // fetchData();
+    fetchData();
     setEmailModal(false);
     setStatusModal(false);
     setInvoiceModal(false);
@@ -356,7 +368,7 @@ const UploadedTickets = () => {
         isVisible={modalVisible}
         closeTicketHisModal={() => setModalVisible(false)}
       />
-      <View >
+      <View>
         {statusmodal && (
           <StatusModal data={statusmodaldata} closeModal={closeEmailModal} />
         )}

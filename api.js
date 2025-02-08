@@ -1,5 +1,6 @@
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 
 const API_BASE_URL = 'https://uatbackend.rdvision.tech';
 
@@ -10,17 +11,18 @@ const apiInstance = axios.create({
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
+  withCredentials: true, // Include cookies if required by API
 });
 
-// Add a request interceptor
+// 📌 Add a request interceptor to include the token
 apiInstance.interceptors.request.use(
   async (config) => {
     try {
       const token = await AsyncStorage.getItem('jwtToken');
-      console.log("Retrieved Token:", token); // Debugging
+      console.log("🔑 Retrieved Token from Storage:", token); 
 
       if (!token) {
-        console.error("⚠️ No Token Found in Storage!");
+        console.warn("⚠️ No Token Found in Storage! Authentication may fail.");
       } else {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -32,13 +34,29 @@ apiInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-
-// Add a response interceptor
+// 📌 Add a response interceptor to handle errors globally
 apiInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
-    // Handle errors globally
-    console.error('API Error:', error.response || error.message);
+  async (error) => {
+    if (!error.response) {
+      console.error("🚨 Network Error:", error.message);
+      Alert.alert("Network error! Please check your internet connection.");
+      return Promise.reject(error);
+    }
+
+    const { status, data } = error.response;
+    console.warn(`⚠️ API Error: ${status}`, data);
+
+    if (status === 401) {
+      console.warn("⏳ Token expired or invalid, logging out...");
+
+      // Handle logout or token refresh logic
+      await AsyncStorage.removeItem('jwtToken');
+      Alert.alert("Session expired. Please log in again.");
+    } else {
+      Alert.alert(`Error: ${data.message || "Something went wrong!"}`);
+    }
+
     return Promise.reject(error);
   }
 );

@@ -8,7 +8,9 @@ import {
   Image,
 } from 'react-native';
 import {useSelector} from 'react-redux';
-import apiInstance from '../../../api';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const InvoiceInfoTab = () => {
   const {userData} = useSelector(state => state.crmUser);
@@ -21,9 +23,27 @@ const InvoiceInfoTab = () => {
 
   const fetchInvoices = async () => {
     try {
-      const response = await apiInstance.get(
-        `/invoice/getAssInvoice/${userData.userId}`,
+      // Retrieve user data and token from AsyncStorage
+      const user = await AsyncStorage.getItem('user');
+      const token = await AsyncStorage.getItem('jwtToken');
+  
+      if (!user || !token) {
+        throw new Error('User data or token not found');
+      }
+  
+      const userData = JSON.parse(user);
+  
+      const response = await axios.get(
+        `https://uatbackend.rdvision.tech/invoice/getAssInvoice/${userData.userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
       );
+  
+      console.log('Fetched Invoices:', response.data); // Log response for verification
       setInvoiceDataTab(response.data);
     } catch (error) {
       console.error('Error fetching invoices:', error);

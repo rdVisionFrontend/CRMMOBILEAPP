@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -7,14 +7,17 @@ import {
   Image,
   Button,
   TouchableOpacity,
+  Alert,
+  Modal,
 } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import Login from './src/screens/Login';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import {NavigationContainer} from '@react-navigation/native';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {createDrawerNavigator} from '@react-navigation/drawer';
+
 import ProfileScreen from './src/sidecreens/Profile';
 import Ticket from './src/screens/Ticket';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 import In_Nagociation from './src/screens/nagotiation/In_Nagociation';
 import EmailModal from './src/screens/nagotiation/EmailModal';
 import Invoice from './src/screens/invoice/Invoice';
@@ -22,11 +25,12 @@ import TodaySalesRepost from './src/screens/todaySales/TodaySalesRepost';
 import AbcTicket from './src/screens/ABC/AbcTicket';
 import InvoiceInfo from './src/screens/ASS/InvoiceInfo';
 import ProductInfo from './src/screens/MIS_PRODUCT/ProductInfo';
-import { Linking, Platform } from 'react-native';
-import { useAuth } from './src/Authorization/AuthContext';
-import { createStackNavigator } from '@react-navigation/stack';
+import {Linking, Platform} from 'react-native';
+import {useAuth} from './src/Authorization/AuthContext';
+import {createStackNavigator} from '@react-navigation/stack';
 import Note from './src/screens/Note';
 import Clock from './src/screens/Clock';
+import Login from './src/screens/Login';
 
 const Drawer = createDrawerNavigator();
 const openGmail = () => {
@@ -40,10 +44,10 @@ const openGmail = () => {
 };
 
 const EmailScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
     <TouchableOpacity
       onPress={openGmail}
-      style={{ borderWidth: 1, padding: 10, borderRadius: 2 }}>
+      style={{borderWidth: 1, padding: 10, borderRadius: 2}}>
       <View
         style={{
           display: 'flex',
@@ -56,7 +60,7 @@ const EmailScreen = () => (
           source={{
             uri: 'https://cdn-icons-png.flaticon.com/128/5968/5968534.png',
           }}
-          style={{ width: 20, height: 20 }}
+          style={{width: 20, height: 20}}
         />
         <Text>OPEN GMAIL</Text>
       </View>
@@ -64,14 +68,7 @@ const EmailScreen = () => (
   </View>
 );
 
-
-
-
-
 const DrawerNavigator = () => (
-
-  
-  
   <Drawer.Navigator
     screenOptions={{
       drawerType: 'front',
@@ -89,7 +86,7 @@ const DrawerNavigator = () => (
           backgroundColor: '#b1a7a6', // Change header background color
         },
         headerTintColor: '#0b2545', // Change text color in header
-        drawerIcon: ({ focused, size }) => (
+        drawerIcon: ({focused, size}) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/432/432312.png',
@@ -97,7 +94,6 @@ const DrawerNavigator = () => (
             style={{
               width: size, // Set the icon size
               height: size, // Set the icon size
-
             }}
           />
         ),
@@ -112,7 +108,7 @@ const DrawerNavigator = () => (
           backgroundColor: '#b1a7a6', // Change header background color
         },
         headerTintColor: '0b2545',
-        drawerIcon: ({ focused, size }) => (
+        drawerIcon: ({focused, size}) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/1006/1006657.png',
@@ -120,7 +116,6 @@ const DrawerNavigator = () => (
             style={{
               width: size, // Set the icon size
               height: size, // Set the icon size
-
             }}
           />
         ),
@@ -136,7 +131,7 @@ const DrawerNavigator = () => (
           backgroundColor: '#b1a7a6', // Change header background color
         },
         headerTintColor: '0b2545',
-        drawerIcon: ({ focused, size }) => (
+        drawerIcon: ({focused, size}) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/11052/11052937.png',
@@ -144,7 +139,6 @@ const DrawerNavigator = () => (
             style={{
               width: size, // Set the icon size
               height: size, // Set the icon size
-
             }}
           />
         ),
@@ -160,7 +154,7 @@ const DrawerNavigator = () => (
           backgroundColor: '#b1a7a6', // Change header background color
         },
         headerTintColor: '0b2545',
-        drawerIcon: ({ focused, size }) => (
+        drawerIcon: ({focused, size}) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/16859/16859716.png',
@@ -168,7 +162,6 @@ const DrawerNavigator = () => (
             style={{
               width: size, // Set the icon size
               height: size, // Set the icon size
-
             }}
           />
         ),
@@ -183,7 +176,7 @@ const DrawerNavigator = () => (
           backgroundColor: '#b1a7a6', // Change header background color
         },
         headerTintColor: '0b2545',
-        drawerIcon: ({ focused, size }) => (
+        drawerIcon: ({focused, size}) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/3031/3031708.png',
@@ -191,7 +184,6 @@ const DrawerNavigator = () => (
             style={{
               width: 20,
               height: 20,
-
             }}
           />
         ),
@@ -206,7 +198,7 @@ const DrawerNavigator = () => (
           backgroundColor: '#b1a7a6', // Change header background color
         },
         headerTintColor: '0b2545',
-        drawerIcon: ({ focused, size }) => (
+        drawerIcon: ({focused, size}) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/27/27130.png',
@@ -214,7 +206,6 @@ const DrawerNavigator = () => (
             style={{
               width: 20,
               height: 20,
-
             }}
           />
         ),
@@ -230,7 +221,7 @@ const DrawerNavigator = () => (
           backgroundColor: '#b1a7a6', // Change header background color
         },
         headerTintColor: '0b2545',
-        drawerIcon: ({ focused, size }) => (
+        drawerIcon: ({focused, size}) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/10608/10608943.png',
@@ -238,7 +229,6 @@ const DrawerNavigator = () => (
             style={{
               width: 20,
               height: 20,
-
             }}
           />
         ),
@@ -250,9 +240,9 @@ const DrawerNavigator = () => (
       component={EmailScreen}
       options={{
         headerShown: true,
-        headerStyle: { backgroundColor: '#b1a7a6' },
+        headerStyle: {backgroundColor: '#b1a7a6'},
         headerTintColor: '#0b2545',
-        drawerIcon: ({ focused, size }) => (
+        drawerIcon: ({focused, size}) => (
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/5968/5968534.png',
@@ -260,7 +250,6 @@ const DrawerNavigator = () => (
             style={{
               width: 20,
               height: 20,
-
             }}
           />
         ),
@@ -269,171 +258,126 @@ const DrawerNavigator = () => (
   </Drawer.Navigator>
 
   // Admin Login menu
-
 );
-
-
-
-
-
-
-
 
 // Bottom Tab Navigator
 const Tab = createBottomTabNavigator();
 
 const Navigation = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState();
-  const [token, setToken] = useState(null);
-  const [userImage,setUserImage]=useState()
-
-  const { jwtToken, userData } = useSelector(state => state.crmUser);
-
+  const {isAuthenticated, setIsAuthenticated} = useAuth();
+  const [token,setToken] = useState(null)
   useEffect(() => {
-    FetchToken();
-    setUserImage(userData.imageData)
-    console.log('get', isLoggedIn);
-  }, [isLoggedIn, jwtToken]);
+    const fetchToken = async () => {
+      const token = await AsyncStorage.getItem('jwtToken');
+      console.log("Navigation Tokn",token)
+      setToken(token)
+    };
+  });
 
-  // Check if token exists in local storage
-  const FetchToken = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      setToken(token);
-      setIsLoggedIn(!!token); // Update state based on token existence
-      console.log(token);
-    } catch (error) {
-      console.log('error', error);
-    }
-  };
   const Stack = createStackNavigator();
-  const { isAuthenticated, setIsAuthenticated } = useAuth()
-
   const LoginNavigator = () => {
     return (
       <Stack.Navigator>
         <Stack.Screen
-          name='Login'
+          name="Login"
           component={Login}
-          options={{headerShown:false}}
+          options={{headerShown: false}}
         />
       </Stack.Navigator>
-    )
-  }
-
-
+    );
+  };
 
   return (
     <NavigationContainer>
-     {isAuthenticated && isAuthenticated ? <Tab.Navigator
-        screenOptions={({ route }) => ({
-          tabBarIcon: ({ color, size }) =>{
-            let iconUrl;          
-            if (route.name === 'Login') {
-              iconUrl = 'https://cdn-icons-png.flaticon.com/128/8323/8323511.png';
-            } else if (route.name === 'Dashboard') {
-              iconUrl = 'https://cdn-icons-png.flaticon.com/128/1828/1828765.png';
-            } else if (route.name === 'Ticket') {
-              iconUrl = 'https://cdn-icons-png.flaticon.com/128/389/389801.png';
-            } else if (route.name === 'Logout') {
-              iconUrl = 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png';
-            } else if (route.name === 'Note') {
-              iconUrl = 'https://cdn-icons-png.flaticon.com/128/3561/3561424.png';
-            }
-            else if (route.name === 'Time') {
-              iconUrl = 'https://cdn-icons-png.flaticon.com/128/2784/2784459.png';
-            } else {
-              // Fallback for other routes or when userImage is available
-              iconUrl = userImage ? userImage : 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png';
-            }
-          
-            return (
-              <Image
-                source={{ uri: iconUrl.startsWith('data:image') ? iconUrl : iconUrl }}
-                style={{ width: size, height: size, tintColor: color }}
-              />
-            );
-          },
-          tabBarActiveTintColor: '#fff', 
-          tabBarInactiveTintColor: '#2b2d42', 
-          tabBarStyle: {
-            backgroundColor: '#8d99ae',
-            height: 55,
-            borderTopLeftRadius: 5,
-            borderTopRightRadius: 5,
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,          
-            borderTopWidth: 0,  // Remove thin border
-            shadowColor: 'transparent',  // Remove shadow on iOS
-            elevation: 0,  // Remove shadow on Android
-          }
-          
-        })}
-        >
-        <Tab.Screen
-          name={jwtToken ? `${userData.firstName}` : 'Login'}
-          component={Login}
-          options={{
-            headerShown: false,
-            tabBarLabelStyle: {
-              fontSize: 16, // Increase the font size
-              fontWeight: 300 // Optional: Make it bold
+      {isAuthenticated ? (
+        <Tab.Navigator
+          screenOptions={({route}) => ({
+            tabBarIcon: ({color, size}) => {
+              let iconUrl;
+              if (route.name === 'Login') {
+                iconUrl =
+                  'https://cdn-icons-png.flaticon.com/128/8323/8323511.png';
+              } else if (route.name === 'Dashboard') {
+                iconUrl =
+                  'https://cdn-icons-png.flaticon.com/128/1828/1828765.png';
+              } else if (route.name === 'Ticket') {
+                iconUrl =
+                  'https://cdn-icons-png.flaticon.com/128/389/389801.png';
+              } else if (route.name === 'Logout') {
+                iconUrl =
+                  'https://cdn-icons-png.flaticon.com/128/1077/1077114.png';
+              } else if (route.name === 'Note') {
+                iconUrl = 'https://img.icons8.com/?size=50&id=25591&format=png';
+              } else if (route.name === 'Clock') {
+                iconUrl = 'https://img.icons8.com/?size=50&id=423&format=png';
+              } else {
+                iconUrl = userImage
+                  ? userImage
+                  : 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png';
+              }
 
+              return (
+                <Image
+                  source={{
+                    uri: iconUrl.startsWith('data:image') ? iconUrl : iconUrl,
+                  }}
+                  style={{width: size, height: size, tintColor: color}}
+                />
+              );
             },
-          }}
-        />
-        <Tab.Screen
-          name="Dashboard"
-          component={ProfileScreen}
-          options={{
-            headerShown: false,
-            tabBarLabelStyle: {
-              fontSize: 16, // Increase the font size
-              fontWeight: 300 // Optional: Make it bold
-
+            tabBarActiveTintColor: '#219ebc',
+            tabBarInactiveTintColor: '#2b2d42',
+            tabBarStyle: {
+              backgroundColor: '#fdf0d5',
+              height: 58,
+              borderTopLeftRadius: 5,
+              borderTopRightRadius: 5,
+              position: 'absolute',
+              borderWidth: 1,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              borderTopWidth: 2,
+              shadowColor: 'transparent',
+              elevation: 0,
             },
-          }}
-        />
-
-        <Tab.Screen
-          name="Ticket"
-          component={DrawerNavigator}
-          options={{
-            headerShown: false,
-            tabBarLabelStyle: {
-              fontSize: 16, // Increase the font size
-              fontWeight: 300 // Optional: Make it bold
-
-            },
-          }}
-        />
+          })}>
           <Tab.Screen
-          name="Note"
-          component={Note}
-          options={{
-            headerShown: false,
-            tabBarLabelStyle: {
-              fontSize: 16, // Increase the font size
-              fontWeight: 300 // Optional: Make it bold
-
-            },
-          }}
-        />
-        <Tab.Screen
-          name="Time"
-          component={Clock}
-          options={{
-            headerShown: false,
-            tabBarLabelStyle: {
-              fontSize: 16, // Increase the font size
-              fontWeight: 300 // Optional: Make it bold
-
-            },
-          }}
-        />
-      </Tab.Navigator>:<LoginNavigator/>}
+            name="Dashboard"
+            component={ProfileScreen}
+            options={{
+              headerShown: false,
+              tabBarLabelStyle: {fontSize: 16, fontWeight: 300},
+            }}
+          />
+          <Tab.Screen
+            name="Ticket"
+            component={DrawerNavigator}
+            options={{
+              headerShown: false,
+              tabBarLabelStyle: {fontSize: 16, fontWeight: 300},
+            }}
+          />
+          <Tab.Screen
+            name="Note"
+            component={Note}
+            options={{
+              headerShown: false,
+              tabBarLabelStyle: {fontSize: 16, fontWeight: 300},
+            }}
+          />
+          <Tab.Screen
+            name="Clock"
+            component={Clock}
+            options={{
+              headerShown: false,
+              tabBarLabelStyle: {fontSize: 16, fontWeight: 300},
+            }}
+          />
+        </Tab.Navigator>
+      ) : (
+        <LoginNavigator />
+      )}
     </NavigationContainer>
   );
 };
@@ -445,6 +389,19 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
     alignItems: 'center',
   },
 });
