@@ -39,7 +39,7 @@ const Email = ({data,closeModal }) => {
       const token = await AsyncStorage.getItem('jwtToken');
       setToken(token);
       const user = await AsyncStorage.getItem('user');
-      const parsedUser = parse.JSON(user);
+      const parsedUser = JSON.parse(user);
       setUser(parsedUser);
     } catch (error) {
       console.log(error);
@@ -57,8 +57,9 @@ const Email = ({data,closeModal }) => {
         const apiPath = data.uniqueQueryId.length < 15 ? "third_party_api/ticket" : "upload"; 
         console.log("PAth",apiPath)    
         console.log("uniqueQueryId",data.uniqueQueryId)    
+        const queryParam = formattedDateTime ? `&followUpDateTime=${formattedDateTime}` : "";
       setLoading(true);
-      const url = `https://uatbackend.rdvision.tech/${apiPath}/updateTicketResponse/${data.uniqueQueryId}?userId=${userData.userId}&ticketStatus=${selectedOption}&comment=${text}&followUpDateTime=${formattedDateTime}`;
+      const url = `https://uatbackend.rdvision.tech/${apiPath}/updateTicketResponse/${data.uniqueQueryId}?userId=${userData.userId}&ticketStatus=${selectedOption}&comment=${text}${queryParam}`;
       console.log(url, token);
       const response = await axios.post(url,{} ,{
         headers: {
@@ -71,10 +72,7 @@ const Email = ({data,closeModal }) => {
       Alert.alert('Status Updated');
       closeModal();
     } catch (error) {
-      console.error(
-        'Error:',
-        error.response ? error.response.data : error.message,
-      );
+      console.log( 'Error:', error.response , );
       setLoading(false);
       Alert.alert('Error', 'Failed to update status. Please try again.');
     }

@@ -20,7 +20,6 @@ import StatusModal from '../StatustModal';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 // Enable LayoutAnimation for Android
 if (
   Platform.OS === 'android' &&
@@ -34,7 +33,7 @@ const UploadedTickets = () => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [expandedTicketId, setExpandedTicketId] = useState(null);
-  const [selectedTicket, setSelectedTicket] = useState(null); 
+  const [selectedTicket, setSelectedTicket] = useState(null);
   const [invoiceModal, setInvoiceModal] = useState(false);
   const [emailModal, setEmailModal] = useState(false);
   const [invoiceData, setInvoiceData] = useState();
@@ -44,7 +43,7 @@ const UploadedTickets = () => {
 
   useEffect(() => {
     fetchData();
-  }, [emailModal, currentPage, invoiceModal]);
+  }, [emailModal, currentPage, invoiceModal,closeEmailModal]);
   const fetchData = async () => {
     try {
       const user = await AsyncStorage.getItem('user');
@@ -52,21 +51,22 @@ const UploadedTickets = () => {
       const storedUser = JSON.parse(user);
 
       console.log('User Data:', storedUser);
-   
 
-      const response = await axios.get('https://uatbackend.rdvision.tech/upload/getAssignedTickets', {
-        params: {
-          userId: storedUser.userId,
-          page: currentPage,
-          size: 4,
-          ticketStatus: 'New',
+      const response = await axios.get(
+        'https://uatbackend.rdvision.tech/upload/getAssignedTickets',
+        {
+          params: {
+            userId: storedUser.userId,
+            page: currentPage,
+            size: 4,
+            ticketStatus: 'New',
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         },
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
-        
-      });
+      );
       setData(response.data.dtoList);
       console.log('ABC Data:', response.data);
     } catch (error) {
@@ -86,7 +86,6 @@ const UploadedTickets = () => {
       .toString()
       .padStart(2, '0')}-${year}`;
   };
-
   const closeEmailModal = () => {
     fetchData();
     setEmailModal(false);
@@ -124,6 +123,7 @@ const UploadedTickets = () => {
     console.log('status', item);
     setStatusModal(true);
     setStatusModalData(item);
+    console.log("status data",statusmodaldata)
   };
 
   const [ticketHisModal, setTicketHisModal] = useState(false);
@@ -368,18 +368,34 @@ const UploadedTickets = () => {
         isVisible={modalVisible}
         closeTicketHisModal={() => setModalVisible(false)}
       />
-      <View>
+      {/* <View>
         {statusmodal && (
-          <StatusModal data={statusmodaldata} closeModal={closeEmailModal} />
+          <StatusModal
+            visible={statusmodal}
+            animationType="slide"
+            data={statusmodaldata}
+            closeModal={closeEmailModal}
+          />
         )}
-      </View>
+      </View> */}
+
+      <Modal
+        visible={statusmodal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={closeEmailModal}>
+        <View style={styles.modalOverlay}>
+          <View >
+            <StatusModal closeModal={closeEmailModal} data={statusmodaldata} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    
     padding: 16,
     backgroundColor: '#f5f5f5',
   },
@@ -488,21 +504,15 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 14,
   },
-  // emailModal: {
-  //   paddingHorizontal: 10,
-  // },
-  emailModal: {
-    position: 'absolute',
-    top: 0,
-    left: 15,
-    width:'100%'
-  },
+ 
+  
   disabledButton: {
     backgroundColor: '#ccc', // Grayed-out background
   },
   disabledText: {
     color: '#888', // Grayed-out text
   },
+ 
 });
 
 export default UploadedTickets;

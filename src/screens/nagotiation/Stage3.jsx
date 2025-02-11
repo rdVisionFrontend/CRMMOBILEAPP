@@ -76,28 +76,48 @@ const Stage2 = () => {
     }
   };
 
-  const formatDate = () => {
-    console.log(someDataArray.map(ele => ele.followUpDateTime));
-    const formattedDates = someDataArray.map(ele => {
-      const [year, month, day, hour, minute] = ele.followUpDateTime;
-      const date = new Date(year, month - 1, day, hour, minute);
-      const formattedDate = date.toLocaleDateString('en-US', {
-        weekday: 'short', // Mon, Tue, Wed, etc.
-        year: 'numeric',
-        month: 'long', // Full month name (e.g., January, February)
-        day: 'numeric',
-      });
-      const hours = date.getHours();
-      const minutes = date.getMinutes();
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const formattedTime = `${hours % 12 || 12}:${
-        minutes < 10 ? '0' + minutes : minutes
-      } ${ampm}`;
-      return { date: formattedDate, time: formattedTime };
-    });
-    setLocalDate(formattedDates[0]?.date);
-    setLocalTime(formattedDates[0]?.time);
+  const formatToLocalTime = (dateString) => {
+    if (!dateString) return "Invalid Date";
+  
+    let date;
+  
+    // Handle timestamps (milliseconds since epoch)
+    if (!isNaN(dateString) && dateString.length > 10) {
+      date = new Date(parseInt(dateString, 10));
+    }
+    // Handle ISO and standard date formats
+    else if (dateString.includes("T")) {
+      date = new Date(dateString);
+    }
+    // Handle formats like "2025-01-11 19:45:57"
+    else if (dateString.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
+      date = new Date(dateString.replace(" ", "T")); // Convert to valid ISO format
+    }
+    // Handle time-only formats (e.g., "07:46:44.066826382") - Attach today's date
+    else if (dateString.match(/^\d{2}:\d{2}:\d{2}/)) {
+      const today = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD
+      date = new Date(`${today}T${dateString.split(".")[0]}`); // Remove microseconds
+    }
+    // If nothing works, try as a general Date
+    else {
+      date = new Date(dateString);
+    }
+  
+    // Validate date
+    if (isNaN(date.getTime())) return "Invalid Date";
+  
+    // Convert to local format
+    return new Intl.DateTimeFormat("default", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    }).format(date);
   };
+  
 
   const toggleAccordion = index => {
     setExpandedCardId(expandedCardId === index ? null : index);
@@ -310,8 +330,14 @@ const Stage2 = () => {
                           ]}>
                           {item.ticketstatus}
                         </Text>
-                        <Text style={{ fontSize: 11, marginLeft: 10 }}>
-                          {localdate} {localtime}
+                        <Text
+                          style={{
+                            fontSize: 11,
+                            marginLeft: 10,
+                            fontWeight: 800,
+                          }}>
+                          {/* {localdate} {localtime} */}
+                          {formatToLocalTime(item.queryTime)}
                         </Text>
                       </View>
                       <View
@@ -325,7 +351,7 @@ const Stage2 = () => {
                         <Text
                           onPress={() => toggleAccordion(index)}
                           style={{ fontSize: 16 }}>
-                          {item.senderName}
+                          {item.senderName || item.firstName}
                         </Text>
                         <View style={{ flexDirection: 'row', gap: 10 }}>
                           <TouchableOpacity

@@ -16,6 +16,8 @@ import BestSellingClosers from '../screens/BestSellingCloser';
 import LiveCalendar from '../screens/LiveClander';
 import {LineChart} from 'react-native-chart-kit';
 import WorkTimeGraph from './WorktimeGraph';
+import {RadioButton} from 'react-native-paper';
+import axios from 'axios';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -27,6 +29,7 @@ const Profile = () => {
   const [breakTime, setBreakTime] = useState(0);
   const [onBreak, setOnBreak] = useState(false);
   const [breakTimerActive, setBreakTimerActive] = useState(false);
+  const [checked, setChecked] = useState();
 
   useEffect(() => {
     fetchToken();
@@ -49,6 +52,7 @@ const Profile = () => {
     setOnBreak(false);
     setTimerActive(true); // Resume work timer
     setModalVisible(false); // Close modal
+    setLogoutModal(false);
   };
 
   const fetchToken = async () => {
@@ -60,7 +64,7 @@ const Profile = () => {
       const storedUser = await AsyncStorage.getItem('user');
       const parsedUser = storedUser ? JSON.parse(storedUser) : null;
       setUser(parsedUser);
-      console.log('User:', parsedUser);
+      console.log('User:', storedUser);
       if (isAuthenticated) {
         setTimerActive(true); // Start the timer if authenticated
       }
@@ -97,34 +101,75 @@ const Profile = () => {
     ).padStart(2, '0')} Min`;
   };
 
+  const [logoutModal, setLogoutModal] = useState(false);
   const handleLogout = async () => {
-    Alert.alert('Logout Confirmation', 'Are you sure you want to log out?', [
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
-      {
-        text: 'Logout',
-        onPress: async () => {
-          try {
-            await AsyncStorage.removeItem('jwtToken'); // Clear token
-            await AsyncStorage.removeItem('user'); // Clear user data
-            
-            if (elapsedTime !== undefined) {
-              await AsyncStorage.setItem('totalWorkTime', String(elapsedTime)); // Convert to string
-            }
-            console.log('totalWorkTime', String(elapsedTime))
-            setIsAuthenticated(false); // Update authentication state
-            Alert.alert('You are logged out'); // Corrected message
-          } catch (error) {
-            console.error('Error during logout:', error);
-          }
-        },
-        style: 'destructive',
-      },
-    ]);
+    setLogoutModal(true);
   };
-  
+
+  const handleLogoutFinal = async () => {
+    console.log('Logout');
+    if (!checked) {
+      Alert.alert('Select a Reason');
+      return;
+    }
+    try {
+      // Retrieve stored values
+      const attId = await AsyncStorage.getItem('atdncId');
+      const token = await AsyncStorage.getItem('jwtToken');
+      const totalWorkTime =
+        elapsedTime !== undefined ? String(elapsedTime) : '0';
+      const totalBreakTime = breakTime !== undefined ? String(breakTime) : '0';
+
+      console.log('Stored User Info:', attId);
+      console.log('totalWorkTime:', totalWorkTime);
+      console.log('breakTime:', totalBreakTime);
+      console.log('tokenLogout:', token);
+      console.log('reason:', checked);
+
+      // Store total work time if available
+      if (elapsedTime !== undefined) {
+        await AsyncStorage.setItem('totalWorkTime', totalWorkTime);
+      }
+
+      // Validate logout reason
+      if (!checked) {
+        Alert.alert('Error', 'Please select a reason');
+        return;
+      }
+
+      // Construct FormData
+      const formData = {
+        attendanceId: attId,
+        logoutReason: checked,
+        actualWorkingSeconds: totalWorkTime,
+        totalBreakInSec: totalBreakTime,
+      };
+
+      console.log('FormData:', formData);
+
+      // Make API request with token in headers
+      const response = await axios.post(
+        'https://uatbackend.rdvision.tech/attendance/logout',
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass JWT token
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      console.log('Logout Response:', response.data);
+
+      if (response.status === 200) {
+        await AsyncStorage.clear(); // Clear AsyncStorage on logout
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      console.error('Logout Error:', error);
+      Alert.alert('Error', 'Failed to logout. Please try again.');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -141,12 +186,22 @@ const Profile = () => {
               style={styles.icon}
             />
           </TouchableOpacity>
-          <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png',
-            }}
-            style={styles.profileImage}
-          />
+          <View style={styles.imageContainer}>
+            <Image
+              source={{
+                uri: 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png',
+              }}
+              style={styles.profileImage}
+            />
+            {/* Dot Overlay */}
+            <View
+              style={[
+                styles.statusDot,
+                {backgroundColor: user?.onBreak ? 'red' : 'green'},
+              ]}
+            />
+          </View>
+
           <Text style={styles.userName}>
             {user?.firstName} {user?.lastName}
           </Text>
@@ -158,16 +213,7 @@ const Profile = () => {
               style={styles.icon}
             />
             <Text style={styles.phoneText}>{user?.phoneNumber}</Text>
-          </View>
-          {user?.onBreak ? (
-            <View style={styles.statusContainerInActive}>
-              <Text style={styles.statusText}>In Active</Text>
-            </View>
-          ) : (
-            <View style={styles.statusContainer}>
-              <Text style={styles.statusText}>Active</Text>
-            </View>
-          )}
+          </View>        
         </View>
 
         {/* User Details */}
@@ -257,8 +303,8 @@ const Profile = () => {
           </View>
         </View>
         <BestSellingClosers />
-        <LiveCalendar/>
-        <Text style={{marginBottom:20}}></Text>
+        <LiveCalendar />
+        <Text style={{marginBottom: 20}}></Text>
       </ScrollView>
 
       <Modal
@@ -310,6 +356,61 @@ const Profile = () => {
           </View>
         </View>
       </Modal>
+      {/* Logout Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={logoutModal}
+        onRequestClose={() => setLogoutModal(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContentLogout}>
+            <Text style={{fontWeight: 800, fontSize: 25}}>Logout</Text>
+            <View
+              style={{display: 'flex', flexDirection: 'column', width: '95%'}}>
+              <RadioButton.Item
+                label="Half Day"
+                value="Half_Day"
+                status={checked === 'Half_Day' ? 'checked' : 'unchecked'}
+                onPress={() => setChecked('Half_Day')}
+              />
+
+              <RadioButton.Item
+                label="Senior Instruction"
+                value="Senior_Instruction"
+                status={
+                  checked === 'Senior_Instruction' ? 'checked' : 'unchecked'
+                }
+                onPress={() => setChecked('Senior_Instruction')}
+              />
+
+              <RadioButton.Item
+                label="Over"
+                value="Over"
+                status={checked === 'Over' ? 'checked' : 'unchecked'}
+                onPress={() => setChecked('Over')}
+              />
+            </View>
+            <View
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                gap: 10,
+              }}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={handleEndBreak}>
+                <Text style={{fontWeight: '600', color: '#fff'}}>Cancle</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.LogoutBtn}
+                onPress={handleLogoutFinal}>
+                <Text style={{fontWeight: '600', color: '#fff'}}>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -327,20 +428,16 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   header: {
-    height: 250,
+    position:'relative',
+    height: 220,
     backgroundColor: '#0088FF',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 30,
     borderEndEndRadius: 60,
     borderBottomLeftRadius: 60,
   },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 10,
-  },
+ 
   userName: {
     fontSize: 32,
     color: '#FFF',
@@ -380,12 +477,9 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   statusContainerLogout: {
-    alignSelf: 'flex-start', // Aligns to the right dynamically
-    paddingVertical: 3,
-    paddingHorizontal: 10,
-    borderRadius: 15, // Makes it look smoother
-    marginRight: 20, // Adds some spacing from the edge
-    marginTop: 10, // Adds space from the previous element
+    alignSelf: 'flex-end',    
+    marginRight: 20, 
+   
   },
   statusContainer: {
     alignSelf: 'flex-end', // Aligns to the right dynamically
@@ -394,7 +488,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 15, // Makes it look smoother
     marginRight: 30, // Adds some spacing from the edge
-    marginTop: 5, // Adds space from the previous element
+    marginTop: -5, // Adds space from the previous element
   },
   statusContainerInActive: {
     alignSelf: 'flex-end', // Aligns to the right dynamically
@@ -403,7 +497,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 15, // Makes it look smoother
     marginRight: 30, // Adds some spacing from the edge
-    marginTop: 5, // Adds space from the previous element
+    marginTop: -5, // Adds space from the previous element
+    width: '99%',
   },
   statusText: {
     textAlign: 'center',
@@ -423,10 +518,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
+  modalContentLogout: {
+    backgroundColor: '#ffff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '100%',
+  },
   closeButton: {
     marginTop: 10,
-    backgroundColor: '#c1121f',
+    backgroundColor: '#415a77',
     padding: 10,
     borderRadius: 5,
+  },
+  LogoutBtn: {
+    marginTop: 10,
+    backgroundColor: '#134074',
+    padding: 10,
+    borderRadius: 5,
+  },
+  imageContainer: {
+    position: 'relative', // Needed for absolute positioning of the dot
+  },
+  profileImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 20, // Circular image
+    
+    
+  },
+  statusDot: {
+    position: 'absolute',
+    bottom: 0, // Position at the bottom of the image
+    right: 0, // Position at the right of the image
+    width: 12,
+    height: 12,
+    borderRadius: 6, // Circular dot
+    borderWidth: 2,
+    borderColor: 'white', // Add a white border for better visibility
   },
 });

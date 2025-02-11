@@ -1,7 +1,6 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
-import apiInstance from '../../../api';
 import InvoiceInfoTab from './InvoiceInfoTab';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -56,18 +55,38 @@ const fetchInvoiceData = async () => {
 };
 
 
-  const fetchInvoices = async () => {
-    try {
-      const response = await apiInstance.get(
-        `/invoice/getAssInvoice/${ userData.userId}`
-      );
-      console.log(response.data);
-      setInvoiceDataTab(response.data)
-    } catch (error) {
-      console.error("Error fetching invoices:", error);
-      setError("Failed to fetch invoices");
+
+const fetchInvoices = async () => {
+  try {
+    // Retrieve the token from AsyncStorage
+    const token = await AsyncStorage.getItem("jwtToken");
+    const user = await AsyncStorage.getItem('user');
+    const userData = JSON.parse(user);
+
+    if (!token) {
+      console.error("No authentication token found");
+      setError("Authentication token missing");
+      return;
     }
-  };
+
+    // Make API request with the token in headers
+    const response = await axios.get(
+      `https://uatbackend.rdvision.tech/invoice/invoideCOunt/invoice/getAssInvoice/${userData.userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include token in request
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("Invoices:", response.data);
+    setInvoiceDataTab(response.data);
+  } catch (error) {
+    console.error("Error fetching invoices:", error);
+    setError("Failed to fetch invoices");
+  }
+};
 
   return (
     <View style={styles.container}>

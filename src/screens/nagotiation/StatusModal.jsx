@@ -10,24 +10,25 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import {Picker} from '@react-native-picker/picker'; // Import Picker
 import DateTimePicker from '@react-native-community/datetimepicker';
-import {useSelector} from 'react-redux';
-import axios from 'axios';
 
-const StatusModal = ({data, closeModal}) => {
+import {useSelector} from 'react-redux';
+
+const Email = ({data,closeModal }) => {
   const {width, height} = Dimensions.get('window'); // Get full screen dimensions
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState(null);
   const [text, setText] = useState('');
   const [user, setUser] = useState(null);
-  const [selectedOption, setSelectedOption] = useState(data); // Set default value to ticketStatus
+  const [selectedOption, setSelectedOption] = useState(data.ticketStatus); // Set default value to ticketStatus
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
   const [mode, setMode] = useState('date');
   const [selectedDate, setSelectedDate] = useState(null);
-  const [callid, setCallId] = useState(12);
-  const {userData} = useSelector(state => state.crmUser);
+  const [callId, setCallId] = useState(0);
+ 
 
   useEffect(() => {
     fetchToken();
@@ -40,67 +41,44 @@ const StatusModal = ({data, closeModal}) => {
       const user = await AsyncStorage.getItem('user');
       const parsedUser = JSON.parse(user);
       setUser(parsedUser);
-      console.log('loacal user', user);
     } catch (error) {
       console.log(error);
     }
   };
-
-  const updateResaponse = async () => {
-    console.log('Try to update in negotiation');
-    try {
+  const updateTicketResponse = async () => {
+    console.log("Try to updated asdas")
+    try {    
+      const storedUser = await AsyncStorage.getItem('user');
+      const userData = JSON.parse(storedUser);
       const formattedDateTime = selectedDate
         ? selectedDate.toISOString().replace('Z', '')
         : null;
-      console.log('Date and Time', formattedDateTime);
-      console.log('id', data.uniqueQueryId);
-      console.log('userId', user.userId);
-
-      const encodedComment = encodeURIComponent(text);
-      const url = `https://uatbackend.rdvision.tech/upload/updateTicketResponse/${data.uniqueQueryId}?userId=${user.userId}&ticketStatus=${selectedOption}&comment=${encodedComment}&followUpDateTime=${formattedDateTime}`;
-      console.log(url, token);
-
+        console.log(formattedDateTime)
+        const apiPath = data.uniqueQueryId.length < 15 ? "third_party_api/ticket" : "upload"; 
+        console.log("PAth",apiPath)    
+        console.log("uniqueQueryId",data.uniqueQueryId)    
+        const queryParam = formattedDateTime ? `&followUpDateTime=${formattedDateTime}` : "";
       setLoading(true);
-      const response = await axios.post(
-        url,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyYWphbnByYWphcGF0aTc0M0BnbWFpbC5jb20iLCJpYXQiOjE3MzkwMDcyNzAsImV4cCI6MTczOTA1MDQ3MH0.nTmnhvLUWiUaQL60sqlP6ZiVw2zIZkZPZxxgQ6fX2uEnsy09DHrOEIk17qRac07BipXiLSIx9TkZ-cuuj24ojQ`,
-            'Content-Type': 'application/json',
-          },
+      const url = `https://uatbackend.rdvision.tech/${apiPath}/updateTicketResponse/${data.uniqueQueryId}?userId=${userData.userId}&ticketStatus=${selectedOption}&comment=${text}${queryParam}`;
+      console.log(url, token);
+      const response = await axios.post(url,{} ,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-      );
+      });
       console.log('Response:', response.data);
       setLoading(false);
       Alert.alert('Status Updated');
       closeModal();
     } catch (error) {
-      console.error(
-        'Error:',
-        error.response ? error.response.data : error.message,
-      );
+      console.log( 'Error:', error.response , );
       setLoading(false);
       Alert.alert('Error', 'Failed to update status. Please try again.');
     }
   };
 
-  //   const updatResaponse = async () => {
-  //     console.log('clcike');
-  //     // const url = `https://uatbackend.rdvision.tech/${apiPath}/updateTicketResponse/${data.uniqueQueryId}?userId=${userData.userId}&ticketStatus=${selectedOption}&comment=${text}&followUpDateTime=${formattedDateTime}`;
-  //     // console.log(url)
-  //     const response = await axios.post(
-  //       `"https://uatbackend.rdvision.tech/upload/updateTicketResponse/ac53bba34ba048cd941968ec82dd78c3?userId=802&ticketStatus=Not_Interested"`,
-  //       {},
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyYWphbnByYWphcGF0aTc0M0BnbWFpbC5jb20iLCJpYXQiOjE3Mzg4MTg3NTQsImV4cCI6MTczODg2MTk1NH0.ewf5GyJADWV19DFwcgZ79cDgdmAq85ArM46qzhz9qLGMXRa-hRNdek1hf8KpBVghW7aXPjcIMJCP2aiung0e5g`,
-  //           'Content-Type': 'application/json',
-  //         },
-  //       },
-  //     );
-  //     console.log(response.data);
-  //   };
+
 
   const statuses = [
     'New',
@@ -141,20 +119,23 @@ const StatusModal = ({data, closeModal}) => {
   };
 
   return (
-    <View>
-      <View style={styles.container}>
+    <View style={[styles.container, {width: width, height: height}]}>
+      <View style={styles.footer}>
         {/* Dropdown for ticket status */}
+
         <Picker
           selectedValue={selectedOption}
           onValueChange={itemValue => setSelectedOption(itemValue)} // Set the selected value
-          style={{backgroundColor: '#bcb8b1'}}>
+          style={styles.picker}>
           {statuses.map(status => (
             <Picker.Item key={status} label={status} value={status} />
           ))}
         </Picker>
         {selectedOption === 'Follow' && (
           <View>
-            <Text style={{fontWeight: 'bold', marginTop: 5}}>Select Date</Text>
+            <Text style={{fontWeight: 'bold'}}>
+              Select Follow Up Date and Time
+            </Text>
           </View>
         )}
 
@@ -179,7 +160,7 @@ const StatusModal = ({data, closeModal}) => {
               <View
                 style={{
                   display: 'flex',
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
                   alignItems: 'center',
                   flexDirection: 'row',
                   gap: 10,
@@ -191,7 +172,7 @@ const StatusModal = ({data, closeModal}) => {
                   <Text style={styles.timeBtnText}>Select date</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.timeBtnDate}
+                  style={styles.timeBtnTime}
                   onPress={showTimepicker}>
                   <Text style={styles.timeBtnText}>Select Time</Text>
                 </TouchableOpacity>
@@ -221,22 +202,16 @@ const StatusModal = ({data, closeModal}) => {
             value={text}
             style={styles.textInput}
             placeholder="Write something"
-            required
           />
         </View>
 
         {/* Buttons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            onPress={closeModal}
-            style={styles.closeButtonContainer}>
-            <Text style={styles.closeButtonText}>Close</Text>
+          <TouchableOpacity onPress={closeModal}>
+            <Text style={styles.closeButton}>Close</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={updateResaponse}
-            disabled={loading}
-            style={styles.updateButtonContainer}>
-            <Text style={styles.updateButtonText}>
+          <TouchableOpacity onPress={updateTicketResponse} disabled={loading}>
+            <Text style={styles.emailButton}>
               {loading ? 'Updating...' : 'Update'}
             </Text>
           </TouchableOpacity>
@@ -247,52 +222,74 @@ const StatusModal = ({data, closeModal}) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#ffffff',
+    padding: 10,
+    justifyContent: 'start',
+    alignItems: 'center',
+  },
+  footer: {
+    flexDirection: 'column', // Change to column to stack the items
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 20, // Adjust gap between elements
+    width: '100%',
+  },
+  closeButton: {
+    backgroundColor: '#da5552',
+    color: '#fff',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    paddingVertical: 10,
+  },
+  emailButton: {
+    backgroundColor: '#006400',
+    color: '#fff',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    paddingVertical: 10,
+  },
   picker: {
+    width: 200, // Adjust the width of the picker
+    marginBottom: 20,
+    backgroundColor: '#e5e5e5',
+    borderRadius: 20,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 5,
+  },
+  textInput: {
+    width: '100%', // Full width of the container
+    borderColor: 'gray',
     borderWidth: 1,
+    marginTop: 10,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    height: 100, // Adjust height as needed
   },
   timeBtnDate: {
-    backgroundColor: '#8e9aaf',
+    backgroundColor: '#55c2da',
+    borderRadius: 3,
+    paddingVertical: 2,
+    paddingHorizontal: 5,
+  },
+  timeBtnTime: {
+    backgroundColor: '#5dbea3',
+    borderRadius: 3,
     paddingVertical: 2,
     paddingHorizontal: 5,
   },
   timeBtnText: {
-    color: '#FFFF',
-    fontWeight: 600,
-  },
-  textInput: {
-    borderWidth: 1,
-    borderRadius: 5,
-    height: 60,
-    marginTop: 10,
-  },
-  buttonContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '99%',
-    marginTop: 10,
-  },
-  closeButtonContainer: {
-    backgroundColor: '#ba181b',
-    paddingVertical: 5,
-    paddingHorizontal: 20,
-    borderRadius: 4,
-  },
-  closeButtonText: {
-    color: '#FFFF',
-    fontWeight: 600,
-  },
-  updateButtonContainer: {
-    backgroundColor: '#008000',
-    paddingVertical: 5,
-    paddingHorizontal: 20,
-    borderRadius: 4,
-  },
-  updateButtonText: {
-    color: '#FFFF',
-    fontWeight: 600,
+    borderRadius: 3,
+    paddingVertical: 2,
+    paddingHorizontal: 5,
   },
 });
 
-export default StatusModal;
+export default Email;

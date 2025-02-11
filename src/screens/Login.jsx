@@ -65,10 +65,10 @@ const Login = ({navigation}) => {
         password,
         logInOtp: otp,
       });
-      console.log('OTP verified:', response);    
+      console.log('Login Success', response);    
+      storeUserData(response)      
       setIsAuthenticated(true);   
-      await AsyncStorage.setItem('jwtToken', response.data.jwtToken);   
-      await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+
       const sessionDuration = 60 * 60; // 1 hour in seconds
       await AsyncStorage.setItem(
         'sessionDuration',
@@ -82,6 +82,23 @@ const Login = ({navigation}) => {
       setLoading(false);
     }
   };
+
+
+  const storeUserData = async (response) => {
+    try {
+        await AsyncStorage.setItem('jwtToken', response.data.jwtToken);
+        await AsyncStorage.setItem('refreshToken', response.data.refreshToken);
+        await AsyncStorage.setItem('atdncId', response.data.attendanceId.toString());
+        await AsyncStorage.setItem('UserInfo', JSON.stringify(response.data)); // Ensure it's a string
+        await AsyncStorage.setItem('user', JSON.stringify(response.data.user)); 
+      
+        
+        Alert.alert('Login successfully!');
+    } catch (error) {
+        console.error('Error storing user data:', error);
+        Alert.alert('Failed to store user data.');
+    }
+  }
 
   return (
     <>    
