@@ -9,7 +9,7 @@ import TicketSocket from './src/screens/TicketWebSocket/TicketSocket'
 const App = () => {
   return (   
     <AuthProvider>
-      {/* <TicketSocket/> */}
+      <TicketSocket/>
       <Navigation />
     </AuthProvider>
     )

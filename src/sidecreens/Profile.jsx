@@ -33,7 +33,7 @@ const Profile = () => {
 
   useEffect(() => {
     fetchToken();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     let breakTimer;
@@ -46,6 +46,7 @@ const Profile = () => {
     }
     return () => clearInterval(breakTimer);
   }, [onBreak, breakTimerActive]);
+  
 
   const handleEndBreak = () => {
     setBreakTimerActive(false); // Stop break timer
@@ -55,17 +56,25 @@ const Profile = () => {
     setLogoutModal(false);
   };
 
+  const handleTakeBreak = () => {
+    setTimerActive(false); // Pause work timer
+    setOnBreak(true);
+    setBreakTimerActive(true); // Start break timer
+    setModalVisible(true); // Show break modal
+  };
+  
+  
+
   const fetchToken = async () => {
     try {
       const storedToken = await AsyncStorage.getItem('jwtToken');
       setToken(storedToken);
-      console.log('Token:', storedToken);
-
       const storedUser = await AsyncStorage.getItem('user');
       const parsedUser = storedUser ? JSON.parse(storedUser) : null;
       setUser(parsedUser);
+      console.log('Token:', storedToken);
       console.log('User:', storedUser);
-      if (isAuthenticated) {
+      if (parsedUser) {
         setTimerActive(true); // Start the timer if authenticated
       }
     } catch (error) {
@@ -85,13 +94,7 @@ const Profile = () => {
     return () => clearInterval(timer);
   }, [isAuthenticated, timerActive]);
 
-  const handleTakeBreak = () => {
-    setTimerActive(false); // Pause work timer
-    setBreakTime(0); // Reset break timer
-    setOnBreak(true);
-    setBreakTimerActive(true); // Start break timer
-    setModalVisible(true); // Show break modal
-  };
+  
 
   const formatTime = seconds => {
     const minutes = Math.floor(seconds / 60);
@@ -106,6 +109,15 @@ const Profile = () => {
     setLogoutModal(true);
   };
 
+
+  useEffect(() => {
+    const logoutAfter12Hours = setTimeout(() => {
+      handleLogoutFinal();
+    }, 12 * 60 * 60 * 1000); // 12 hours in milliseconds  
+    return () => clearTimeout(logoutAfter12Hours);
+  }, []);
+
+  
   const handleLogoutFinal = async () => {
     console.log('Logout');
     if (!checked) {
@@ -119,13 +131,11 @@ const Profile = () => {
       const totalWorkTime =
         elapsedTime !== undefined ? String(elapsedTime) : '0';
       const totalBreakTime = breakTime !== undefined ? String(breakTime) : '0';
-
       console.log('Stored User Info:', attId);
       console.log('totalWorkTime:', totalWorkTime);
       console.log('breakTime:', totalBreakTime);
       console.log('tokenLogout:', token);
       console.log('reason:', checked);
-
       // Store total work time if available
       if (elapsedTime !== undefined) {
         await AsyncStorage.setItem('totalWorkTime', totalWorkTime);
@@ -159,7 +169,7 @@ const Profile = () => {
         },
       );
 
-      console.log('Logout Response:', response.data);
+      console.log('Logout Response:', response);
 
       if (response.status === 200) {
         await AsyncStorage.clear(); // Clear AsyncStorage on logout

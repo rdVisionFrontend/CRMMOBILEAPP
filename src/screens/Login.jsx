@@ -66,8 +66,12 @@ const Login = ({navigation}) => {
         logInOtp: otp,
       });
       console.log('Login Success', response);    
-      storeUserData(response)      
-      setIsAuthenticated(true);   
+      storeUserData(response).then(res=>{
+        setIsAuthenticated(true);  
+      }).catch(err=>{
+        setIsAuthenticated(false)
+        console.log("Error During Login",err)
+      })
 
       const sessionDuration = 60 * 60; // 1 hour in seconds
       await AsyncStorage.setItem(

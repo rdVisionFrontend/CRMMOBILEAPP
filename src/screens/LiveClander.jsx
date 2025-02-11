@@ -46,9 +46,7 @@ const LiveCalendar = () => {
         console.error('Error fetching token/user:', error);
       }
     };
-
     fetchTokenAndData();
-
     return () => {
       isMounted = false;
     };
@@ -61,7 +59,7 @@ const LiveCalendar = () => {
       );
       setCalendarData(response.data.response);
       console.log('Live Events:', response.data.response);
-      setLive(true)
+      setLive(true);
     } catch (error) {
       console.error('Error fetching calendar data:', error);
     }
@@ -168,7 +166,10 @@ const LiveCalendar = () => {
                 setSelectedEvent(event);
                 setIsModalVisible(true);
               }}>
-                <Text style={{textAlign:'center', fontWeight:600, fontSize:20}}>{live?"Live Followup":""}</Text>
+              <Text
+                style={{textAlign: 'center', fontWeight: 600, fontSize: 20}}>
+                {live ? 'Live Followup' : ''}
+              </Text>
               <Text style={styles.eventTitle}>{`➤ ${event.comments}`}</Text>
               <Text style={styles.eventTitle}>{`➤ ${event.date}`}</Text>
               <Text
@@ -203,7 +204,7 @@ const LiveCalendar = () => {
 const styles = StyleSheet.create({
   container: {backgroundColor: 'transparent', width: '100%'},
   calendar: {borderRadius: 10, elevation: 3},
-  eventsContainer: {marginTop: 20, paddingHorizontal:5},
+  eventsContainer: {marginTop: 20, paddingHorizontal: 5},
   eventItem: {padding: 15, borderRadius: 8, marginBottom: 10},
   eventTitle: {color: 'white', fontSize: 16, fontWeight: '500'},
   modalContainer: {flex: 1, justifyContent: 'center', alignItems: 'center'},

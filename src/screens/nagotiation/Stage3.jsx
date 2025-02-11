@@ -9,8 +9,8 @@ import {
   Linking,
   Modal,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { Picker } from '@react-native-picker/picker';
+import React, {useEffect, useState} from 'react';
+import {Picker} from '@react-native-picker/picker';
 import Email from './EmailModal';
 import Clipboard from '@react-native-clipboard/clipboard';
 import TicketHistoryModal from '../TicketHistroyModal';
@@ -76,48 +76,47 @@ const Stage2 = () => {
     }
   };
 
-  const formatToLocalTime = (dateString) => {
-    if (!dateString) return "Invalid Date";
-  
+  const formatToLocalTime = dateString => {
+    if (!dateString) return 'Invalid Date';
+
     let date;
-  
+
     // Handle timestamps (milliseconds since epoch)
     if (!isNaN(dateString) && dateString.length > 10) {
       date = new Date(parseInt(dateString, 10));
     }
     // Handle ISO and standard date formats
-    else if (dateString.includes("T")) {
+    else if (dateString.includes('T')) {
       date = new Date(dateString);
     }
     // Handle formats like "2025-01-11 19:45:57"
     else if (dateString.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-      date = new Date(dateString.replace(" ", "T")); // Convert to valid ISO format
+      date = new Date(dateString.replace(' ', 'T')); // Convert to valid ISO format
     }
     // Handle time-only formats (e.g., "07:46:44.066826382") - Attach today's date
     else if (dateString.match(/^\d{2}:\d{2}:\d{2}/)) {
-      const today = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD
-      date = new Date(`${today}T${dateString.split(".")[0]}`); // Remove microseconds
+      const today = new Date().toISOString().split('T')[0]; // Get YYYY-MM-DD
+      date = new Date(`${today}T${dateString.split('.')[0]}`); // Remove microseconds
     }
     // If nothing works, try as a general Date
     else {
       date = new Date(dateString);
     }
-  
+
     // Validate date
-    if (isNaN(date.getTime())) return "Invalid Date";
-  
+    if (isNaN(date.getTime())) return 'Invalid Date';
+
     // Convert to local format
-    return new Intl.DateTimeFormat("default", {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+    return new Intl.DateTimeFormat('default', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
       hour12: true,
     }).format(date);
   };
-  
 
   const toggleAccordion = index => {
     setExpandedCardId(expandedCardId === index ? null : index);
@@ -213,7 +212,7 @@ const Stage2 = () => {
   return (
     <>
       {stage2 && (
-        <ScrollView style={{ position: 'relative' }}>
+        <ScrollView style={{position: 'relative'}}>
           <View style={styles.filterContainer}>
             <View style={styles.row}>
               <Image
@@ -293,7 +292,7 @@ const Stage2 = () => {
                       {
                         backgroundColor:
                           item.ticketstatus === 'Sale'
-                            ? '#8ac926'
+                            ? '#588157'
                             : item.ticketstatus === 'Intersted'
                             ? 'orange'
                             : item.ticketstatus === 'Place_With_order'
@@ -301,7 +300,7 @@ const Stage2 = () => {
                             : 'white', // Default color if no condition matches
                       },
                     ]}>
-                    <View style={{ flexDirection: 'column' }}>
+                    <View style={{flexDirection: 'column'}}>
                       <View
                         style={{
                           flexDirection: 'row',
@@ -310,26 +309,44 @@ const Stage2 = () => {
                           width: `90%`,
                           gap: 5,
                         }}>
-                        <Text
-                          onPress={() => openStatusModal(item)}
-                          style={[
-                            {
-                              borderWidth: 1,
-                              borderRadius: 10,
-                              fontSize: 12,
-                              paddingHorizontal: 6,
-                              paddingVertical: 2,
-                            },
-                            item.ticketstatus === 'Follow'
-                              ? { backgroundColor: '#fff3b0', color: 'black' }
-                              : item.ticketstatus === 'Intersted'
-                              ? { backgroundColor: 'orange', color: 'black' }
-                              : item.ticketstatus === 'Place_With_order'
-                              ? { backgroundColor: 'red', color: 'white' }
-                              : {},
-                          ]}>
-                          {item.ticketstatus}
-                        </Text>
+                        <View
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'flex-start',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                          }}>
+                          <Text
+                            onPress={() => openStatusModal(item)}
+                            style={[
+                              {
+                                borderRadius: 10,
+                                fontSize: 14,
+                                paddingHorizontal: 8,
+                                paddingVertical: 2,
+                                marginRight: 5, // Adds spacing between text and image
+                                color: '#fff',
+                                fontWeight: 600,
+                              },
+                              item.ticketstatus === 'Follow'
+                                ? {backgroundColor: '#fff3b0', color: '#fff'}
+                                : item.ticketstatus === 'Intersted'
+                                ? {backgroundColor: 'orange', color: '#ffff'}
+                                : item.ticketstatus === 'Place_With_order'
+                                ? {backgroundColor: 'red', color: 'white'}
+                                : {},
+                            ]}>
+                            {item.ticketstatus}
+                          </Text>
+
+                          <Image
+                            source={{
+                              uri: 'https://cdn-icons-png.flaticon.com/128/6276/6276686.png',
+                            }}
+                            style={{height: 30, width: 30}}
+                          />
+                        </View>
+
                         <Text
                           style={{
                             fontSize: 11,
@@ -350,10 +367,10 @@ const Stage2 = () => {
                         }}>
                         <Text
                           onPress={() => toggleAccordion(index)}
-                          style={{ fontSize: 16 }}>
+                          style={{fontSize: 16}}>
                           {item.senderName || item.firstName}
                         </Text>
-                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                        <View style={{flexDirection: 'row', gap: 10}}>
                           <TouchableOpacity
                             onPress={() =>
                               openTicketHistroy(item.uniqueQueryId)
@@ -363,7 +380,7 @@ const Stage2 = () => {
                               source={{
                                 uri: 'https://cdn-icons-png.flaticon.com/128/9195/9195785.png',
                               }}
-                              style={{ width: 20, height: 20, marginRight: 5 }}
+                              style={{width: 20, height: 20, marginRight: 5}}
                             />
                           </TouchableOpacity>
                           <TouchableOpacity onPress={() => openWhatsApp()}>
@@ -383,7 +400,7 @@ const Stage2 = () => {
                               style={styles.iconSocial}
                             />
                           </TouchableOpacity>
-                         
+
                           <TouchableOpacity
                             onPress={() => openEmailModal(item)}>
                             <Image
@@ -409,7 +426,7 @@ const Stage2 = () => {
                             source={{
                               uri: 'https://cdn-icons-png.flaticon.com/128/2190/2190552.png',
                             }}
-                            style={{ height: 12, width: 12 }}
+                            style={{height: 12, width: 12}}
                           />
                           <Text>{`Comment: ${item.comment || 'N/A'}`}</Text>
                         </View>
@@ -425,7 +442,7 @@ const Stage2 = () => {
                             source={{
                               uri: 'https://cdn-icons-png.flaticon.com/128/732/732200.png',
                             }}
-                            style={{ height: 10, width: 10 }}
+                            style={{height: 10, width: 10}}
                           />
                           <View
                             style={{
@@ -447,7 +464,7 @@ const Stage2 = () => {
                             source={{
                               uri: 'https://cdn-icons-png.flaticon.com/128/3059/3059561.png',
                             }}
-                            style={{ height: 12, width: 12 }}
+                            style={{height: 12, width: 12}}
                           />
 
                           <View
@@ -479,13 +496,28 @@ const Stage2 = () => {
                     style={styles.Next}
                     onPress={handlePrevious}
                     disabled={currentPage === 1}>
-                    <Text
-                      style={
-                        currentPage === 1 ? styles.disabled : styles.button
-                      }>
-                      Previous
-                    </Text>
+                    <View style={{display: 'flex', flexDirection: 'row'}}>
+                      <Image
+                        source={{
+                          uri: 'https://cdn-icons-png.flaticon.com/128/189/189254.png',
+                        }}
+                        style={{
+                          width: 20,
+                          height: 20,
+                          marginRight: 5,
+                          opacity: currentPage === 1 ? 0.9 : 1,
+                        }} // Reduced opacity if disabled
+                      />
+
+                      <Text
+                        style={
+                          currentPage === 1 ? styles.disabled : styles.button
+                        }>
+                        Previous
+                      </Text>
+                    </View>
                   </TouchableOpacity>
+
                   <Text style={styles.pageInfo}>
                     Page {currentPage} of {totalPages}
                   </Text>
@@ -493,14 +525,27 @@ const Stage2 = () => {
                     style={styles.Next}
                     onPress={handleNext}
                     disabled={currentPage === totalPages}>
-                    <Text
-                      style={
-                        currentPage === totalPages
-                          ? styles.disabled
-                          : styles.button
-                      }>
-                      Next
-                    </Text>
+                    <View style={{display: 'flex', flexDirection: 'row', gap:5}}>
+                      <Text
+                        style={
+                          currentPage === totalPages
+                            ? styles.disabled
+                            : styles.button
+                        }>
+                        Next
+                      </Text>
+                      <Image
+                        source={{
+                          uri: 'https://cdn-icons-png.flaticon.com/128/189/189253.png',
+                        }}
+                        style={{
+                          width: 20,
+                          height: 20,
+                          marginRight: 5,
+                          opacity: currentPage === 1 ? 0.9 : 1,
+                        }} // Reduced opacity if disabled
+                      />
+                    </View>
                   </TouchableOpacity>
                 </View>
               )}
@@ -612,7 +657,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#90e0ef',
     paddingHorizontal: 8,
     alignSelf: 'center',
-    paddingVertical: 2,
+    paddingVertical: 4,
+    borderRadius: 4,
   },
   accordionContent: {
     marginTop: 10,
@@ -644,7 +690,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)', // Adds a dim effect
   },
-  
+
   modalContainer: {
     width: '90%',
     backgroundColor: '#fff',
@@ -652,7 +698,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 5, // Adds shadow (Android)
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.3,
     shadowRadius: 4,
   },

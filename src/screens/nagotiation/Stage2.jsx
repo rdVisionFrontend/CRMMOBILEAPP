@@ -301,7 +301,7 @@ const [visibleModal,setVisibleModal] = useState(false)
                             ? '#a8dadc'
                             : item.ticketstatus === 'Place_With_order'
                             ? '#3dccc7'
-                            : 'white', // Default color if no condition matches
+                            : '#ffc2d1', // Default color if no condition matches
                       },
                     ]}>
                     <View style={{flexDirection: 'column'}}>
@@ -319,9 +319,10 @@ const [visibleModal,setVisibleModal] = useState(false)
                             {
                               borderWidth: 1,
                               borderRadius: 10,
-                              fontSize: 12,
+                              fontSize: 14,
                               paddingHorizontal: 6,
                               paddingVertical: 2,
+                              fontWeight:700
                             },
                             item.ticketstatus === 'Follow'
                               ? {backgroundColor: '#fff3b0', color: 'black'}
