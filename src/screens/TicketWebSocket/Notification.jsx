@@ -4,6 +4,7 @@ import { View, Text, StyleSheet } from "react-native";
 const Notification = ({ title, details, requirement, name, type }) => {
     return (
         <View style={[styles.notification, { backgroundColor: type === "newLead" ? "#e3f2fd" : "#f0f4c3" }]}>
+            <Text>HEllo</Text>
             <Text style={styles.title}>{title}</Text>
             <Text style={styles.details}>{details}</Text>
             <Text style={styles.requirement}>{requirement}</Text>
