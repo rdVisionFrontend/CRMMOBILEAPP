@@ -14,7 +14,6 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createDrawerNavigator} from '@react-navigation/drawer';
-
 import ProfileScreen from './src/sidecreens/Profile';
 import Ticket from './src/screens/Ticket';
 import {useSelector} from 'react-redux';

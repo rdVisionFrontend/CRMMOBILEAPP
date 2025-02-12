@@ -153,7 +153,7 @@ const Invoice = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e9ecef',
+    backgroundColor: '#dee2e6',
     padding: 10,
   },
   listContainer: {
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '100%',
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     borderRadius: 10,
     padding: 15,
     marginVertical: 10,
@@ -216,6 +216,7 @@ const styles = StyleSheet.create({
   productDetailContainer: {
     padding: 10,
     width: '100%',
+    
   },
   row: {
     flexDirection: 'row',

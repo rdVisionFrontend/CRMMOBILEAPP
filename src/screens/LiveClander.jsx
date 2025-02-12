@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Animated,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Calendar} from 'react-native-calendars';
+import { Calendar } from 'react-native-calendars';
 import moment from 'moment';
 import apiInstance from '../../api';
 
@@ -23,6 +24,8 @@ const LiveCalendar = () => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [live, setLive] = useState(false);
+
+  const scrollViewRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true; // Prevents state update after unmount
@@ -86,7 +89,7 @@ const LiveCalendar = () => {
       const type = item.hasOwnProperty('comments') ? 'live' : 'uploaded';
 
       if (!markedDates[date]) {
-        markedDates[date] = {dots: []};
+        markedDates[date] = { dots: [] };
       }
 
       markedDates[date].dots.push({
@@ -103,8 +106,8 @@ const LiveCalendar = () => {
       selected: true,
       selectedColor: '#2196F3',
       customStyles: {
-        container: {backgroundColor: '#2196F3', borderRadius: 8},
-        text: {color: 'white', fontWeight: 'bold'},
+        container: { backgroundColor: '#2196F3', borderRadius: 8 },
+        text: { color: 'white', fontWeight: 'bold' },
       },
     };
 
@@ -123,6 +126,11 @@ const LiveCalendar = () => {
 
     setSelectedDate(day.dateString);
     setSelectedEvents([...selectedLiveEvents, ...selectedUploadedEvents]);
+
+    // Scroll to the top of the ScrollView
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true });
+    }
   };
 
   const theme = {
@@ -150,7 +158,10 @@ const LiveCalendar = () => {
       />
 
       {selectedEvents.length > 0 && (
-        <ScrollView style={styles.eventsContainer}>
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.eventsContainer}
+          contentContainerStyle={{ paddingBottom: 20 }}>
           {selectedEvents.map((event, index) => (
             <TouchableOpacity
               key={index}
@@ -158,7 +169,7 @@ const LiveCalendar = () => {
                 styles.eventItem,
                 {
                   backgroundColor: event.hasOwnProperty('comments')
-                    ? '#f44336'
+                    ? '#f4a261'
                     : '#ff9800',
                 },
               ]}
@@ -166,14 +177,27 @@ const LiveCalendar = () => {
                 setSelectedEvent(event);
                 setIsModalVisible(true);
               }}>
-              <Text
-                style={{textAlign: 'center', fontWeight: 600, fontSize: 20}}>
-                {live ? 'Live Followup' : ''}
-              </Text>
-              <Text style={styles.eventTitle}>{`➤ ${event.comments}`}</Text>
-              <Text style={styles.eventTitle}>{`➤ ${event.date}`}</Text>
-              <Text
-                style={styles.eventTitle}>{`➤ ${event['no of tickets']}`}</Text>
+              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: 10 }}>
+                <Text
+                  style={{
+                    textAlign: 'left',
+                    fontWeight: 600,
+                    fontSize: 20,
+                    borderBottomWidth: 1,
+                    paddingBottom: 5,
+                  }}>
+                  {live ? 'Live Followup' : ''}
+                </Text>
+                <BlinkingCircle />
+              </View>
+              <View style={{ marginTop: 10 }}>
+                <Text style={styles.eventTitle}>{`➤ ${event.comments}`}</Text>
+                <Text style={styles.eventTitle}>{`➤ ${event.date}`}</Text>
+                <Text
+                  style={
+                    styles.eventTitle
+                  }>{`➤ ${event['no of tickets']}`}</Text>
+              </View>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -201,22 +225,62 @@ const LiveCalendar = () => {
   );
 };
 
+// Blinking Circle Component
+const BlinkingCircle = () => {
+  const sizeAnim = useRef(new Animated.Value(10)).current; // Initial size
+
+  useEffect(() => {
+    const blinkAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(sizeAnim, {
+          toValue: 20, // Larger size
+          duration: 500,
+          useNativeDriver: false,
+        }),
+        Animated.timing(sizeAnim, {
+          toValue: 15, // Smaller size
+          duration: 500,
+          useNativeDriver: false,
+        }),
+      ])
+    );
+
+    blinkAnimation.start();
+
+    return () => blinkAnimation.stop();
+  }, [sizeAnim]);
+
+  return (
+    <Animated.View
+      style={{
+        height: sizeAnim,
+        width: sizeAnim,
+        borderRadius: sizeAnim.interpolate({
+          inputRange: [15, 30],
+          outputRange: [7.5, 15],
+        }),
+        backgroundColor: 'green',
+      }}
+    />
+  );
+};
+
 const styles = StyleSheet.create({
-  container: {backgroundColor: 'transparent', width: '100%'},
-  calendar: {borderRadius: 10, elevation: 3},
-  eventsContainer: {marginTop: 20, paddingHorizontal: 5},
-  eventItem: {padding: 15, borderRadius: 8, marginBottom: 10},
-  eventTitle: {color: 'white', fontSize: 16, fontWeight: '500'},
-  modalContainer: {flex: 1, justifyContent: 'center', alignItems: 'center'},
-  modalContent: {backgroundColor: 'white', padding: 20, borderRadius: 10},
-  modalTitle: {fontSize: 20, fontWeight: 'bold', marginBottom: 15},
+  container: { backgroundColor: 'transparent', width: '100%' },
+  calendar: { borderRadius: 10, elevation: 3 },
+  eventsContainer: { marginTop: 20, paddingHorizontal: 5 },
+  eventItem: { padding: 15, borderRadius: 8, marginBottom: 10 },
+  eventTitle: { color: 'white', fontSize: 16, fontWeight: '500' },
+  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  modalContent: { backgroundColor: 'white', padding: 20, borderRadius: 10 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15 },
   button: {
     backgroundColor: '#2196F3',
     padding: 12,
     borderRadius: 8,
     marginTop: 10,
   },
-  buttonText: {color: 'white', fontWeight: '500'},
+  buttonText: { color: 'white', fontWeight: '500' },
 });
 
 export default LiveCalendar;

@@ -7,16 +7,16 @@ const WorkTimeProgressBar = ({ workHours }) => {
   const progress = Math.min(workHours, maxHours) / maxHours; // Normalize (0 to 1)
   
   return (
-    <View style={{ margin: 20, alignItems: "center" ,width:'80%'}}>
+    <View style={{ alignItems: "left" ,width:'80%' ,}}>
       {/* Label */}
-      <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 5, textAlign:'left' }}>
+      <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 5, textAlign:'left', marginTop:10 }}>
         Work Progress ({workHours.toFixed(1)} / {maxHours} hrs)
       </Text>
 
       {/* Progress Bar */}
       <Progress.Bar
         progress={progress}
-        width={Dimensions.get("window").width - 50} // Responsive width
+        width={Dimensions.get("window").width - 100} // Responsive width
         height={8}
         color={progress >= 1 ? "#ff5252" : "#007bff"} // Red when max reached
         borderRadius={10}
