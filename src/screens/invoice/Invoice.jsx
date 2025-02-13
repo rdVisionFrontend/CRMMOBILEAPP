@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
-  Image,
+  Image, 
 } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -187,17 +187,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#e9ecef',
   },
   expandedSection: {
-    backgroundColor: '#a4c3b2',
+    backgroundColor: '#CDF5FD',
     marginTop: 10,
     paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: '#ddd',
+    borderRadius: 10
   },
   expandedText: {
     fontSize: 16,
-    color: '#333',
+    color: '#000',
     marginVertical: 2,
     textAlign: 'center',
+    fontWeight: 'bold'
   },
   productSection: {
     marginVertical: 5,

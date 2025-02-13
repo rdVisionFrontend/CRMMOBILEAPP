@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,18 +12,19 @@ import {
 import apiInstance from '../../api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import {useAuth} from '../Authorization/AuthContext';
+import { useAuth } from '../Authorization/AuthContext';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const Enotebook = () => {
   const [notes, setNotes] = useState([]);
   const [isOpened, setIsOpened] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [dark, setDark] = useState(false);
-  const {isAuthenticated, setIsAuthenticated} = useAuth();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
   const [noteDetails, setNoteDetails] = useState({
     title: '',
     noteContent: '',
-    user: {userId: ''},
+    user: { userId: '' },
   });
 
   useEffect(() => {
@@ -34,7 +35,7 @@ const Enotebook = () => {
           const parsedUser = JSON.parse(userData);
           setNoteDetails(prevDetails => ({
             ...prevDetails,
-            user: {userId: parsedUser.userId},
+            user: { userId: parsedUser.userId },
           }));
         }
       } catch (error) {
@@ -70,6 +71,14 @@ const Enotebook = () => {
   };
 
   const addNote = async () => {
+    if (!noteDetails.title.trim()) {
+      Alert.alert('Please enter a note title.');
+      return;
+    }
+    if (!noteDetails.noteContent.trim()) {
+      Alert.alert('Please enter note content.');
+      return;
+    }
     try {
       const authToken = await AsyncStorage.getItem('jwtToken');
       if (!authToken) {
@@ -113,7 +122,7 @@ const Enotebook = () => {
         setNoteDetails({
           title: '',
           noteContent: '',
-          user: {userId: user.userId},
+          user: { userId: user.userId },
         });
         fetchNotes(user.userId);
         setIsOpened(false);
@@ -129,7 +138,7 @@ const Enotebook = () => {
       'Delete Confirmation',
       'Are you sure you want to delete this note?',
       [
-        {text: 'Cancel', style: 'cancel'},
+        { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
           style: 'destructive',
@@ -148,7 +157,7 @@ const Enotebook = () => {
           },
         },
       ],
-      {cancelable: true},
+      { cancelable: true },
     );
   };
 
@@ -169,7 +178,7 @@ const Enotebook = () => {
 
     const formattedDay = date.getDate();
     const formattedMonth = date
-      .toLocaleString('en-US', {month: 'short'})
+      .toLocaleString('en-US', { month: 'short' })
       .toUpperCase();
     const formattedYear = date.getFullYear();
     const formattedHours = date.getHours() % 12 || 12; // Convert 24h to 12h format
@@ -235,7 +244,7 @@ const Enotebook = () => {
                   source={{
                     uri: 'https://cdn-icons-png.flaticon.com/128/6861/6861362.png',
                   }}
-                  style={{width: 20, height: 20}}
+                  style={{ width: 20, height: 20 }}
                 />
               </TouchableOpacity>
             </View>
@@ -253,31 +262,39 @@ const Enotebook = () => {
       </TouchableOpacity>
 
       {isOpened && (
-        <View
-          style={[
-            styles.addNoteForm,
-            dark ? styles.darkForm : styles.lightForm,
-          ]}>
-          <TextInput
-            style={[styles.input, dark ? styles.darkInput : styles.lightInput]}
-            placeholder="Note Title"
-            value={noteDetails.title}
-            onChangeText={text => handleChange('title', text)}
-          />
-          <TextInput
+        <View style={styles.modalOverlay}>
+          <View
             style={[
-              styles.textArea,
-              dark ? styles.darkInput : styles.lightInput,
-            ]}
-            placeholder="Write your note content here..."
-            multiline
-            numberOfLines={4}
-            value={noteDetails.noteContent}
-            onChangeText={text => handleChange('noteContent', text)}
-          />
-          <TouchableOpacity style={styles.saveButton} onPress={addNote}>
-            <Text style={styles.saveButtonText}>Save Note</Text>
-          </TouchableOpacity>
+              styles.addNoteForm,
+              dark ? styles.darkForm : styles.lightForm,
+            ]}>
+            <TouchableOpacity onPress={()=>setIsOpened(false)}>
+              <AntDesign name='close' color={'red'} size={20}
+                style={{ position: 'relative', top: -15, left: 270 }} />
+            </TouchableOpacity>
+            <TextInput
+              style={[styles.input, dark ? styles.darkInput : styles.lightInput]}
+              placeholder="Note Title"
+              value={noteDetails.title}
+              onChangeText={text => handleChange('title', text)}
+            />
+            <TextInput
+              style={[
+                styles.textArea,
+                dark ? styles.darkInput : styles.lightInput,
+              ]}
+              placeholder="Write your note content here..."
+              multiline
+              numberOfLines={4}
+              value={noteDetails.noteContent}
+              onChangeText={text => handleChange('noteContent', text)}
+            />
+            <View style={{alignItems: 'center'}}>
+            <TouchableOpacity style={styles.saveButton} onPress={addNote}>
+              <Text style={styles.saveButtonText}>Save Note</Text>
+            </TouchableOpacity>
+            </View>
+          </View>
         </View>
       )}
     </View>
@@ -285,39 +302,50 @@ const Enotebook = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, padding: 16,},
-  darkContainer: {backgroundColor: '#000'},
-  lightContainer: {backgroundColor: '#ced4da'},
+  container: { flex: 1, padding: 16, },
+  darkContainer: { backgroundColor: '#000' },
+  lightContainer: { backgroundColor: '#ced4da' },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 10,
-    borderWidth:1,
-    paddingHorizontal:5,
-    paddingVertical:8,
-    borderRadius:10,
-    fontSize:18
+    borderWidth: 1,
+    paddingHorizontal: 5,
+    paddingVertical: 8,
+    borderRadius: 10,
+    fontSize: 18
   },
-  searchIcon: {width: 20, height: 20, marginRight: 8},
-  searchInput: {flex: 1, height: 40, fontSize: 16},
-  notesList: {flex: 1},
-  noteCard: {padding: 10, borderRadius: 10, marginBottom: 16, backgroundColor:'#ffffff'},
-  noteTitle: {fontSize: 16, fontWeight: 'bold'},
-  noteDate: {fontSize: 12, color: '#666', marginBottom: 8},
-  noteContent: {marginTop: 8},
-  deleteButton: {alignItems: 'flex-end'},
-  addNoteButton: {position: 'absolute', bottom: 80, right: 20},
-  addNoteIcon: {width: 40, height: 40},
+  searchIcon: { width: 20, height: 20, marginRight: 8 },
+  searchInput: { flex: 1, height: 40, fontSize: 16 },
+  notesList: { flex: 1 },
+  noteCard: { padding: 10, borderRadius: 10, marginBottom: 16, backgroundColor: '#ffffff' },
+  noteTitle: { fontSize: 16, fontWeight: 'bold' },
+  noteDate: { fontSize: 12, color: '#666', marginBottom: 8 },
+  noteContent: { marginTop: 8 },
+  deleteButton: { alignItems: 'flex-end' },
+  addNoteButton: { position: 'absolute', bottom: 80, right: 20 },
+  addNoteIcon: { width: 40, height: 40 },
+  /* Overlay with Slate Background */
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(108, 122, 137, 0.7)', // Slate with 70% opacity
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   addNoteForm: {
     position: 'absolute',
-    bottom: '20%',
+    bottom: '40%',
     left: '10%',
     right: '10%',
     backgroundColor: '#bfdbf7',
     padding: 20,
     borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
@@ -348,6 +376,7 @@ const styles = StyleSheet.create({
 
   saveButton: {
     backgroundColor: '#007bff',
+    width: '30%',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
