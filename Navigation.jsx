@@ -5,20 +5,14 @@ import {
   StyleSheet,
   AsyncStorage,
   Image,
-  Button,
-  TouchableOpacity,
-  Alert,
-  Modal,
+  TouchableOpacity, 
 } from 'react-native';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import ProfileScreen from './src/sidecreens/Profile';
 import Ticket from './src/screens/Ticket';
-import {useSelector} from 'react-redux';
 import In_Nagociation from './src/screens/nagotiation/In_Nagociation';
-import EmailModal from './src/screens/nagotiation/EmailModal';
 import Invoice from './src/screens/invoice/Invoice';
 import TodaySalesRepost from './src/screens/todaySales/TodaySalesRepost';
 import AbcTicket from './src/screens/ABC/AbcTicket';

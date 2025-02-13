@@ -251,6 +251,7 @@ const styles = StyleSheet.create({
     backdropFilter: 'blur(10px)',
     borderRadius: 15,
     paddingVertical: 50,
+    zIndex:10
   },
   emailContainer: {
     position: 'relative',

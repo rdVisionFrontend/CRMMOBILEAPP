@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import Stage1 from './Stage1';
 import Stage2 from './Stage2';
 import Stage3 from './Stage3';
-import Stage4 from './Stage4';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../Authorization/AuthContext';
 
@@ -39,8 +38,6 @@ const In_Negotiation = ({ navigation }) => {
         return '#ffe1a8';
       case 3:
         return '#57cc99';
-      case 4:
-        return '#ff9b54';
       default:
         return '#000';
     }
@@ -59,8 +56,6 @@ const In_Negotiation = ({ navigation }) => {
         return <Stage2 />;
       case 3:
         return <Stage3 />;
-      case 4:
-        return <Stage4 />;
       default:
         return <Text>Select a Stage</Text>;
     }
@@ -71,7 +66,7 @@ const In_Negotiation = ({ navigation }) => {
       <View style={styles.wrapper}>
         {/* Stage Buttons */}
         <View style={styles.buttonContainer}>
-          {[1, 2, 3, 4].map((stageNum) => (
+          {[1, 2, 3].map((stageNum) => ( // Removed Stage 4 from the array
             <TouchableOpacity
               key={stageNum}
               style={[
@@ -121,7 +116,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    gap: 2,
+    gap: 30,
   },
   button: {
     paddingVertical: 10,
