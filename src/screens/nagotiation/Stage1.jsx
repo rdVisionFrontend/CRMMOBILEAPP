@@ -11,22 +11,21 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {Picker} from '@react-native-picker/picker';
-import Email from './EmailModal';
+
 import Clipboard from '@react-native-clipboard/clipboard';
 import TicketHistoryModal from '../TicketHistroyModal';
-import StatusModal from './StatusModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StatustModal from '../StatustModal'
 import axios from 'axios';
+import Email from './EmailModal';
+
 
 const Stage1 = () => {
   const [selectedStage, setSelectedStage] = useState('All');
   const [selectedItem, setSelectedItem] = useState(4); // Default items per page
   const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
   const [expandedCardId, setExpandedCardId] = useState(null); // Track expanded card
-  const [someDataArray, setSomeDataArray] = useState([]);
-  const [localdate, setLocalDate] = useState('');
-  const [localtime, setLocalTime] = useState('');
+  const [someDataArray, setSomeDataArray] = useState([]);  
   const [emailmodal, setEmailModal] = useState(false);
   const [statusmodal, setStatusModal] = useState(false);
   const [emaildata, setEmailData] = useState();
@@ -207,7 +206,7 @@ const Stage1 = () => {
     console.log(ticketId);
     setTicketHisModal(true);
     setModalVisible(true);
-    fetchStage2Data();
+    fetchStage1Data();
     setSelectedTicketInfo(ticketId);
   };
   const closeTicketJourney = () => {
@@ -299,9 +298,11 @@ const Stage1 = () => {
                           item.ticketstatus === 'Wrong_Number'
                             ? '#fff3b0'
                             : item.ticketstatus === 'Not_Pickup'
-                            ? '#e76f51'
+                            ? '#ccdcff'
                             : item.ticketstatus === 'Not_Interested'
                             ? '#fca311'
+                            : item.ticketstatus === 'hang_up'
+                            ? '#f7a399'
                             : '#cdb4db', // Default color if no condition matches
                       },
                     ]}>
@@ -362,7 +363,7 @@ const Stage1 = () => {
                               source={{
                                 uri: 'https://cdn-icons-png.flaticon.com/128/9195/9195785.png',
                               }}
-                              style={{width: 20, height: 20, marginRight: 5}}
+                              style={{width: 24, height: 24, }}
                             />
                           </TouchableOpacity>
                           <TouchableOpacity onPress={() => openWhatsApp()}>
@@ -382,12 +383,12 @@ const Stage1 = () => {
                               style={styles.iconSocial}
                             />
                           </TouchableOpacity>
-                          <Image
+                          {/* <Image
                             source={{
                               uri: 'https://cdn-icons-png.flaticon.com/128/295/295128.png',
                             }}
                             style={styles.iconSocial}
-                          />
+                          /> */}
                           <TouchableOpacity
                             onPress={() => openEmailModal(item)}>
                             <Image
@@ -512,6 +513,7 @@ const Stage1 = () => {
         </ScrollView>
       )}
       {/* {emailmodal && <Email closeModal={closeEmailModal} data={emaildata} />} */}
+      {emailmodal && <Email closeModal={closeEmailModal} data={emaildata} />}
 
       <Modal
         visible={statusmodal}

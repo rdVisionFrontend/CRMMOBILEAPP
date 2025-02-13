@@ -301,6 +301,8 @@ const [visibleModal,setVisibleModal] = useState(false)
                             ? '#a8dadc'
                             : item.ticketstatus === 'Place_With_order'
                             ? '#3dccc7'
+                             : item.ticketstatus === 'hang_up'
+                            ? '#780000'
                             : '#ffc2d1', // Default color if no condition matches
                       },
                     ]}>
@@ -367,7 +369,7 @@ const [visibleModal,setVisibleModal] = useState(false)
                               source={{
                                 uri: 'https://cdn-icons-png.flaticon.com/128/9195/9195785.png',
                               }}
-                              style={{width: 20, height: 20, marginRight: 5}}
+                              style={{width: 24, height: 24, }}
                             />
                           </TouchableOpacity>
                           <TouchableOpacity onPress={() => openWhatsApp()}>
@@ -387,12 +389,12 @@ const [visibleModal,setVisibleModal] = useState(false)
                               style={styles.iconSocial}
                             />
                           </TouchableOpacity>
-                          <Image
+                          {/* <Image
                             source={{
                               uri: 'https://cdn-icons-png.flaticon.com/128/295/295128.png',
                             }}
                             style={styles.iconSocial}
-                          />
+                          /> */}
                           <TouchableOpacity
                             onPress={() => openEmailModal(item)}>
                             <Image
