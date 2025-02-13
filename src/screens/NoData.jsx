@@ -18,10 +18,11 @@ export default Nodata;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // Takes full height & width of the screen
+    height:'100%', // Takes full height & width of the screen
     justifyContent: 'center', // Centers vertically
     alignItems: 'center', // Centers horizontally
-    backgroundColor: '#f9f9f9', // Optional: Light background
+    backgroundColor: '#fff',
+    paddingBottom: 160
   },
   image: {
     width: 120, // Increased size for better visibility
