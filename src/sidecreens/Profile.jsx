@@ -285,6 +285,7 @@ const Profile = () => {
                     paddingHorizontal: 8,
                     marginLeft: 100,
                     borderRadius: 8,
+                    boxShadow: '4px 5px 6px rgba(0,0,0,0.4)',
                   }}>
                   <Text style={{color: '#fff', fontWeight: 600}}>
                     Take Break
@@ -309,7 +310,7 @@ const Profile = () => {
         <LiveCalendar />
         <Text style={{marginBottom: 20}}></Text>
       </ScrollView>
-
+      {/* Live Take break  Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -321,7 +322,7 @@ const Profile = () => {
               style={{
                 display: 'flex',
                 flexDirection: 'row',
-                width: '90%',
+                width: '100%',
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
@@ -334,7 +335,7 @@ const Profile = () => {
               </Text>
             </View>
 
-            <View style={{alignContent: 'center'}}>
+            <View style={{alignContent: 'center', paddingVertical: 20}}>
               <View
                 style={{
                   backgroundColor: '#fff',
@@ -347,6 +348,7 @@ const Profile = () => {
                   style={{
                     fontSize: 20,
                     textAlign: 'center',
+                    fontWeight: 600,
                   }}>{`${user?.firstName} ${user?.lastName} You are on break`}</Text>
               </View>
             </View>
@@ -354,7 +356,7 @@ const Profile = () => {
             <TouchableOpacity
               style={styles.closeButton}
               onPress={handleEndBreak}>
-              <Text style={{fontWeight: '600'}}>End Break</Text>
+              <Text style={{fontWeight: '600', color: '#fff'}}>End Break</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -475,7 +477,7 @@ const styles = StyleSheet.create({
     width: 20,
   },
   detailText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
     padding: 5,
   },
@@ -514,11 +516,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.9)',
   },
   modalContent: {
-    backgroundColor: '#f08080',
+    backgroundColor: '#Fff',
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
-    width: '100%',
+    width: '92%',
   },
   modalContentLogout: {
     backgroundColor: '#ffff',
@@ -532,6 +534,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#415a77',
     padding: 10,
     borderRadius: 5,
+    boxShadow: '4px 5px 4px rgba(0,0,0,0.5)',
   },
   LogoutBtn: {
     marginTop: 10,

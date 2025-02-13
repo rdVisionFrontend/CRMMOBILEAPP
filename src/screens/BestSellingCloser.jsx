@@ -133,11 +133,10 @@ const BestSellingClosers = ({ dark }) => {
 
 const styles = StyleSheet.create({
   container: {  
-
-    backgroundColor: '#fff',
-    elevation: 2,
+    backgroundColor: '#fff', 
     width: '100%',
-    paddingHorizontal:10,    
+    paddingHorizontal:10, 
+    marginTop:14      
   },
   darkContainer: {
     backgroundColor: '#343a40',
@@ -157,6 +156,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
+    
   },
   darkHeader: {
     backgroundColor: '#0056b3',
@@ -172,6 +172,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderBottomWidth: 1,
     borderColor: '#dee2e6',
+    borderWidth:1
   },
   darkRow: {
     backgroundColor: '#454d55',

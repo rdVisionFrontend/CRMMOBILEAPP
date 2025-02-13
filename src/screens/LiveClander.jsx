@@ -154,7 +154,7 @@ const LiveCalendar = () => {
         style={{
           fontWeight: 700,
           fontSize: 20,
-          paddingVertical: 10,
+          paddingTop: 24,
           marginLeft: 10,
         }}>
         Calander
@@ -175,27 +175,21 @@ const LiveCalendar = () => {
         />
       )}
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
-        visible={isModalVisible} // Ensure modal only shows when true
-        onRequestClose={() => setIsModalVisible(false)} // Handle Android back press
-      >
+        visible={isModalVisible}
+        onRequestClose={() => setIsModalVisible(false)}>
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+          <View style={styles.card}>
             {/* Close Button (X) */}
             <TouchableOpacity
               onPress={() => setIsModalVisible(false)}
-              style={{
-                position: 'absolute',
-                top: 10,
-                right: 15,
-                zIndex: 10,
-                padding: 5, // Increased tap area
-              }}>
-              <Text style={{fontSize: 22, fontWeight: 'bold', color: '#333'}}>
-                ✕
-              </Text>
+              style={styles.closeButton}>
+              <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
+
+            {/* Modal Title */}
+            <Text style={styles.modalTitle}>Events on {selectedDate}</Text>
 
             {selectedEvents.length > 0 ? (
               <ScrollView
@@ -203,41 +197,27 @@ const LiveCalendar = () => {
                 style={styles.eventsContainer}
                 contentContainerStyle={{paddingBottom: 20}}>
                 {selectedEvents.map((event, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.eventItem,
-                      {
-                        backgroundColor: event.hasOwnProperty('comments')
-                          ? '#f4a261'
-                          : '#ff9800',
-                      },
-                    ]}
-                    onPress={() => setSelectedEvent(event)}>
-                    <View style={styles.eventHeader}>
-                      <Text style={styles.eventTitle}>
-                        {live ? 'Live Followup' : ''}
+                  <View key={index} style={styles.eventCard}>
+                    <Text style={styles.eventTitle}>
+                      {event.hasOwnProperty('comments')
+                        ? 'Live Followup'
+                        : 'Uploaded Followup'}
+                    </Text>
+                    {/* <View style={{marginLeft: 10, marginTop: 5, height:20}}>
+                      <BlinkingCircle />
+                    </View> */}
+                    <View style={styles.eventDetails}>
+                      <Text style={styles.eventText}>➤ {event.comments}</Text>
+                      <Text style={styles.eventText}>➤ {event.date}</Text>
+                      <Text style={styles.eventText}>
+                        ➤ {event['no of tickets']}
                       </Text>
-                      <View style={{marginLeft: 10, marginTop: 5}}>
-                        <BlinkingCircle />
-                      </View>
                     </View>
-                    <View style={{marginTop: 10}}>
-                      <Text
-                        style={styles.eventText}>{`➤ ${event.comments}`}</Text>
-                      <Text style={styles.eventText}>{`➤ ${event.date}`}</Text>
-                      <Text
-                        style={
-                          styles.eventText
-                        }>{`➤ ${event['no of tickets']}`}</Text>
-                    </View>
-                  </TouchableOpacity>
+                  </View>
                 ))}
               </ScrollView>
             ) : (
-              <Text style={{textAlign: 'center', marginVertical: 20}}>
-                No events for this date.
-              </Text>
+              <Text style={styles.noEventsText}>No events for this date.</Text>
             )}
           </View>
         </View>
@@ -291,7 +271,7 @@ const styles = StyleSheet.create({
   calendar: {
     borderRadius: 10,
     elevation: 3,
-    marginVertical: 10,
+    marginVertical: 15,
     marginHorizontal: 15,
     backgroundColor: '#e9ecef',
     padding: 5,
@@ -303,33 +283,73 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Transparent dark overlay
   },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
+  card: {
     width: '90%',
-    maxHeight: '80%',
+    backgroundColor: '#ade8f4', // Modern gradient blue
+    borderRadius: 15,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 10,
   },
-  modalTitle: {fontSize: 20, fontWeight: 'bold', marginBottom: 15},
-  modalScrollView: {maxHeight: 400, marginBottom: 10},
-  modalEventItem: {marginBottom: 10},
-  modalEventText: {fontSize: 16, color: '#333'},
-  button: {
-    backgroundColor: '#2196F3',
-    padding: 12,
-    borderRadius: 8,
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 15,
+    padding: 8,
+    zIndex: 10,
+  },
+  closeText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 10,
+    textAlign: 'center',
+    color:'#001d3d'
+  },
+  eventsContainer: {
+    maxHeight: 300,
+    width: '100%',
+  },
+  eventCard: {
+    backgroundColor: '#caf0f8', // Vibrant warm contrast
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+    width: '100%',
+  },
+  eventTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'black',
+    borderBottomWidth: 1,
+    borderBottomColor: 'white',
+    paddingBottom: 5,
+  },
+  eventDetails: {
     marginTop: 10,
   },
-  buttonText: {color: 'white', fontWeight: '500'},
-  eventHeader: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    width: '70%',
-    height: 50,
+  eventText: {
+    color: 'black',
+    fontSize: 16,
   },
+  noEventsText: {
+    fontSize: 16,
+    color: '#eee',
+    textAlign: 'center',
+    marginVertical: 20,
+  },
+  
 });
 
 export default LiveCalendar;

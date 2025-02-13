@@ -292,7 +292,7 @@ const Navigation = () => {
                   'https://cdn-icons-png.flaticon.com/128/8323/8323511.png';
               } else if (route.name === 'Dashboard') {
                 iconUrl =
-                  'https://cdn-icons-png.flaticon.com/128/1828/1828765.png';
+                  'https://cdn-icons-png.flaticon.com/128/9070/9070895.png';
               } else if (route.name === 'Ticket') {
                 iconUrl =
                   'https://cdn-icons-png.flaticon.com/128/389/389801.png';
@@ -318,15 +318,14 @@ const Navigation = () => {
                 />
               );
             },
-            tabBarActiveTintColor: '#219ebc',
+            tabBarActiveTintColor: '#097bff',
             tabBarInactiveTintColor: '#2b2d42',
             tabBarStyle: {
-              backgroundColor: '#fdf0d5',
-              height: 58,
+              backgroundColor: '#fff',
+              height: 55,
               borderTopLeftRadius: 5,
               borderTopRightRadius: 5,
-              position: 'absolute',
-              borderWidth: 1,
+              position: 'absolute',           
               left: 0,
               right: 0,
               bottom: 0,
@@ -340,7 +339,7 @@ const Navigation = () => {
             component={ProfileScreen}
             options={{
               headerShown: false,
-              tabBarLabelStyle: {fontSize: 16, fontWeight: 300},
+              tabBarLabelStyle: {fontSize: 12, fontWeight: 300},
             }}
           />
           <Tab.Screen
@@ -348,7 +347,7 @@ const Navigation = () => {
             component={DrawerNavigator}
             options={{
               headerShown: false,
-              tabBarLabelStyle: {fontSize: 16, fontWeight: 300},
+              tabBarLabelStyle: {fontSize: 12, fontWeight: 300},
             }}
           />
           <Tab.Screen
@@ -356,7 +355,7 @@ const Navigation = () => {
             component={Note}
             options={{
               headerShown: false,
-              tabBarLabelStyle: {fontSize: 16, fontWeight: 300},
+              tabBarLabelStyle: {fontSize: 12, fontWeight: 300},
             }}
           />
           <Tab.Screen
@@ -364,7 +363,7 @@ const Navigation = () => {
             component={Clock}
             options={{
               headerShown: false,
-              tabBarLabelStyle: {fontSize: 16, fontWeight: 300},
+              tabBarLabelStyle: {fontSize: 12, fontWeight: 300},
             }}
           />
         </Tab.Navigator>

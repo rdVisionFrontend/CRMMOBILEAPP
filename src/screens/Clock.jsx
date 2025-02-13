@@ -28,7 +28,6 @@ const AnalogClock = ({ timezone, isIndianClock }) => {
       <Svg height="100" width="100" viewBox="0 0 100 100">
         {/* Clock Circle */}
         <Circle cx="50" cy="50" r="45" stroke="black" strokeWidth="2" fill="white" />
-
         {/* Clock Numbers */}
         {Array.from({ length: 12 }).map((_, index) => {
           const angle = (index + 1) * 30; // 30° per number
@@ -75,7 +74,7 @@ const DigitalClock = ({ timezone, country, isIndianClock }) => {
   const timeDifference = (time.utcOffset() - indianTime.utcOffset()) / 60;
 
   return (
-    <View style={[styles.digitalClockContainer, { backgroundColor: isIndianClock ? '#FFD1DC' : '#E8F8FF' }]}>
+    <View style={[styles.digitalClockContainer, { backgroundColor: isIndianClock ? '#FFD1DC' : '#a2d2ff' }]}>
       <Text style={styles.digitalTime}>{digitalTime}</Text>
       <Text style={styles.countryText}>{country}</Text>
       <Text style={styles.timeDiff}>
@@ -150,18 +149,18 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   digitalTime: {
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#333',
   },
   countryText: {
-    fontSize: 16,
+    fontSize: 12,
     marginTop: 5,
     color: '#555',
     fontWeight: 'bold',
   },
   timeDiff: {
-    fontSize: 14,
+    fontSize: 12,
     marginTop: 5,
     color: '#777',
   },
