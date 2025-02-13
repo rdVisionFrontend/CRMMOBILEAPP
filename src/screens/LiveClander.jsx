@@ -15,7 +15,7 @@ import apiInstance from '../../api';
 
 const LiveCalendar = () => {
   const [calendarData, setCalendarData] = useState([]);
-  const [calendarDataUploaded, setCalendarDataUploaded] = useState([]);
+  const [calendarDataUploaded, setCalendarDataUploaded] = useState([]); 
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedEvents, setSelectedEvents] = useState([]);
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '90%',
-    backgroundColor: '#ade8f4', // Modern gradient blue
+    backgroundColor: '#BCF2F6', // Modern gradient blue
     borderRadius: 15,
     padding: 20,
     alignItems: 'center',
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   eventCard: {
-    backgroundColor: '#caf0f8', // Vibrant warm contrast
+    backgroundColor: '#FFF2F2', // Vibrant warm contrast
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
     borderBottomWidth: 1,
-    borderBottomColor: 'white',
+    borderBottomColor: '#22dff6',
     paddingBottom: 5,
   },
   eventDetails: {

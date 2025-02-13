@@ -7,13 +7,13 @@ import {
   TouchableOpacity,
   ActivityIndicator, // Import ActivityIndicator
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 
 const TodaySalesRepost = () => {
-  const {userData} = useSelector(state => state.crmUser);
+  const { userData } = useSelector(state => state.crmUser);
   const [todaySale, setToDaySale] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState(null); // To track which card is expanded
@@ -76,7 +76,8 @@ const TodaySalesRepost = () => {
             todaySale.map((ele, index) => {
               const isExpanded = expandedIndex === index; // Check if the card is expanded
               return (
-                <View style={styles.card} key={index}>
+                <View style={{alignItems: 'center'}}>
+                  <View style={styles.card} key={index}>
                   <TouchableOpacity onPress={() => handleCardPress(index)}>
                     <View style={styles.cardRow}>
                       <Text style={styles.nameText}>{ele.customerName}</Text>
@@ -100,6 +101,7 @@ const TodaySalesRepost = () => {
                     </View>
                   )}
                 </View>
+                </View>
               );
             })
           ) : (
@@ -112,18 +114,18 @@ const TodaySalesRepost = () => {
 };
 
 // Reusable Header Item Component
-const HeaderItem = ({title}) => (
+const HeaderItem = ({ title }) => (
   <View style={styles.headerItem}>
     <Text style={styles.headerText}>{title}</Text>
     <Image
-      source={{uri: 'https://cdn-icons-png.flaticon.com/128/14034/14034783.png'}}
+      source={{ uri: 'https://cdn-icons-png.flaticon.com/128/14034/14034783.png' }}
       style={styles.headerIcon}
     />
   </View>
 );
 
 // Reusable Detail Row Component
-const DetailRow = ({label, value}) => (
+const DetailRow = ({ label, value }) => (
   <View style={styles.detailRow}>
     <Text style={styles.detailLabel}>{label}:</Text>
     <Text style={styles.detailValue}>{value}</Text>
@@ -131,7 +133,7 @@ const DetailRow = ({label, value}) => (
 );
 
 // Reusable Product Details Component
-const ProductDetails = ({product, order}) => (
+const ProductDetails = ({ product, order }) => (
   <View style={styles.productDetailContainer}>
     <DetailRow label="Product Name" value={product.name} />
     <DetailRow label="Quantity" value={order.quantity || 0} />
@@ -174,18 +176,19 @@ const styles = StyleSheet.create({
     height: 20,
   },
   card: {
-    width: '99%',
+    width: '98%',
     padding: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    marginBottom: 20,
+    borderRadius: 10,
     backgroundColor: '#fff',
+    shadowColor: '#000',
+    elevation: 10
   },
   cardRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal:5
+    paddingHorizontal: 10
   },
   nameText: {
     width: '42%',
@@ -199,7 +202,7 @@ const styles = StyleSheet.create({
     width: '42%',
     color: '#2f195f',
     fontWeight: '600',
-    paddingRight:5
+    paddingRight: 5
   },
   expandedContent: {
     padding: 10,
@@ -224,8 +227,9 @@ const styles = StyleSheet.create({
   productDetailContainer: {
     padding: 10,
     width: '100%',
-    backgroundColor: '#94d1be',
+    backgroundColor: '#CDF5FD',
     marginTop: 10,
+    borderRadius: 10
   },
   noDataText: {
     textAlign: 'center',
