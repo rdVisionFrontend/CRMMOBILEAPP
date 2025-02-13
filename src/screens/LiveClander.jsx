@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   Animated,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Calendar } from 'react-native-calendars';
+import {Calendar} from 'react-native-calendars';
 import moment from 'moment';
 import apiInstance from '../../api';
 
@@ -24,6 +24,7 @@ const LiveCalendar = () => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [live, setLive] = useState(false);
+  const [showclander, setShowCalnader] = useState(true);
 
   const scrollViewRef = useRef(null);
 
@@ -89,7 +90,7 @@ const LiveCalendar = () => {
       const type = item.hasOwnProperty('comments') ? 'live' : 'uploaded';
 
       if (!markedDates[date]) {
-        markedDates[date] = { dots: [] };
+        markedDates[date] = {dots: []};
       }
 
       markedDates[date].dots.push({
@@ -106,8 +107,8 @@ const LiveCalendar = () => {
       selected: true,
       selectedColor: '#2196F3',
       customStyles: {
-        container: { backgroundColor: '#2196F3', borderRadius: 8 },
-        text: { color: 'white', fontWeight: 'bold' },
+        container: {backgroundColor: '#2196F3', borderRadius: 8},
+        text: {color: 'white', fontWeight: 'bold'},
       },
     };
 
@@ -126,10 +127,11 @@ const LiveCalendar = () => {
 
     setSelectedDate(day.dateString);
     setSelectedEvents([...selectedLiveEvents, ...selectedUploadedEvents]);
+    setIsModalVisible(true);
 
     // Scroll to the top of the ScrollView
     if (scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true });
+      scrollViewRef.current.scrollTo({x: 0, y: 0, animated: true});
     }
   };
 
@@ -148,76 +150,95 @@ const LiveCalendar = () => {
 
   return (
     <View style={styles.container}>
-      <Calendar
-        markingType={'multi-dot'}
-        markedDates={events}
-        onDayPress={handleDayPress}
-        theme={theme}
-        style={styles.calendar}
-        current={moment().format('YYYY-MM-DD')}
-      />
-
-      {selectedEvents.length > 0 && (
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.eventsContainer}
-          contentContainerStyle={{ paddingBottom: 20 }}>
-          {selectedEvents.map((event, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.eventItem,
-                {
-                  backgroundColor: event.hasOwnProperty('comments')
-                    ? '#f4a261'
-                    : '#ff9800',
-                },
-              ]}
-              onPress={() => {
-                setSelectedEvent(event);
-                setIsModalVisible(true);
-              }}>
-              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: 10 }}>
-                <Text
-                  style={{
-                    textAlign: 'left',
-                    fontWeight: 600,
-                    fontSize: 20,
-                    borderBottomWidth: 1,
-                    paddingBottom: 5,
-                  }}>
-                  {live ? 'Live Followup' : ''}
-                </Text>
-                <BlinkingCircle />
-              </View>
-              <View style={{ marginTop: 10 }}>
-                <Text style={styles.eventTitle}>{`➤ ${event.comments}`}</Text>
-                <Text style={styles.eventTitle}>{`➤ ${event.date}`}</Text>
-                <Text
-                  style={
-                    styles.eventTitle
-                  }>{`➤ ${event['no of tickets']}`}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+      <Text
+        style={{
+          fontWeight: 700,
+          fontSize: 20,
+          paddingVertical: 10,
+          marginLeft: 10,
+        }}>
+        Calander
+        <Text
+          style={{fontSize: 15, marginLeft: 10}}
+          onPress={() => setShowCalnader(!showclander)}>
+          {`${showclander ? '(Hide)' : '(View)'}`}
+        </Text>
+      </Text>
+      {showclander && (
+        <Calendar
+          markingType={'multi-dot'}
+          markedDates={events}
+          onDayPress={handleDayPress}
+          theme={theme}
+          style={styles.calendar}
+          current={moment().format('YYYY-MM-DD')}
+        />
       )}
-
-      {/* Event Modal */}
       <Modal
-        visible={isModalVisible}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setIsModalVisible(false)}>
+        visible={isModalVisible} // Ensure modal only shows when true
+        onRequestClose={() => setIsModalVisible(false)} // Handle Android back press
+      >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Ticket Journey</Text>
-            <Text>{selectedEvent?.comments || 'No comments available'}</Text>
+            {/* Close Button (X) */}
             <TouchableOpacity
-              style={styles.button}
-              onPress={() => setIsModalVisible(false)}>
-              <Text style={styles.buttonText}>Close</Text>
+              onPress={() => setIsModalVisible(false)}
+              style={{
+                position: 'absolute',
+                top: 10,
+                right: 15,
+                zIndex: 10,
+                padding: 5, // Increased tap area
+              }}>
+              <Text style={{fontSize: 22, fontWeight: 'bold', color: '#333'}}>
+                ✕
+              </Text>
             </TouchableOpacity>
+
+            {selectedEvents.length > 0 ? (
+              <ScrollView
+                ref={scrollViewRef}
+                style={styles.eventsContainer}
+                contentContainerStyle={{paddingBottom: 20}}>
+                {selectedEvents.map((event, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.eventItem,
+                      {
+                        backgroundColor: event.hasOwnProperty('comments')
+                          ? '#f4a261'
+                          : '#ff9800',
+                      },
+                    ]}
+                    onPress={() => setSelectedEvent(event)}>
+                    <View style={styles.eventHeader}>
+                      <Text style={styles.eventTitle}>
+                        {live ? 'Live Followup' : ''}
+                      </Text>
+                      <View style={{marginLeft: 10, marginTop: 5}}>
+                        <BlinkingCircle />
+                      </View>
+                    </View>
+                    <View style={{marginTop: 10}}>
+                      <Text
+                        style={styles.eventText}>{`➤ ${event.comments}`}</Text>
+                      <Text style={styles.eventText}>{`➤ ${event.date}`}</Text>
+                      <Text
+                        style={
+                          styles.eventText
+                        }>{`➤ ${event['no of tickets']}`}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            ) : (
+              <Text style={{textAlign: 'center', marginVertical: 20}}>
+                No events for this date.
+              </Text>
+            )}
           </View>
         </View>
       </Modal>
@@ -242,7 +263,7 @@ const BlinkingCircle = () => {
           duration: 500,
           useNativeDriver: false,
         }),
-      ])
+      ]),
     );
 
     blinkAnimation.start();
@@ -266,21 +287,49 @@ const BlinkingCircle = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: 'transparent', width: '100%' },
-  calendar: { borderRadius: 10, elevation: 3 },
-  eventsContainer: { marginTop: 20, paddingHorizontal: 5 },
-  eventItem: { padding: 15, borderRadius: 8, marginBottom: 10 },
-  eventTitle: { color: 'white', fontSize: 16, fontWeight: '500' },
-  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  modalContent: { backgroundColor: 'white', padding: 20, borderRadius: 10 },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15 },
+  container: {backgroundColor: '#fff', width: '100%'},
+  calendar: {
+    borderRadius: 10,
+    elevation: 3,
+    marginVertical: 10,
+    marginHorizontal: 15,
+    backgroundColor: '#e9ecef',
+    padding: 5,
+  },
+  eventsContainer: {marginTop: 20, paddingHorizontal: 5},
+  eventItem: {padding: 15, borderRadius: 8, marginBottom: 10},
+  eventTitle: {color: 'white', fontSize: 18, fontWeight: '500'},
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '90%',
+    maxHeight: '80%',
+  },
+  modalTitle: {fontSize: 20, fontWeight: 'bold', marginBottom: 15},
+  modalScrollView: {maxHeight: 400, marginBottom: 10},
+  modalEventItem: {marginBottom: 10},
+  modalEventText: {fontSize: 16, color: '#333'},
   button: {
     backgroundColor: '#2196F3',
     padding: 12,
     borderRadius: 8,
     marginTop: 10,
   },
-  buttonText: { color: 'white', fontWeight: '500' },
+  buttonText: {color: 'white', fontWeight: '500'},
+  eventHeader: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    width: '70%',
+    height: 50,
+  },
 });
 
 export default LiveCalendar;
