@@ -132,13 +132,12 @@ const BestSellingClosers = ({ dark }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    borderRadius: 8,
-    margin: 16,
-    padding: 16,
+  container: {  
+
     backgroundColor: '#fff',
     elevation: 2,
-    width: '99%',
+    width: '100%',
+    paddingHorizontal:10,    
   },
   darkContainer: {
     backgroundColor: '#343a40',

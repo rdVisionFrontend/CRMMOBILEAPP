@@ -46,7 +46,6 @@ const Profile = () => {
     }
     return () => clearInterval(breakTimer);
   }, [onBreak, breakTimerActive]);
-  
 
   const handleEndBreak = () => {
     setBreakTimerActive(false); // Stop break timer
@@ -62,8 +61,6 @@ const Profile = () => {
     setBreakTimerActive(true); // Start break timer
     setModalVisible(true); // Show break modal
   };
-  
-  
 
   const fetchToken = async () => {
     try {
@@ -94,8 +91,6 @@ const Profile = () => {
     return () => clearInterval(timer);
   }, [isAuthenticated, timerActive]);
 
-  
-
   const formatTime = seconds => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -109,15 +104,13 @@ const Profile = () => {
     setLogoutModal(true);
   };
 
-
   useEffect(() => {
     const logoutAfter12Hours = setTimeout(() => {
       handleLogoutFinal();
-    }, 12 * 60 * 60 * 1000); // 12 hours in milliseconds  
+    }, 12 * 60 * 60 * 1000); // 12 hours in milliseconds
     return () => clearTimeout(logoutAfter12Hours);
   }, []);
 
-  
   const handleLogoutFinal = async () => {
     console.log('Logout');
     if (!checked) {
@@ -223,7 +216,7 @@ const Profile = () => {
               style={styles.icon}
             />
             <Text style={styles.phoneText}>{user?.phoneNumber}</Text>
-          </View>        
+          </View>
         </View>
 
         {/* User Details */}
@@ -438,7 +431,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   header: {
-    position:'relative',
+    position: 'relative',
     height: 220,
     backgroundColor: '#0088FF',
     justifyContent: 'center',
@@ -447,9 +440,9 @@ const styles = StyleSheet.create({
     borderEndEndRadius: 60,
     borderBottomLeftRadius: 60,
   },
- 
+
   userName: {
-    fontSize: 32,
+    fontSize: 25,
     color: '#FFF',
     fontWeight: 'bold',
   },
@@ -478,8 +471,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   icon: {
-    height: 30,
-    width: 30,
+    height: 20,
+    width: 20,
   },
   detailText: {
     fontSize: 16,
@@ -487,9 +480,8 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   statusContainerLogout: {
-    alignSelf: 'flex-end',    
-    marginRight: 20, 
-   
+    alignSelf: 'flex-end',
+    marginRight: 20,
   },
   statusContainer: {
     alignSelf: 'flex-end', // Aligns to the right dynamically
@@ -554,8 +546,6 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 20, // Circular image
-    
-    
   },
   statusDot: {
     position: 'absolute',
