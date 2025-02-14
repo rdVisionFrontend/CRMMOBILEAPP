@@ -9,26 +9,26 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import apiInstance from '../../api';
-import {useAuth} from '../Authorization/AuthContext';
-import {useSelector} from 'react-redux';
-import {Modal} from 'react-native';
-import {TextInput} from 'react-native';
-import {Picker} from '@react-native-picker/picker';
+import { useAuth } from '../Authorization/AuthContext';
+import { useSelector } from 'react-redux';
+import { Modal } from 'react-native';
+import { TextInput } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
-const InvoiceModal = ({data, closeModal}) => {
-  const {width, height} = Dimensions.get('window'); // Get full screen dimensions
+const InvoiceModal = ({ data, closeModal }) => {
+  const { width, height } = Dimensions.get('window'); // Get full screen dimensions
   const [loading, setLoading] = useState(false);
   const [orderdetails, setOrderDetails] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const {apicall, raiseInoice, setRaiseInvoice} = useAuth();
+  const { apicall, raiseInoice, setRaiseInvoice } = useAuth();
   const [addressData, setAddressData] = useState([]);
   const [selectedCurrency, setSelectedCurrency] = useState();
   const [products, setProducts] = useState([]);
   const [error, setError] = useState();
   const [productStates, setProductStates] = useState({}); // State to store input values for each product
-  const {userData} = useSelector(state => state.crmUser);
+  const { userData } = useSelector(state => state.crmUser);
   const [sameAsShipping, setSameAsShipping] = useState(false);
   const [name, setName] = useState();
   const [house, setHouse] = useState();
@@ -145,6 +145,7 @@ const InvoiceModal = ({data, closeModal}) => {
     try {
       const response = await apiInstance.post('/order/addToOrder', orderData);
       Alert.alert('Added to order successfully!');
+      fatchaddedproduct();
       console.log('qty,price updated', response);
 
       if (response.data.success.message == 'success') {
@@ -192,8 +193,8 @@ const InvoiceModal = ({data, closeModal}) => {
 
   return (
     <ScrollView>
-      <View style={[styles.container, {width: width, height: height}]}>
-        <Text style={{fontSize: 20}}>Raise Invoice</Text>
+      <View style={[styles.container, { width: width, height: height }]}>
+        <Text style={{ fontSize: 20 }}>Raise Invoice</Text>
 
         <View
           style={{
@@ -203,16 +204,16 @@ const InvoiceModal = ({data, closeModal}) => {
             alignItems: 'center',
             gap: 10,
           }}>
-          <TouchableOpacity disabled={true}>
+          {/* <TouchableOpacity disabled={true}>
             <Text style={styles.emailButton}>
               Update
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity onPress={closeModal}>
             <Text style={styles.closeButtonTop}>Close</Text>
           </TouchableOpacity>
         </View>
-        <View style={{width: '100%', paddingVertical: 5}}>
+        <View style={{ width: '100%', paddingVertical: 5 }}>
           <View
             style={{
               display: 'flex',
@@ -220,16 +221,17 @@ const InvoiceModal = ({data, closeModal}) => {
               justifyContent: 'space-between',
               gap: 5,
             }}>
-            <View style={{borderWidth: 1, padding: 5, width: '45%'}}>
+            <View style={{ borderWidth: 1, padding: 5, width: '45%' }}>
               <Text>Customer details</Text>
-              <View style={{display: 'flex', flexDirection: 'row'}}>
-                <Text style={{fontWeight: 'bold'}}>Name :</Text>
-                <Text style={{paddingHorizontal: 11}}>
-                  {data.senderName || data.firstName}
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
+                <Text style={{ fontWeight: 'bold' }}>Name :</Text>
+                <Text style={{ paddingHorizontal: 11 }}>
+                  
+                  {/* {data && data.senderName || data && data.firstName} */}
                 </Text>
               </View>
-              <View style={{display: 'flex', flexDirection: 'row'}}>
-                <Text style={{fontWeight: 'bold'}}>Email :</Text>
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
+                <Text style={{ fontWeight: 'bold' }}>Email :</Text>
                 <Text
                   style={{
                     paddingHorizontal: 11,
@@ -239,16 +241,16 @@ const InvoiceModal = ({data, closeModal}) => {
                   {data.senderEmail || data.email}
                 </Text>
               </View>
-              <View style={{display: 'flex', flexDirection: 'row'}}>
-                <Text style={{fontWeight: 'bold'}}>Mobile :</Text>
-                <Text style={{paddingHorizontal: 11}}>
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
+                <Text style={{ fontWeight: 'bold' }}>Mobile :</Text>
+                <Text style={{ paddingHorizontal: 11 }}>
                   {data.senderMobile || data.mobileNumber}
                 </Text>
               </View>
             </View>
-            <View style={{borderWidth: 1, padding: 5, width: '45%', marginRight:25}}>
-            <Text>Address details</Text>
-              <View style={{display: 'flex', flexDirection: 'column'}}>
+            <View style={{ borderWidth: 1, padding: 5, width: '45%', marginRight: 25 }}>
+              <Text>Address details</Text>
+              <View style={{ display: 'flex', flexDirection: 'column' }}>
                 <Text
                   style={{
                     paddingHorizontal: 11,
@@ -268,7 +270,7 @@ const InvoiceModal = ({data, closeModal}) => {
                       source={{
                         uri: 'https://cdn-icons-png.flaticon.com/128/1865/1865269.png',
                       }}
-                      style={{width: 20, height: 20}} // Adjust size as needed
+                      style={{ width: 20, height: 20 }} // Adjust size as needed
                     />
                     <View>
                       <Text>
@@ -278,13 +280,13 @@ const InvoiceModal = ({data, closeModal}) => {
                       </Text>
                     </View>
                   </View>
-                ):(<Text>No address</Text>)}
+                ) : (<Text>No address</Text>)}
               </View>
             </View>
           </View>
         </View>
         {/* all added product */}
-        <View style={{width: '80%'}}>
+        <View style={{ width: '80%' }}>
           <View style={styles.tableHeader}>
             <Text style={styles.headerCell}>Name</Text>
             <Text style={styles.headerCell}>Brand</Text>
@@ -321,7 +323,7 @@ const InvoiceModal = ({data, closeModal}) => {
                       source={{
                         uri: 'https://cdn-icons-png.flaticon.com/128/6861/6861362.png',
                       }}
-                      style={{width: 20, height: 20}} // Adjust size as needed
+                      style={{ width: 20, height: 20 }} // Adjust size as needed
                     />
                   </TouchableOpacity>
                 </View>
@@ -332,7 +334,7 @@ const InvoiceModal = ({data, closeModal}) => {
               ),
             )
           ) : (
-            <Text style={{textAlign: 'center', marginTop: 10}}>
+            <Text style={{ textAlign: 'center', marginTop: 10 }}>
               No products found
             </Text>
           )}
@@ -401,7 +403,7 @@ const InvoiceModal = ({data, closeModal}) => {
                   <FlatList
                     data={filteredProducts} // Use filtered products based on the search query
                     keyExtractor={item => item.productId.toString()}
-                    renderItem={({item}) => (
+                    renderItem={({ item }) => (
                       <View style={styles.card}>
                         <Text style={styles.productName}>{item.name}</Text>
 
@@ -428,9 +430,9 @@ const InvoiceModal = ({data, closeModal}) => {
                         />
 
                         <TouchableOpacity
-                          style={{backgroundColor: 'green', padding: 5}}
+                          style={{ backgroundColor: 'green', padding: 5 }}
                           onPress={() => handleAddProduct(item.productId)}>
-                          <Text style={{textAlign: 'center', color: '#fff'}}>
+                          <Text style={{ textAlign: 'center', color: '#fff' }}>
                             Add
                           </Text>
                         </TouchableOpacity>
@@ -450,7 +452,7 @@ const InvoiceModal = ({data, closeModal}) => {
           </Modal>
 
           {/* Adrress form */}
-          <View style={{marginRight:20}}>
+          <View style={{ marginRight: 20 }}>
             <Text style={styles.title}>Shipping to</Text>
             <TextInput
               style={styles.input}
@@ -538,12 +540,12 @@ export default InvoiceModal;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#ffff',
-    paddingHorizontal:10,
+    paddingHorizontal: 10,
     width: '99%',
     justifyContent: 'start',
     alignItems: 'center',
-    marginRight:5
-   
+    marginRight: 5
+
   },
   SubmitButton: {
     backgroundColor: 'green',
@@ -634,7 +636,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     elevation: 3, // For shadow effect
     shadowColor: '#000',
-    shadowOffset: {width: 1, height: 2},
+    shadowOffset: { width: 1, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
@@ -697,5 +699,5 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     width: '48%',
   },
-  
+
 });

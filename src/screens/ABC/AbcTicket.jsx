@@ -352,11 +352,12 @@ const UploadedTickets = () => {
           )}
         </View>
       )}
-      <View style={styles.emailModal}>
+      {/* invoice modal */}
+      {/* <View style={styles.emailModal}>
         {invoiceModal && (
           <InvoiceModal data={data} closeModal={closeEmailModal} />
         )}
-      </View>
+      </View> */}
 
       <View style={styles.emailModal}>
         {emailModal && <Email data={emailData} closeModal={closeEmailModal} />}
@@ -380,13 +381,14 @@ const UploadedTickets = () => {
       </View> */}
 
       <Modal
-        visible={statusmodal}
+        visible={invoiceModal}
         transparent={true}
         animationType="slide"
         onRequestClose={closeEmailModal}>
         <View style={styles.modalOverlay}>
           <View >
-            <StatusModal closeModal={closeEmailModal} data={statusmodaldata} />
+            {/* <StatusModal closeModal={closeEmailModal} data={statusmodaldata} /> */}
+            <InvoiceModal data={data} closeModal={closeEmailModal} />
           </View>
         </View>
       </Modal>
