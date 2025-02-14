@@ -13,12 +13,13 @@ import {
   Linking,
 } from 'react-native';
 import {useAuth} from '../../Authorization/AuthContext';
-import InvoiceModal from '../InvoiceModal';
+import TicketInvoiceModal from '../TicketRaiseInvoiceModal/TicketInvoiceModal';
 import Email from '../Email';
 import TicketHistoryModal from '../TicketHistroyModal';
 import StatusModal from '../StatustModal';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import InvoiceModal from '../InvoiceModal';
 
 // Enable LayoutAnimation for Android
 if (
@@ -28,7 +29,7 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const UploadedTickets = () => {
+const AbcTicket = () => {
   const {userId, dark} = useAuth();
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -43,7 +44,8 @@ const UploadedTickets = () => {
 
   useEffect(() => {
     fetchData();
-  }, [emailModal, currentPage, invoiceModal,closeEmailModal]);
+  }, [emailModal, currentPage, invoiceModal, closeEmailModal]);
+
   const fetchData = async () => {
     try {
       const user = await AsyncStorage.getItem('user');
@@ -86,6 +88,7 @@ const UploadedTickets = () => {
       .toString()
       .padStart(2, '0')}-${year}`;
   };
+
   const closeEmailModal = () => {
     fetchData();
     setEmailModal(false);
@@ -93,6 +96,7 @@ const UploadedTickets = () => {
     setInvoiceModal(false);
     setStatusModal(false);
   };
+
   const InvoiceCreate = item => {
     console.log('ABC', item);
     setData(item);
@@ -108,7 +112,6 @@ const UploadedTickets = () => {
   };
 
   const handleEmailButtonPress = () => {
-    // Open email client with a new draft
     Linking.openURL('mailto:');
   };
 
@@ -123,7 +126,7 @@ const UploadedTickets = () => {
     console.log('status', item);
     setStatusModal(true);
     setStatusModalData(item);
-    console.log("status data",statusmodaldata)
+    console.log('status data', statusmodaldata);
   };
 
   const [ticketHisModal, setTicketHisModal] = useState(false);
@@ -136,17 +139,10 @@ const UploadedTickets = () => {
     setModalVisible(true);
     setSelectedTicketInfo(ticketId);
   };
+
   const closeTicketJourney = () => {
     setTicketHisModal(false);
   };
-
-  // Example usage
-  const uploadDate = [2025, 1, 18]; // Example date array
-  const formattedDate = formatDate(uploadDate);
-
-  // Inside JSX
-  <Text>{formattedDate}</Text>;
-  const [ticketSts, setTicketSts] = useState();
 
   const renderItem = ({item}) => (
     <TouchableOpacity
@@ -234,7 +230,6 @@ const UploadedTickets = () => {
           </View>
 
           <View style={styles.actionButtons}>
-            {/* ticket journey */}
             <TouchableOpacity
               onPress={() => openTicketHistroy(item.uniqueQueryId)}
               style={styles.actionButton}>
@@ -245,7 +240,6 @@ const UploadedTickets = () => {
                 style={{width: 18, height: 18, marginRight: 5}}
               />
             </TouchableOpacity>
-            {/* email */}
             <TouchableOpacity
               style={styles.actionButton}
               onPress={handleEmailButtonPress}>
@@ -256,7 +250,6 @@ const UploadedTickets = () => {
                 style={{width: 18, height: 18, marginRight: 5}}
               />
             </TouchableOpacity>
-            {/* quotation */}
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() => openEmailModal(item)}>
@@ -267,7 +260,6 @@ const UploadedTickets = () => {
                 style={{width: 18, height: 18, marginRight: 5}}
               />
             </TouchableOpacity>
-            {/* invoice */}
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() => InvoiceCreate(item)}>
@@ -278,7 +270,6 @@ const UploadedTickets = () => {
                 style={{width: 18, height: 18, marginRight: 5}}
               />
             </TouchableOpacity>
-            {/* whatsapp */}
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() => openWhatsApp(item.mobileNumber)}>
@@ -289,7 +280,6 @@ const UploadedTickets = () => {
                 style={{width: 18, height: 18, marginRight: 5}}
               />
             </TouchableOpacity>
-            {/* call */}
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() => Linking.openURL(`tel:${item.mobileNumber}`)}>
@@ -308,76 +298,116 @@ const UploadedTickets = () => {
 
   return (
     <View style={[styles.container, dark && styles.darkContainer]}>
-      <FlatList
-        data={data} // ✅ Filter items with 'New' status
-        renderItem={renderItem}
-        keyExtractor={item => item.uniqueQueryId}
-        contentContainerStyle={styles.listContent}
-      />
+      <View>
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={item => item.uniqueQueryId}
+          contentContainerStyle={styles.listContent}
+        />
+      </View>
 
-      {/* Pagination Controls */}
+      {/* Fixed Pagination at the Bottom */}
       {!statusmodal && (
         <View style={styles.pagination}>
-          {!statusmodal && (
-            <TouchableOpacity
+          <TouchableOpacity
+            style={[
+              styles.pageButton,
+              currentPage === 0 && styles.disabledButton,
+            ]}
+            onPress={() => {
+              if (currentPage > 0) {
+                setCurrentPage(currentPage - 1);
+              }
+            }}
+            disabled={currentPage === 0}>
+            <Text
               style={[
-                styles.pageButton,
-                currentPage === 0 && styles.disabledButton, // Apply disabled style
-              ]}
-              onPress={() => {
-                if (currentPage > 0) {
-                  setCurrentPage(currentPage - 1); // Only decrement if currentPage > 0
-                }
-              }}
-              disabled={currentPage === 0} // Disable the button when currentPage is 0
-            >
-              <Text
-                style={[
-                  styles.pageText,
-                  currentPage === 0 && styles.disabledText, // Apply disabled text style
-                ]}>
-                Previous
-              </Text>
-            </TouchableOpacity>
-          )}
+                styles.pageText,
+                currentPage === 0 && styles.disabledText,
+              ]}>
+              Previous
+            </Text>
+          </TouchableOpacity>
 
           <Text style={styles.pageText}>Page {currentPage + 1}</Text>
 
-          {!statusmodal && (
-            <TouchableOpacity
-              style={styles.pageButton}
-              onPress={() => setCurrentPage(currentPage + 1)}>
-              <Text style={styles.pageText}>Next</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={styles.pageButton}
+            onPress={() => setCurrentPage(currentPage + 1)}>
+            <Text style={styles.pageText}>Next</Text>
+          </TouchableOpacity>
         </View>
       )}
-      <View style={styles.emailModal}>
-        {invoiceModal && (
-          <InvoiceModal data={data} closeModal={closeEmailModal} />
-        )}
-      </View>
 
-      <View style={styles.emailModal}>
-        {emailModal && <Email data={emailData} closeModal={closeEmailModal} />}
-      </View>
+      {/* Modals */}
+      <Modal
+        visible={invoiceModal} // Control visibility based on `invoiceModal` state
+        transparent={true} // Make the modal background transparent
+        animationType="slide" // Slide animation for the modal
+        onRequestClose={closeEmailModal} // Handle Android back button
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+          }}>
+          <View
+            style={{
+              width: '100%', // Set modal width
+              backgroundColor: '#fff', // White background for the modal content
+              borderRadius: 10, // Rounded corners
+              padding: 20, // Inner padding
+              elevation: 5, // Shadow for Android
+              shadowColor: '#000', // Shadow for iOS
+              shadowOffset: {width: 0, height: 2},
+              shadowOpacity: 0.25,
+              shadowRadius: 4,
+            }}>
+            <InvoiceModal data={data} closeModal={closeEmailModal} />
+          </View>
+        </View>
+      </Modal>
+      {/* email Modal send */}
+      <Modal
+        visible={emailModal} // Control visibility based on `invoiceModal` state
+        transparent={true} // Make the modal background transparent
+        animationType="slide" // Slide animation for the modal
+        onRequestClose={closeEmailModal} // Handle Android back button
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+          }}>
+          <View
+            style={{
+              width: '100%', // Set modal width
+              backgroundColor: '#fff', // White background for the modal content
+              borderRadius: 10, // Rounded corners
+              padding: 20, // Inner padding
+              elevation: 5, // Shadow for Android
+              shadowColor: '#000', // Shadow for iOS
+              shadowOffset: {width: 0, height: 2},
+              shadowOpacity: 0.25,
+              shadowRadius: 4,
+            }}>
+             <Email data={emailData} closeModal={closeEmailModal} />
+          </View>
+        </View>
+      </Modal>
 
-      {/* Ticket histroy modal */}
+     
+
       <TicketHistoryModal
         ticketId={selectedTicketInfo}
         isVisible={modalVisible}
         closeTicketHisModal={() => setModalVisible(false)}
       />
-      {/* <View>
-        {statusmodal && (
-          <StatusModal
-            visible={statusmodal}
-            animationType="slide"
-            data={statusmodaldata}
-            closeModal={closeEmailModal}
-          />
-        )}
-      </View> */}
 
       <Modal
         visible={statusmodal}
@@ -385,7 +415,7 @@ const UploadedTickets = () => {
         animationType="slide"
         onRequestClose={closeEmailModal}>
         <View style={styles.modalOverlay}>
-          <View >
+          <View>
             <StatusModal closeModal={closeEmailModal} data={statusmodaldata} />
           </View>
         </View>
@@ -396,8 +426,10 @@ const UploadedTickets = () => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#e3f2fd',
+    // backgroundColor: 'red',
   },
   darkContainer: {
     backgroundColor: '#121212',
@@ -409,7 +441,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2a2a2a',
   },
   listContent: {
-    paddingBottom: 20,
+    paddingBottom: 80, // Add padding to avoid overlap with pagination
   },
   card: {
     backgroundColor: '#fff',
@@ -465,7 +497,6 @@ const styles = StyleSheet.create({
     color: '#444',
     width: '65%',
   },
-
   actionButtons: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -485,13 +516,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   pagination: {
+    position: 'absolute',
+    bottom: 50,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 16,
     borderTopWidth: 1,
     borderTopColor: '#eee',
-    marginBottom: 30,
+    backgroundColor: '#e3f2fd',
   },
   pageButton: {
     backgroundColor: '#007bff',
@@ -504,15 +539,12 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 14,
   },
- 
-  
   disabledButton: {
-    backgroundColor: '#ccc', // Grayed-out background
+    backgroundColor: '#ccc',
   },
   disabledText: {
-    color: '#888', // Grayed-out text
+    color: '#888',
   },
- 
 });
 
-export default UploadedTickets;
+export default AbcTicket;

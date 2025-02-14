@@ -20,7 +20,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import Nodata from './NoData';
 import apiInstance from '../../api';
 import StatustModal from './StatustModal';
-import InvoiceModal from './InvoiceModal';
+import TicketInvoiceModal from '../screens/TicketRaiseInvoiceModal/TicketInvoiceModal';
 import TicketHistoryModal from './TicketHistroyModal';
 
 const Ticket = () => {
@@ -368,7 +368,9 @@ const Ticket = () => {
                         />
                       </TouchableOpacity>
                       {/* Invoice Icon */}
-                      <TouchableOpacity onPress={() => InvoiceCreate(item)}>
+                      <TouchableOpacity
+                        // onPress={toggleModal}
+                        onPress={() => InvoiceCreate(item)}>
                         <Image
                           source={{
                             uri: 'https://cdn-icons-png.flaticon.com/128/5270/5270107.png',
@@ -391,6 +393,11 @@ const Ticket = () => {
 
       {/* Email Modal */}
       {emailModal && <Email data={emailData} closeModal={closeEmailModal} />}
+      <View style={{flex:1, position:'absolute', top:0, left:5}}>
+        {invoiceModal && (
+          <TicketInvoiceModal data={invoiceData} closeModal={closeEmailModal} />
+        )}
+      </View>
 
       {/* Status Modal */}
       {statusmodal && (
@@ -401,16 +408,15 @@ const Ticket = () => {
         />
       )}
 
-     
       {/* {invoiceModal && } */}
-      <View style={{flex: 1 , width:'100%'}}>
+      {/* <View style={{flex: 1 , width:'100%'}}>
         <Modal isVisible={invoiceModal}>
-          <View style={{flex: 1}}>
-            <InvoiceModal data={invoiceData} closeModal={closeEmailModal} />
+          <View >
+            <TicketInvoiceModal data={invoiceData} closeModal={closeEmailModal} />
             <Button title="Close" onPress={() => setInvoiceModal(false)} />
           </View>
         </Modal>
-      </View>
+      </View> */}
 
       {/* Ticket History Modal */}
       <TicketHistoryModal
@@ -434,13 +440,7 @@ const styles = StyleSheet.create({
   },
   item: {
     marginBottom: 10,
-    borderRadius: 8,
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: {width: 0, height: 2},
-    shadowRadius: 4,
-    elevation: 3,
+    paddingHorizontal: 10,
   },
   header: {
     padding: 16,
@@ -501,8 +501,8 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   icon: {
-    width: 30,
-    height: 30,
+    width: 28,
+    height: 28,
     alignSelf: 'center',
     marginBottom: 20,
   },

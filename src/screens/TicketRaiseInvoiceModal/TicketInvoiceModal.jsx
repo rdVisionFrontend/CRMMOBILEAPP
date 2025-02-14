@@ -10,13 +10,13 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import apiInstance from '../../api';
-import {useAuth} from '../Authorization/AuthContext';
+
 import {useSelector} from 'react-redux';
 import {Modal} from 'react-native';
 import {TextInput} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
-import AntDesign from 'react-native-vector-icons/AntDesign'
+import {useAuth} from '../../Authorization/AuthContext';
+import apiInstance from '../../../api';
 
 const InvoiceModal = ({data, closeModal}) => {
   const {width, height} = Dimensions.get('window'); // Get full screen dimensions
@@ -40,14 +40,18 @@ const InvoiceModal = ({data, closeModal}) => {
   const [country, setCountry] = useState();
   const [search, setSearch] = useState('');
 
- 
-
-  console.log('invoice data', data);
+  console.log('New invoice', data);
   useEffect(() => {
     fatchaddedproduct();
     fetchAddressDetails();
-    fetchProducts();   
-    
+    fetchProducts();
+    if (raiseInoice) {
+      fetchAddressDetails();
+      // closeModal();
+    }
+    if (apicall) {
+      fetchAddressDetails();
+    }
   }, []);
 
   const filteredProducts = products.filter(product =>
@@ -85,7 +89,7 @@ const InvoiceModal = ({data, closeModal}) => {
     const response = await apiInstance.delete(
       `/order/deleteProductOrder/${productOrderId}`,
     );
-    if (response) {
+    if (response.data === 'deleted') {
       console.log('deleetd');
       fatchaddedproduct();
     }
@@ -96,7 +100,8 @@ const InvoiceModal = ({data, closeModal}) => {
         `/address/getAddress/${data.uniqueQueryId}`,
       );
       setAddressData(response.data.dto);
-      console.log('Addredd 2', response);      
+      console.log('Addredd 2', response);
+      fatchaddedproduct();
       setRaiseInvoice(false);
     } catch (err) {
       console.error('Error fetching address details:', err);
@@ -141,8 +146,14 @@ const InvoiceModal = ({data, closeModal}) => {
     try {
       const response = await apiInstance.post('/order/addToOrder', orderData);
       Alert.alert('Added to order successfully!');
+      fatchaddedproduct();
       console.log('qty,price updated', response);
-      fatchaddedproduct(); 
+
+      if (response.data.success.message == 'success') {
+        fetchAddressDetails();
+        fatchaddedproduct();
+      }
+
       setModalVisible(false);
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -184,14 +195,9 @@ const InvoiceModal = ({data, closeModal}) => {
   return (
     <ScrollView>
       <View style={[styles.container, {width: width, height: height}]}>
-        <Text style={{fontSize: 20}}>Raise Invoice</Text>
+        <Text style={{fontSize: 20}}>Create Invoice</Text>
        
-         <TouchableOpacity style={{position:'absolute' ,top:0 ,right:45}} onPress={closeModal}>
-         <AntDesign name='closecircle' size={25}/>
-          </TouchableOpacity>
-          
-      
-        <View style={{width: '96%', paddingVertical: 5}}>
+        <View style={{width: '100%', paddingVertical: 5}}>
           <View
             style={{
               display: 'flex',
@@ -271,7 +277,7 @@ const InvoiceModal = ({data, closeModal}) => {
           </View>
         </View>
         {/* all added product */}
-        <View style={{width: '91%'}}>
+        <View style={{width: '80%'}}>
           <View style={styles.tableHeader}>
             <Text style={styles.headerCell}>Name</Text>
             <Text style={styles.headerCell}>Brand</Text>
@@ -330,13 +336,15 @@ const InvoiceModal = ({data, closeModal}) => {
         <View style={styles.container}>
           {/* Open Modal Button */}
           <TouchableOpacity
-              style={{backgroundColor:'#0096c7', paddingVertical:6,borderRadius:2}}
-              onPress={()=>setModalVisible(true)}
-              disabled={loading}>
-              <Text style={{textAlign:'center', color:'#fff', fontWeight:600 }}>Add Product</Text>
-            </TouchableOpacity>
-          
-        
+            style={styles.openButton}
+            onPress={() => setModalVisible(true)}>
+            <Text style={styles.buttonText}>Add Product</Text>
+          </TouchableOpacity>
+          {/* <TouchableOpacity
+          style={styles.openButton}
+          onPress={() => setModalVisible(true)}>
+          <Text style={styles.buttonText}>Add Address</Text>
+        </TouchableOpacity> */}
 
           {/* Modal Component */}
           <Modal
@@ -505,12 +513,25 @@ const InvoiceModal = ({data, closeModal}) => {
             )}
 
             {/* Submit Button */}
-            <TouchableOpacity
-              style={{backgroundColor:'#02c39a', paddingVertical:6,borderRadius:2}}
-              onPress={handleshipSubmit}
-              disabled={loading}>
-              <Text style={{textAlign:'center', color:'#fff', fontWeight:600 }}>SUBMIT</Text>
-            </TouchableOpacity>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 10,
+                marginTop: 10,
+              }}>
+              <TouchableOpacity
+                style={[styles.SubmitButton, loading && {opacity: 0.5}]}
+                onPress={handleshipSubmit}
+                disabled={loading}>
+                <Text style={styles.buttonTextSubmit}>Submit</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
@@ -522,10 +543,32 @@ export default InvoiceModal;
 
 const styles = StyleSheet.create({
   container: {
-    alignContent: 'center',
-    width: '95%',
-    position:'relative'
-  }, 
+    backgroundColor: '#d8e2dc',
+    paddingHorizontal: 10,
+    justifyContent: 'start',
+    alignItems: 'center',
+    marginRight: 5,
+    height:'100%',
+    oveflow:'auto'
+  },
+  SubmitButton: {
+    backgroundColor: '#52b788',
+    paddingHorizontal: 4,
+    paddingVertical: 10,
+    width: 100,
+  },
+  closeButton: {
+    backgroundColor: '#ef233c',
+    paddingHorizontal: 4,
+    paddingVertical: 10,
+    width: 100,
+  },
+  closeButtonText: {
+    textAlign: 'center',
+  },
+  buttonTextSubmit: {
+    textAlign: 'center',
+  },
 
   tableHeader: {
     flexDirection: 'row',
@@ -535,7 +578,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    width:'100%'
   },
   tableBody: {
     flexDirection: 'row',
@@ -545,7 +587,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    width:'100%'
+    width: '100%',
+  },
+  headerCell: {
+    width: 50,
   },
 
   openButton: {
@@ -560,7 +605,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  modalOverlay: {    
+  modalOverlay: {
+    flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)', // Transparent background
     justifyContent: 'center',
     alignItems: 'center',
@@ -595,11 +641,12 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    borderColor: '#ccc',
+    borderColor: '#d8e2dc',
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 10,
+    backgroundColor: '#fff',
   },
   pickerContainer: {
     borderWidth: 1,
@@ -614,11 +661,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 5,
   },
-  closeButton: {
-    backgroundColor: '#e74c3c',
-    padding: 15,
-    borderRadius: 5,
-  },
+
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -646,8 +689,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     width: '48%',
-  },
-  headerCell:{
-    width:40
   },
 });
