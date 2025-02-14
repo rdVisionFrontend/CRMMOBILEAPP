@@ -65,7 +65,7 @@ const Email = ({data, closeModal}) => {
     try {
       setLoading(true); 
       const storedUser = await  AsyncStorage.getItem('user');
-      const user = JSON.parse(user);
+      const user = JSON.parse(storedUser);
 
       const response = await apiInstance.post('/email/sendsugetionmail', {
         ticket: {
@@ -76,6 +76,7 @@ const Email = ({data, closeModal}) => {
         productsIds: selectedProducts,
         userId:user.userId,
       });
+      Alert.alert("Email has been sent")
       console.log('Email sent successfully:', response);
       setLoading(false); // Set loading to false when email is sent
       closeModal();

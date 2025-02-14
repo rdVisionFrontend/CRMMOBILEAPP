@@ -195,7 +195,7 @@ const InvoiceModal = ({data, closeModal}) => {
       <View style={[styles.container, {width: width, height: height}]}>
         <Text style={{fontSize: 20}}>Raise Invoice</Text>
 
-        <View
+        {/* <View
           style={{
             display: 'flex',
             flexDirection: 'row',
@@ -211,7 +211,7 @@ const InvoiceModal = ({data, closeModal}) => {
           <TouchableOpacity onPress={closeModal}>
             <Text style={styles.closeButtonTop}>Close</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
         <View style={{width: '100%', paddingVertical: 5}}>
           <View
             style={{

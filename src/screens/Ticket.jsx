@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
   Linking,
+  Button,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -223,208 +224,208 @@ const Ticket = () => {
   };
 
   return (
-  <View style={{ flex: 1 }}>
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <View style={styles.container}>
-        <Text>{loading ? 'Loading...' : ''}</Text>
-        {ticketData && ticketData.length > 0 ? (
-          ticketData?.map((item, index) => (
-            <View key={index} style={styles.item}>
-              <View
-                style={[
-                  styles.header,
-                  { backgroundColor: getStatusColor(item.ticketstatus) }, // Dynamic background color
-                ]}
-              >
-                <Text style={styles.indexText}>{index + 1}</Text>
-
-                {readTicket &&
-                  readTicket.some((ele) => ele === item.uniqueQueryId) && (
-                    <Image
-                      source={{
-                        uri: 'https://cdn-icons-png.flaticon.com/128/5290/5290058.png',
-                      }}
-                      style={styles.DoneIcon}
-                    />
-                  )}
-
+    <View style={{flex: 1}}>
+      <ScrollView contentContainerStyle={{flexGrow: 1}}>
+        <View style={styles.container}>
+          <Text>{loading ? 'Loading...' : ''}</Text>
+          {ticketData && ticketData.length > 0 ? (
+            ticketData?.map((item, index) => (
+              <View key={index} style={styles.item}>
                 <View
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-around',
-                    gap: 2,
-                    flexDirection: 'row',
-                    alignItems: 'flex-start',
-                    paddingHorizontal: 2,
-                  }}
-                >
-                  <View
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'flex-start',
-                    }}
-                  >
-                    <Text style={{ fontSize: 12 }}>
-                      {new Date(item.queryTime).toLocaleString('en-US', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true,
-                      })}
-                    </Text>
-                    <View
-                      style={{ display: 'flex', flexDirection: 'row', gap: 4 }}
-                    >
-                      <Text
-                        onPress={() => toggleAccordion(item.uniqueQueryId)}
-                        style={styles.headerText}
-                      >
-                        {item.senderName}
-                      </Text>
-                      <CountryFlagTable
-                        key={index}
-                        flagName={item.senderCountryIso}
+                  style={[
+                    styles.header,
+                    {backgroundColor: getStatusColor(item.ticketstatus)}, // Dynamic background color
+                  ]}>
+                  <Text style={styles.indexText}>{index + 1}</Text>
+
+                  {readTicket &&
+                    readTicket.some(ele => ele === item.uniqueQueryId) && (
+                      <Image
+                        source={{
+                          uri: 'https://cdn-icons-png.flaticon.com/128/5290/5290058.png',
+                        }}
+                        style={styles.DoneIcon}
                       />
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => toggleModal(item.queryMessage)}
-                    >
-                      <Text style={styles.text}>
-                        {item.queryMessage && item.queryMessage.slice(0, 20)}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  {/* Main item which toggles the dropdown menu */}
-                  <TouchableOpacity
-                    style={{
-                      borderWidth: 1,
-                      paddingVertical: 2,
-                      paddingHorizontal: 4,
-                      borderRadius: 5,
-                      fontWeight: 800,
-                      fontSize: 18,
-                    }}
-                    onPress={() => openStatusModal(item)}
-                  >
-                    <Text
-                      style={[
-                        styles.dropdownButton,
-                        {
-                          backgroundColor: getStatusColor(
-                            selectedStatus || 'New'
-                          ),
-                        },
-                      ]}
-                    >
-                      {selectedStatus
-                        ? ` ${selectedStatus}`
-                        : `${item.ticketstatus}`}
-                    </Text>
-                  </TouchableOpacity>
+                    )}
 
                   <View
                     style={{
                       display: 'flex',
-                      gap: 5,
+                      justifyContent: 'space-around',
+                      gap: 2,
                       flexDirection: 'row',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  >
-                    {/* Ticket history */}
+                      alignItems: 'flex-start',
+                      paddingHorizontal: 2,
+                    }}>
+                    <View
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'flex-start',
+                      }}>
+                      <Text style={{fontSize: 12}}>
+                        {new Date(item.queryTime).toLocaleString('en-US', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true,
+                        })}
+                      </Text>
+                      <View
+                        style={{display: 'flex', flexDirection: 'row', gap: 4}}>
+                        <Text
+                          onPress={() => toggleAccordion(item.uniqueQueryId)}
+                          style={styles.headerText}>
+                          {item.senderName}
+                        </Text>
+                        <CountryFlagTable
+                          key={index}
+                          flagName={item.senderCountryIso}
+                        />
+                      </View>
+                      <TouchableOpacity
+                        onPress={() => toggleModal(item.queryMessage)}>
+                        <Text style={styles.text}>
+                          {item.queryMessage && item.queryMessage.slice(0, 20)}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    {/* Main item which toggles the dropdown menu */}
                     <TouchableOpacity
-                      onPress={() => openTicketHistroy(item.uniqueQueryId)}
-                    >
-                      <Image
-                        source={{
-                          uri: 'https://cdn-icons-png.flaticon.com/128/9195/9195785.png',
-                        }}
-                        style={styles.icon}
-                      />
-                    </TouchableOpacity>
-                    {/* WhatsApp */}
-                    <TouchableOpacity onPress={() => openWhatsApp()}>
-                      <Image
-                        source={{
-                          uri: 'https://cdn-icons-png.flaticon.com/128/15707/15707820.png',
-                        }}
-                        style={styles.icon}
-                      />
-                    </TouchableOpacity>
-                    {/* Call */}
-                    <TouchableOpacity
-                      onPress={() => openCallLog(item.senderMobile)}
-                    >
-                      <Image
-                        source={{
-                          uri: 'https://cdn-icons-png.flaticon.com/128/455/455705.png',
-                        }}
-                        style={styles.icon}
-                      />
+                      style={{
+                        borderWidth: 1,
+                        paddingVertical: 2,
+                        paddingHorizontal: 4,
+                        borderRadius: 5,
+                        fontWeight: 800,
+                        fontSize: 18,
+                      }}
+                      onPress={() => openStatusModal(item)}>
+                      <Text
+                        style={[
+                          styles.dropdownButton,
+                          {
+                            backgroundColor: getStatusColor(
+                              selectedStatus || 'New',
+                            ),
+                          },
+                        ]}>
+                        {selectedStatus
+                          ? ` ${selectedStatus}`
+                          : `${item.ticketstatus}`}
+                      </Text>
                     </TouchableOpacity>
 
-                    {/* Email */}
-                    <TouchableOpacity onPress={() => openEmailModal(item)}>
-                      <Image
-                        source={{
-                          uri: 'https://cdn-icons-png.flaticon.com/128/9068/9068642.png',
-                        }}
-                        style={styles.icon}
-                      />
-                    </TouchableOpacity>
-                    {/* Invoice Icon */}
-                    <TouchableOpacity onPress={() => InvoiceCreate(item)}>
-                      <Image
-                        source={{
-                          uri: 'https://cdn-icons-png.flaticon.com/128/5270/5270107.png',
-                        }}
-                        style={styles.icon}
-                      />
-                    </TouchableOpacity>
+                    <View
+                      style={{
+                        display: 'flex',
+                        gap: 5,
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}>
+                      {/* Ticket history */}
+                      <TouchableOpacity
+                        onPress={() => openTicketHistroy(item.uniqueQueryId)}>
+                        <Image
+                          source={{
+                            uri: 'https://cdn-icons-png.flaticon.com/128/9195/9195785.png',
+                          }}
+                          style={styles.icon}
+                        />
+                      </TouchableOpacity>
+                      {/* WhatsApp */}
+                      <TouchableOpacity onPress={() => openWhatsApp()}>
+                        <Image
+                          source={{
+                            uri: 'https://cdn-icons-png.flaticon.com/128/15707/15707820.png',
+                          }}
+                          style={styles.icon}
+                        />
+                      </TouchableOpacity>
+                      {/* Call */}
+                      <TouchableOpacity
+                        onPress={() => openCallLog(item.senderMobile)}>
+                        <Image
+                          source={{
+                            uri: 'https://cdn-icons-png.flaticon.com/128/455/455705.png',
+                          }}
+                          style={styles.icon}
+                        />
+                      </TouchableOpacity>
+
+                      {/* Email */}
+                      <TouchableOpacity onPress={() => openEmailModal(item)}>
+                        <Image
+                          source={{
+                            uri: 'https://cdn-icons-png.flaticon.com/128/9068/9068642.png',
+                          }}
+                          style={styles.icon}
+                        />
+                      </TouchableOpacity>
+                      {/* Invoice Icon */}
+                      <TouchableOpacity onPress={() => InvoiceCreate(item)}>
+                        <Image
+                          source={{
+                            uri: 'https://cdn-icons-png.flaticon.com/128/5270/5270107.png',
+                          }}
+                          style={styles.icon}
+                        />
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
               </View>
+            ))
+          ) : (
+            <View style={styles.noDataContainer}>
+              <Nodata />
             </View>
-          ))
-        ) : (
-          <View style={styles.noDataContainer}>
-            <Nodata />
+          )}
+        </View>
+      </ScrollView>
+
+      {/* Email Modal */}
+      {emailModal && <Email data={emailData} closeModal={closeEmailModal} />}
+
+      {/* Status Modal */}
+      {statusmodal && (
+        <StatustModal
+          data={statusData}
+          closeModal={closeEmailModal}
+          live={'live'}
+        />
+      )}
+
+     
+      {/* {invoiceModal && } */}
+      <View style={{flex: 1 , width:'100%'}}>
+        <Modal isVisible={invoiceModal}>
+          <View style={{flex: 1}}>
+            <InvoiceModal data={invoiceData} closeModal={closeEmailModal} />
+            <Button title="Close" onPress={() => setInvoiceModal(false)} />
           </View>
-        )}
+        </Modal>
       </View>
-    </ScrollView>
 
-    {/* Email Modal */}
-    {emailModal && <Email data={emailData} closeModal={closeEmailModal} />}
-    
-    {/* Status Modal */}
-    {statusmodal && (
-      <StatustModal data={statusData} closeModal={closeEmailModal} live={'live'} />
-    )}
-
-    {/* Invoice Modal */}
-    {invoiceModal && <InvoiceModal data={invoiceData} closeModal={closeEmailModal} />}
-
-    {/* Ticket History Modal */}
-    <TicketHistoryModal
-      ticketId={selectedTicketInfo}
-      isVisible={modalVisible}
-      closeTicketHisModal={() => setModalVisible(false)}
-    />
-  </View>
-);
+      {/* Ticket History Modal */}
+      <TicketHistoryModal
+        ticketId={selectedTicketInfo}
+        isVisible={modalVisible}
+        closeTicketHisModal={() => setModalVisible(false)}
+      />
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-  container: {    
+  container: {
     backgroundColor: '#FFFFFF',
     position: 'relative',
-    
   },
   emailModal: {
     position: 'absolute',
