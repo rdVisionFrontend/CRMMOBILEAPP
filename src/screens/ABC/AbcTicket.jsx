@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Modal,
   FlatList,
-  Image,
+  Image, 
   LayoutAnimation,
   Platform,
   UIManager,

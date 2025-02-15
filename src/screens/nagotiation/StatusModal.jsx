@@ -8,16 +8,16 @@ import {
   Button,
   Alert,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import {Picker} from '@react-native-picker/picker'; // Import Picker
+import { Picker } from '@react-native-picker/picker'; // Import Picker
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 
-const Email = ({data,closeModal }) => {
-  const {width, height} = Dimensions.get('window'); // Get full screen dimensions
+const Email = ({ data, closeModal }) => {
+  const { width, height } = Dimensions.get('window'); // Get full screen dimensions
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState(null);
   const [text, setText] = useState('');
@@ -28,7 +28,9 @@ const Email = ({data,closeModal }) => {
   const [mode, setMode] = useState('date');
   const [selectedDate, setSelectedDate] = useState(null);
   const [callId, setCallId] = useState(0);
- 
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+
 
   useEffect(() => {
     fetchToken();
@@ -47,21 +49,21 @@ const Email = ({data,closeModal }) => {
   };
   const updateTicketResponse = async () => {
     console.log("Try to updated asdas")
-    try {    
+    try {
       const storedUser = await AsyncStorage.getItem('user');
       const userData = JSON.parse(storedUser);
       const formattedDateTime = selectedDate
         ? selectedDate.toISOString().replace('Z', '')
         : null;
-        console.log(formattedDateTime)
-        const apiPath = data.uniqueQueryId.length < 15 ? "third_party_api/ticket" : "upload"; 
-        console.log("PAth",apiPath)    
-        console.log("uniqueQueryId",data.uniqueQueryId)    
-        const queryParam = formattedDateTime ? `&followUpDateTime=${formattedDateTime}` : "";
+      console.log(formattedDateTime)
+      const apiPath = data.uniqueQueryId.length < 15 ? "third_party_api/ticket" : "upload";
+      console.log("PAth", apiPath)
+      console.log("uniqueQueryId", data.uniqueQueryId)
+      const queryParam = formattedDateTime ? `&followUpDateTime=${formattedDateTime}` : "";
       setLoading(true);
       const url = `https://uatbackend.rdvision.tech/${apiPath}/updateTicketResponse/${data.uniqueQueryId}?userId=${userData.userId}&ticketStatus=${selectedOption}&comment=${text}${queryParam}`;
       console.log(url, token);
-      const response = await axios.post(url,{} ,{
+      const response = await axios.post(url, {}, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -72,7 +74,7 @@ const Email = ({data,closeModal }) => {
       Alert.alert('Status Updated');
       closeModal();
     } catch (error) {
-      console.log( 'Error:', error.response , );
+      console.log('Error:', error.response,);
       setLoading(false);
       Alert.alert('Error', 'Failed to update status. Please try again.');
     }
@@ -96,7 +98,6 @@ const Email = ({data,closeModal }) => {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === 'ios' ? true : false);
     setDate(currentDate);
-
     // If it's a valid future date, set it
     if (currentDate > new Date()) {
       setSelectedDate(currentDate);
@@ -119,8 +120,16 @@ const Email = ({data,closeModal }) => {
   };
 
   return (
-    <View style={[styles.container, {width: width, height: height}]}>
+    <View style={[styles.container, { width: width, height: height }]}>
       <View style={styles.footer}>
+        <View style={{ marginTop: 10 }}>
+          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
+            Email: {data.email}
+          </Text>
+          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
+            Name: {(data.firstName || data.senderName) + " " + (data.lastName || " ")}
+          </Text>
+        </View>
         {/* Dropdown for ticket status */}
 
         <Picker
@@ -133,7 +142,7 @@ const Email = ({data,closeModal }) => {
         </Picker>
         {selectedOption === 'Follow' && (
           <View>
-            <Text style={{fontWeight: 'bold'}}>
+            <Text style={{ fontWeight: 'bold' }}>
               Select Follow Up Date and Time
             </Text>
           </View>
@@ -148,7 +157,7 @@ const Email = ({data,closeModal }) => {
               borderWidth: 0.2,
               borderRadius: 3,
             }}>
-            <View style={{width: '100%'}}>
+            <View style={{ width: '100%' }}>
               {selectedDate && (
                 <Text
                   style={{
@@ -191,8 +200,8 @@ const Email = ({data,closeModal }) => {
           </View>
         )}
 
-        <View style={{backgroundColor: '', width: '100%'}}>
-          <Text style={{fontSize: 15, fontWeight: 'bold', marginTop: 10}}>
+        <View style={{ backgroundColor: '', width: '100%' }}>
+          <Text style={{ fontSize: 15, fontWeight: 'bold', marginTop: 10 }}>
             Your Message :
           </Text>
           <TextInput
@@ -242,6 +251,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 20,
     paddingVertical: 10,
+    borderRadius: 5,
+    fontWeight: 'bold'
   },
   emailButton: {
     backgroundColor: '#006400',
@@ -250,10 +261,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 20,
     paddingVertical: 10,
+    borderRadius: 5,
+    fontWeight: 'bold'
   },
   picker: {
-    width: 200, // Adjust the width of the picker
-    marginBottom: 20,
+    width: 100, // Adjust the width of the picker
+    marginBottom: 10,
     backgroundColor: '#e5e5e5',
     borderRadius: 20,
   },

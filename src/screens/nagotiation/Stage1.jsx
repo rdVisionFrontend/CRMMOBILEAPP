@@ -349,7 +349,7 @@ const Stage2 = () => {
                         <Text
                           onPress={() => toggleAccordion(index)}
                           style={{fontSize: 16}}>
-                          {item.senderName}
+                          {item.senderName || (item.firstName+" "+(item.lastName||""))}
                         </Text>
                         <View style={{flexDirection: 'row', gap: 10}}>
                           <TouchableOpacity

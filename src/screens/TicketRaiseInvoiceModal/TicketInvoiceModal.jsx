@@ -17,13 +17,14 @@ import {TextInput} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import {useAuth} from '../../Authorization/AuthContext';
 import apiInstance from '../../../api';
+import LinearGradient from 'react-native-linear-gradient';
 
 const InvoiceModal = ({data, closeModal}) => {
   const {width, height} = Dimensions.get('window'); // Get full screen dimensions
   const [loading, setLoading] = useState(false);
   const [orderdetails, setOrderDetails] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const {apicall, raiseInoice, setRaiseInvoice} = useAuth();
+  const {apicall, raiseInoice, setRaiseInvoice} = useAuth(); 
   const [addressData, setAddressData] = useState([]);
   const [selectedCurrency, setSelectedCurrency] = useState();
   const [products, setProducts] = useState([]);
@@ -49,7 +50,7 @@ const InvoiceModal = ({data, closeModal}) => {
       fetchAddressDetails();
       // closeModal();
     }
-    if (apicall) {
+    if (apicall) { 
       fetchAddressDetails();
     }
   }, []);
@@ -194,8 +195,8 @@ const InvoiceModal = ({data, closeModal}) => {
 
   return (
     <ScrollView>
-      <View style={[styles.container, {width: width, height: height}]}>
-        <Text style={{fontSize: 20}}>Create Invoice</Text>
+      <View style={styles.container}>
+        <Text style={{fontSize: 20, fontWeight: 'bold',marginBottom: 10}}>Create Invoice</Text>
        
         <View style={{width: '100%', }}>
           <View
@@ -205,8 +206,8 @@ const InvoiceModal = ({data, closeModal}) => {
               justifyContent: 'space-between',
               gap: 5,
             }}>
-            <View style={{borderWidth: 1, padding: 5, width: '45%'}}>
-              <Text>Customer details</Text>
+            <View style={{borderRadius: 10, padding: 10, width: '48%',backgroundColor: '#DFF5FF'}}>
+              <Text style={{fontSize: 15, textAlign: 'center', fontWeight: 500}}>Customer details</Text>
               <View style={{display: 'flex', flexDirection: 'row'}}>
                 <Text style={{fontWeight: 'bold'}}>Name :</Text>
                 <Text style={{paddingHorizontal: 11}}>
@@ -233,10 +234,11 @@ const InvoiceModal = ({data, closeModal}) => {
             </View>
             <View
               style={{
-                borderWidth: 1,
-                padding: 5,
-                width: '45%',
+                borderRadius: 10,
+                padding: 10,
+                width: '48%',
                 marginRight: 25,
+                backgroundColor: '#F6F5F5'
               }}>
               <Text>Address details</Text>
               <View style={{display: 'flex', flexDirection: 'column'}}>
@@ -261,8 +263,8 @@ const InvoiceModal = ({data, closeModal}) => {
                       }}
                       style={{width: 20, height: 20}} // Adjust size as needed
                     />
-                    <View style={{width: '95%'}}>
-                      <Text style={{flexWrap: 'wrap'}}>
+                    <View style={{width: '100%'}}>
+                      <Text style={{flexWrap: 'nowrap', width: 150}}>
                         {addressData.houseNumber}, {addressData.landmark},{' '}
                         {addressData.city}, {addressData.state},{' '}
                         {addressData.zipCode}, {addressData.country}
@@ -277,7 +279,7 @@ const InvoiceModal = ({data, closeModal}) => {
           </View>
         </View>
         {/* all added product */}
-        <View style={{width: '80%'}}>
+        <View style={{width: '98%',marginTop: 10, }}>
           <View style={styles.tableHeader}>
             <Text style={styles.headerCell}>Name</Text>
             <Text style={styles.headerCell}>Brand</Text>
@@ -543,9 +545,7 @@ export default InvoiceModal;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#d8e2dc',
-    paddingHorizontal: 10,
-    justifyContent: 'start',
+    
     alignItems: 'center',    
    
   
@@ -562,12 +562,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 10,
     width: 100,
+    borderRadius: 5,
+    
   },
   closeButtonText: {
     textAlign: 'center',
+    fontWeight: 800
   },
   buttonTextSubmit: {
     textAlign: 'center',
+    fontWeight: 800
   },
 
   tableHeader: {
