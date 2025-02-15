@@ -369,7 +369,7 @@ const AbcTicket = () => {
         onRequestClose={closeEmailModal}>
         <View
           style={{
-            flex: 1,
+       
             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -386,7 +386,7 @@ const AbcTicket = () => {
               shadowOpacity: 0.25,
               shadowRadius: 4,
             }}>
-            {/* <InvoiceModal data={data} closeModal={closeEmailModal} /> */}
+           
             <TicketInvoiceModal data={data} closeModal={closeEmailModal} />
           </View>
         </View>
@@ -399,14 +399,14 @@ const AbcTicket = () => {
         onRequestClose={closeEmailModal}>
         <View
           style={{
-            flex: 1,
+           
             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
           }}>
           <View
             style={{
-              width: '100%',
+              width: '110%',
               backgroundColor: '#fff',
               borderRadius: 10,
               padding: 20,
@@ -427,6 +427,44 @@ const AbcTicket = () => {
         isVisible={modalVisible}
         closeTicketHisModal={() => setModalVisible(false)}
       />
+
+      
+
+      <Modal
+        visible={statusmodal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={closeEmailModal}>
+        <View
+          style={{
+            marginTop:10,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            
+            width:'100%'
+          }}>
+          <View
+            style={{
+              width: '110%',
+              backgroundColor: '#fff',
+              borderRadius: 10,
+              padding: 20,
+              elevation: 5,
+              shadowColor: '#000',
+              shadowOffset: {width: 0, height: 2},
+              shadowOpacity: 0.25,
+              shadowRadius: 4,
+            }}>
+            {/* <Email data={emailData} closeModal={closeEmailModal} /> */}
+            <StatusModal
+              data={statusmodaldata}
+              closeModal={closeEmailModal}
+              live={'live'}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };

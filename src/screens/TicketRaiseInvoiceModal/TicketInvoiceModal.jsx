@@ -197,7 +197,7 @@ const InvoiceModal = ({data, closeModal}) => {
       <View style={[styles.container, {width: width, height: height}]}>
         <Text style={{fontSize: 20}}>Create Invoice</Text>
        
-        <View style={{width: '100%', paddingVertical: 5}}>
+        <View style={{width: '100%', }}>
           <View
             style={{
               display: 'flex',
@@ -546,10 +546,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#d8e2dc',
     paddingHorizontal: 10,
     justifyContent: 'start',
-    alignItems: 'center',
-    marginRight: 5,
-    height:'100%',
-    oveflow:'auto'
+    alignItems: 'center',    
+   
+  
+  
   },
   SubmitButton: {
     backgroundColor: '#52b788',
