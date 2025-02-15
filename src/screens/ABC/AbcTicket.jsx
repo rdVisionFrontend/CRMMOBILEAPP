@@ -11,15 +11,17 @@ import {
   Platform,
   UIManager,
   Linking,
+  Alert,
 } from 'react-native';
 import {useAuth} from '../../Authorization/AuthContext';
 import TicketInvoiceModal from '../TicketRaiseInvoiceModal/TicketInvoiceModal';
-import Email from '../Email';
+
 import TicketHistoryModal from '../TicketHistroyModal';
 import StatusModal from '../StatustModal';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import InvoiceModal from '../InvoiceModal';
+import Email from './EmailModal';
 
 // Enable LayoutAnimation for Android
 if (
@@ -41,18 +43,17 @@ const AbcTicket = () => {
   const [statusmodal, setStatusModal] = useState(false);
   const [statusmodaldata, setStatusModalData] = useState();
   const [emailData, setEmailData] = useState();
+  const [hasMoreData, setHasMoreData] = useState(true); // State to track if there is more data
 
   useEffect(() => {
     fetchData();
-  }, [emailModal, currentPage, invoiceModal, closeEmailModal]);
+  }, [currentPage]);
 
   const fetchData = async () => {
     try {
       const user = await AsyncStorage.getItem('user');
       const token = await AsyncStorage.getItem('jwtToken');
       const storedUser = JSON.parse(user);
-
-      console.log('User Data:', storedUser);
 
       const response = await axios.get(
         'https://uatbackend.rdvision.tech/upload/getAssignedTickets',
@@ -69,7 +70,16 @@ const AbcTicket = () => {
           },
         },
       );
+
       setData(response.data.dtoList);
+
+      // Check if there is more data to load
+      if (response.data.dtoList.length < 4) {
+        setHasMoreData(false); // No more data to load
+      } else {
+        setHasMoreData(true); // More data is available
+      }
+
       console.log('ABC Data:', response.data);
     } catch (error) {
       Alert.alert('Error', 'Failed to fetch tickets');
@@ -333,69 +343,80 @@ const AbcTicket = () => {
           <Text style={styles.pageText}>Page {currentPage + 1}</Text>
 
           <TouchableOpacity
-            style={styles.pageButton}
-            onPress={() => setCurrentPage(currentPage + 1)}>
-            <Text style={styles.pageText}>Next</Text>
+            style={[
+              styles.pageButton,
+              !hasMoreData && styles.disabledButton, // Disable the button if there is no more data
+            ]}
+            onPress={() => setCurrentPage(currentPage + 1)}
+            disabled={!hasMoreData} // Disable the button if there is no more data
+          >
+            <Text
+              style={[
+                styles.pageText,
+                !hasMoreData && styles.disabledText, // Change text color if the button is disabled
+              ]}>
+              Next
+            </Text>
           </TouchableOpacity>
         </View>
       )}
 
       {/* Modals */}
       <Modal
-        visible={invoiceModal} // Control visibility based on `invoiceModal` state
-        transparent={true} // Make the modal background transparent
-        animationType="slide" // Slide animation for the modal
-        onRequestClose={closeEmailModal} // Handle Android back button
-      >
+        visible={invoiceModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={closeEmailModal}>
         <View
           style={{
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
           }}>
           <View
             style={{
-              width: '100%', // Set modal width
-              backgroundColor: '#fff', // White background for the modal content
-              borderRadius: 10, // Rounded corners
-              padding: 20, // Inner padding
-              elevation: 5, // Shadow for Android
-              shadowColor: '#000', // Shadow for iOS
+              width: '100%',
+              backgroundColor: '#fff',
+              borderRadius: 10,
+              padding: 20,
+              elevation: 5,
+              shadowColor: '#000',
               shadowOffset: {width: 0, height: 2},
               shadowOpacity: 0.25,
               shadowRadius: 4,
             }}>
-            <InvoiceModal data={data} closeModal={closeEmailModal} />
+            {/* <InvoiceModal data={data} closeModal={closeEmailModal} /> */}
+            <TicketInvoiceModal data={data} closeModal={closeEmailModal} />
           </View>
         </View>
       </Modal>
-      {/* email Modal send */}
+
       <Modal
-        visible={emailModal} // Control visibility based on `invoiceModal` state
-        transparent={true} // Make the modal background transparent
-        animationType="slide" // Slide animation for the modal
-        onRequestClose={closeEmailModal} // Handle Android back button
-      >
+        visible={emailModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={closeEmailModal}>
         <View
           style={{
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
           }}>
           <View
             style={{
-              width: '100%', // Set modal width
-              backgroundColor: '#fff', // White background for the modal content
-              borderRadius: 10, // Rounded corners
-              padding: 20, // Inner padding
-              elevation: 5, // Shadow for Android
-              shadowColor: '#000', // Shadow for iOS
+              width: '100%',
+              backgroundColor: '#fff',
+              borderRadius: 10,
+              padding: 20,
+              elevation: 5,
+              shadowColor: '#000',
               shadowOffset: {width: 0, height: 2},
               shadowOpacity: 0.25,
               shadowRadius: 4,
             }}>
+            {/* <Email data={emailData} closeModal={closeEmailModal} /> */}
             <Email data={emailData} closeModal={closeEmailModal} />
           </View>
         </View>
@@ -406,26 +427,6 @@ const AbcTicket = () => {
         isVisible={modalVisible}
         closeTicketHisModal={() => setModalVisible(false)}
       />
-
-      {/* <Modal
-        visible={invoiceModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={closeEmailModal}>
-        <View style={styles.modalOverlay}>
-          <View>
-           
-            <InvoiceModal data={data} closeModal={closeEmailModal} />
-
-            <View>
-              <StatusModal
-                closeModal={closeEmailModal}
-                data={statusmodaldata}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal> */}
     </View>
   );
 };
@@ -435,7 +436,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: '#e3f2fd',
-    // backgroundColor: 'red',
   },
   darkContainer: {
     backgroundColor: '#121212',
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2a2a2a',
   },
   listContent: {
-    paddingBottom: 80, // Add padding to avoid overlap with pagination
+    paddingBottom: 80,
   },
   card: {
     backgroundColor: '#fff',

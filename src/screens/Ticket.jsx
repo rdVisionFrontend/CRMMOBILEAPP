@@ -393,7 +393,7 @@ const Ticket = () => {
 
       {/* Email Modal */}
       {emailModal && <Email data={emailData} closeModal={closeEmailModal} />}
-      <View style={{flex:1, position:'absolute', top:0, left:5}}>
+      <View style={{flex: 1, position: 'absolute', top: 0, left: 5}}>
         {invoiceModal && (
           <TicketInvoiceModal data={invoiceData} closeModal={closeEmailModal} />
         )}
@@ -408,15 +408,19 @@ const Ticket = () => {
         />
       )}
 
-      {/* {invoiceModal && } */}
-      {/* <View style={{flex: 1 , width:'100%'}}>
-        <Modal isVisible={invoiceModal}>
-          <View >
-            <TicketInvoiceModal data={invoiceData} closeModal={closeEmailModal} />
-            <Button title="Close" onPress={() => setInvoiceModal(false)} />
-          </View>
-        </Modal>
-      </View> */}
+      {/* {invoiceModal && (
+        <View style={{flex: 1, width: '100%'}}>
+          <Modal isVisible={invoiceModal}>
+            <View>
+              <TicketInvoiceModal
+                data={invoiceData}
+                closeModal={closeEmailModal}
+              />
+              <Button title="Close" onPress={() => setInvoiceModal(false)} />
+            </View>
+          </Modal>
+        </View>
+      )} */}
 
       {/* Ticket History Modal */}
       <TicketHistoryModal
