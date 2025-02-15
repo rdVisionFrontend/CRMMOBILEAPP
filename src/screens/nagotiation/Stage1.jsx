@@ -11,21 +11,21 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {Picker} from '@react-native-picker/picker';
-
+import Email from './EmailModal';
 import Clipboard from '@react-native-clipboard/clipboard';
 import TicketHistoryModal from '../TicketHistroyModal';
+import StatusModal from './StatusModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import StatustModal from '../StatustModal'
 import axios from 'axios';
-import Email from './EmailModal';
 
-
-const Stage1 = () => {
+const Stage2 = () => {
   const [selectedStage, setSelectedStage] = useState('All');
-  const [selectedItem, setSelectedItem] = useState(4); // Default items per page
+  const [selectedItem, setSelectedItem] = useState(2); // Default items per page
   const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
   const [expandedCardId, setExpandedCardId] = useState(null); // Track expanded card
-  const [someDataArray, setSomeDataArray] = useState([]);  
+  const [someDataArray, setSomeDataArray] = useState([]);
+  const [localdate, setLocalDate] = useState('');
+  const [localtime, setLocalTime] = useState('');
   const [emailmodal, setEmailModal] = useState(false);
   const [statusmodal, setStatusModal] = useState(false);
   const [emaildata, setEmailData] = useState();
@@ -47,11 +47,11 @@ const Stage1 = () => {
   // Fetch Stage 2 data when token and user are available
   useEffect(() => {
     if (token && user) {
-      fetchStage1Data();
+      fetchStage2Data();
     }
   }, [token, user, emailmodal, statusmodal]);
 
-  const fetchStage1Data = async () => {
+  const fetchStage2Data = async () => {
     try {
       const response = await axios.post(
         `https://uatbackend.rdvision.tech/third_party_api/ticket/negotiationstagebased`,
@@ -66,61 +66,57 @@ const Stage1 = () => {
         },
       );
 
-      console.log('Stage 1 Data:', response.data);
+      console.log('Stage 1 Data:', response);
       setSomeDataArray(response.data);
     } catch (error) {
       console.error(
-        'Error fetching Stage 1 data:',
+        'Error fetching Stage 2 data:',
         error.response?.data || error.message,
       );
     }
   };
 
-  const formatToLocalTime = (dateString) => {
-    if (!dateString) return "Invalid Date";
-  
+  const formatToLocalTime = dateString => {
+    if (!dateString) return 'Invalid Date';
+
     let date;
-  
+
     // Handle timestamps (milliseconds since epoch)
     if (!isNaN(dateString) && dateString.length > 10) {
       date = new Date(parseInt(dateString, 10));
     }
     // Handle ISO and standard date formats
-    else if (dateString.includes("T")) {
+    else if (dateString.includes('T')) {
       date = new Date(dateString);
     }
     // Handle formats like "2025-01-11 19:45:57"
     else if (dateString.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-      date = new Date(dateString.replace(" ", "T")); // Convert to valid ISO format
+      date = new Date(dateString.replace(' ', 'T')); // Convert to valid ISO format
     }
     // Handle time-only formats (e.g., "07:46:44.066826382") - Attach today's date
     else if (dateString.match(/^\d{2}:\d{2}:\d{2}/)) {
-      const today = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD
-      date = new Date(`${today}T${dateString.split(".")[0]}`); // Remove microseconds
+      const today = new Date().toISOString().split('T')[0]; // Get YYYY-MM-DD
+      date = new Date(`${today}T${dateString.split('.')[0]}`); // Remove microseconds
     }
     // If nothing works, try as a general Date
     else {
       date = new Date(dateString);
     }
-  
+
     // Validate date
-    if (isNaN(date.getTime())) return "Invalid Date";
-  
+    if (isNaN(date.getTime())) return 'Invalid Date';
+
     // Convert to local format
-    return new Intl.DateTimeFormat("default", {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+    return new Intl.DateTimeFormat('default', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
       hour12: true,
     }).format(date);
   };
-  
- 
-  
-  
 
   const toggleAccordion = index => {
     setExpandedCardId(expandedCardId === index ? null : index);
@@ -136,10 +132,12 @@ const Stage1 = () => {
   const closeEmailModal = () => {
     setEmailModal(false);
     setStage2(true);
+    setVisibleModal(false);
   };
-
+  const [visibleModal, setVisibleModal] = useState(false);
   const openStatusModal = item => {
     console.log('Status:', item);
+    setVisibleModal(true);
     setStatusModal(true);
     setEmailData(item);
     setStage2(false);
@@ -206,7 +204,7 @@ const Stage1 = () => {
     console.log(ticketId);
     setTicketHisModal(true);
     setModalVisible(true);
-    fetchStage1Data();
+    fetchStage2Data();
     setSelectedTicketInfo(ticketId);
   };
   const closeTicketJourney = () => {
@@ -219,69 +217,63 @@ const Stage1 = () => {
         <ScrollView style={{position: 'relative'}}>
           <View style={styles.filterContainer}>
             <View style={styles.row}>
-              <Image
-                source={{
-                  uri: 'https://cdn-icons-png.flaticon.com/128/566/566737.png',
-                }}
-                style={styles.icon}
-              />
-              <Picker
-                selectedValue={selectedStage}
-                onValueChange={itemValue => {
-                  setSelectedStage(itemValue);
-                  setCurrentPage(1); // Reset to first page
-                }}
-                style={styles.picker}
-                itemStyle={styles.pickerItem}>
-                <Picker.Item
-                  style={styles.labelText}
-                  label="All"
-                  value={'All'}
-                />
-                <Picker.Item
-                  style={styles.labelText}
-                  label="Follow"
-                  value={'Follow'}
-                />
-                <Picker.Item
-                  style={styles.labelText}
-                  label="Intersted"
-                  value={'Intersted'}
-                />
-                <Picker.Item
-                  style={styles.labelText}
-                  label="Place With Other"
-                  value={'Place_With_Other'}
-                />
-              </Picker>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '80%',
-                gap: 20,
-              }}>
-              <Text>Select Page:</Text>
-              {[2, 4, 6, 8, 10].map(item => (
-                <Text
-                  key={item}
-                  onPress={() => {
-                    setSelectedItem(item);
+              {/* First Picker with Image */}             
+              <View style={styles.pickerWrapper}>               
+                <Picker
+                  selectedValue={selectedStage}
+                  onValueChange={itemValue => {
+                    setSelectedStage(itemValue);
                     setCurrentPage(1); // Reset to first page
                   }}
-                  style={{
-                    padding: 5,
-                    borderRadius: 5,
-                    backgroundColor:
-                      selectedItem === item ? 'blue' : 'transparent',
-                    color: selectedItem === item ? 'white' : 'black',
-                    textAlign: 'center',
-                  }}>
-                  {item}
-                </Text>
-              ))}
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}>
+                  <Picker.Item
+                    style={styles.labelText}
+                    label="All"
+                    value={'All'}
+                  />
+                  <Picker.Item
+                    style={styles.labelText}
+                    label="Follow"
+                    value={'Follow'}
+                  />
+                  <Picker.Item
+                    style={styles.labelText}
+                    label="Interested"
+                    value={'Interested'}
+                  />
+                  <Picker.Item
+                    style={styles.labelText}
+                    label="Place With Other"
+                    value={'Place_With_Other'}
+                  />
+                  <Picker.Item
+                    style={styles.labelText}
+                    label="Not_Connected"
+                    value={'Not_Connected'}
+                  />
+                  <Picker.Item
+                    style={styles.labelText}
+                    label="Not_Pickup"
+                    value={'Not_Pickup'}
+                  />
+                </Picker>
+              </View>
+
+              {/* Second Picker */}
+              <View style={styles.pickerWrapper}>
+                <Picker
+                  selectedValue={selectedItem}
+                  onValueChange={itemValue => {
+                    setSelectedItem(itemValue);
+                    setCurrentPage(1); // Reset to the first page
+                  }}
+                  style={styles.picker}>
+                  {[2, 4, 6, 8, 10].map(item => (
+                    <Picker.Item key={item} label={`${item}`} value={item} />
+                  ))}
+                </Picker>
+              </View>
             </View>
           </View>
 
@@ -295,15 +287,15 @@ const Stage1 = () => {
                       styles.dataCard,
                       {
                         backgroundColor:
-                          item.ticketstatus === 'Wrong_Number'
+                          item.ticketstatus === 'Follow'
                             ? '#fff3b0'
-                            : item.ticketstatus === 'Not_Pickup'
-                            ? '#ccdcff'
-                            : item.ticketstatus === 'Not_Interested'
-                            ? '#fca311'
+                            : item.ticketstatus === 'Intersted'
+                            ? '#a8dadc'
+                            : item.ticketstatus === 'Place_With_order'
+                            ? '#3dccc7'
                             : item.ticketstatus === 'hang_up'
-                            ? '#f7a399'
-                            : '#cdb4db', // Default color if no condition matches
+                            ? '#780000'
+                            : '#ffc2d1', // Default color if no condition matches
                       },
                     ]}>
                     <View style={{flexDirection: 'column'}}>
@@ -321,9 +313,10 @@ const Stage1 = () => {
                             {
                               borderWidth: 1,
                               borderRadius: 10,
-                              fontSize: 12,
+                              fontSize: 14,
                               paddingHorizontal: 6,
                               paddingVertical: 2,
+                              fontWeight: 700,
                             },
                             item.ticketstatus === 'Follow'
                               ? {backgroundColor: '#fff3b0', color: 'black'}
@@ -335,7 +328,12 @@ const Stage1 = () => {
                           ]}>
                           {item.ticketstatus}
                         </Text>
-                        <Text style={{fontSize: 11, marginLeft: 10, fontWeight:800}}>
+                        <Text
+                          style={{
+                            fontSize: 11,
+                            marginLeft: 10,
+                            fontWeight: 800,
+                          }}>
                           {/* {localdate} {localtime} */}
                           {formatToLocalTime(item.queryTime)}
                         </Text>
@@ -351,7 +349,7 @@ const Stage1 = () => {
                         <Text
                           onPress={() => toggleAccordion(index)}
                           style={{fontSize: 16}}>
-                          {item.senderName || item.firstName}
+                          {item.senderName}
                         </Text>
                         <View style={{flexDirection: 'row', gap: 10}}>
                           <TouchableOpacity
@@ -363,7 +361,7 @@ const Stage1 = () => {
                               source={{
                                 uri: 'https://cdn-icons-png.flaticon.com/128/9195/9195785.png',
                               }}
-                              style={{width: 24, height: 24, }}
+                              style={{width: 24, height: 24}}
                             />
                           </TouchableOpacity>
                           <TouchableOpacity onPress={() => openWhatsApp()}>
@@ -512,21 +510,19 @@ const Stage1 = () => {
           </View>
         </ScrollView>
       )}
-      {/* {emailmodal && <Email closeModal={closeEmailModal} data={emaildata} />} */}
       {emailmodal && <Email closeModal={closeEmailModal} data={emaildata} />}
-
+      {/* {statusmodal && (
+        <StatusModal closeModal={closeStatusModal} data={emaildata} />
+      )} */}
       <Modal
-        visible={statusmodal}
+        visible={visibleModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={closeStatusModal}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <StatustModal closeModal={closeStatusModal} data={emaildata} />
-          </View>
+        onRequestClose={closeEmailModal}>
+        <View>
+          <StatusModal closeModal={closeEmailModal} data={emaildata} />
         </View>
       </Modal>
-
       <TicketHistoryModal
         ticketId={selectedTicketInfo}
         isVisible={modalVisible}
@@ -536,7 +532,7 @@ const Stage1 = () => {
   );
 };
 
-export default Stage1;
+export default Stage2;
 
 const styles = StyleSheet.create({
   filterContainer: {
@@ -544,9 +540,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f7f3',
     borderRadius: 5,
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     gap: 4,
     marginVertical: 2,
+    width: '80%',
   },
   row: {
     flexDirection: 'row',
@@ -625,6 +622,36 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     borderRadius: 5,
   },
+  filterContainer: {
+    padding: 10,
+    width: '100%',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  pickerWrapper: {
+    flex: 1, // Ensures both pickers take equal space
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 5,
+    marginHorizontal: 5,
+    backgroundColor: '#fff',
+    overflow: 'hidden', // Prevents text cut-off
   
-  
+  },
+  picker: {
+    width: '95%',
+    height: 50,
+    color: 'black', // Ensures text visibility
+  },
+  icon: {
+    width: 20,
+    height: 20,
+    position: 'absolute',
+    left: 10,
+    top: '50%',
+    transform: [{ translateY: -10 }],
+  },
 });

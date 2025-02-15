@@ -18,6 +18,8 @@ import {LineChart} from 'react-native-chart-kit';
 import WorkTimeGraph from './WorktimeGraph';
 import {RadioButton} from 'react-native-paper';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
+import { DevSettings } from 'react-native';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -30,10 +32,26 @@ const Profile = () => {
   const [onBreak, setOnBreak] = useState(false);
   const [breakTimerActive, setBreakTimerActive] = useState(false);
   const [checked, setChecked] = useState();
-
+  const navigation = useNavigation()
   useEffect(() => {
     fetchToken();
+    fetchStartTime();
   }, [token]);
+
+  const fetchStartTime = async () => {
+    const startTime = await AsyncStorage.getItem('startTime');
+    if (startTime) {
+      const currentTime = new Date().getTime();
+      const elapsed = Math.floor((currentTime - parseInt(startTime)) / 1000);
+      setElapsedTime(elapsed);
+    }
+  };
+
+  const startTimer = async () => {
+    const startTime = new Date().getTime();
+    await AsyncStorage.setItem('startTime', startTime.toString());
+    setTimerActive(true);
+  };
 
   useEffect(() => {
     let breakTimer;
@@ -48,18 +66,18 @@ const Profile = () => {
   }, [onBreak, breakTimerActive]);
 
   const handleEndBreak = () => {
-    setBreakTimerActive(false); // Stop break timer
+    setBreakTimerActive(false);
     setOnBreak(false);
-    setTimerActive(true); // Resume work timer
-    setModalVisible(false); // Close modal
+    setTimerActive(true);
+    setModalVisible(false);
     setLogoutModal(false);
   };
 
   const handleTakeBreak = () => {
-    setTimerActive(false); // Pause work timer
+    setTimerActive(false);
     setOnBreak(true);
-    setBreakTimerActive(true); // Start break timer
-    setModalVisible(true); // Show break modal
+    setBreakTimerActive(true);
+    setModalVisible(true);
   };
 
   const fetchToken = async () => {
@@ -72,7 +90,7 @@ const Profile = () => {
       console.log('Token:', storedToken);
       console.log('User:', storedUser);
       if (parsedUser) {
-        setTimerActive(true); // Start the timer if authenticated
+        startTimer();
       }
     } catch (error) {
       console.error('Error fetching data from AsyncStorage:', error);
@@ -84,7 +102,7 @@ const Profile = () => {
     if (isAuthenticated && timerActive) {
       timer = setInterval(() => {
         setElapsedTime(prevTime => prevTime + 1);
-      }, 1000); // Updates every second
+      }, 1000);
     } else {
       clearInterval(timer);
     }
@@ -107,40 +125,29 @@ const Profile = () => {
   useEffect(() => {
     const logoutAfter12Hours = setTimeout(() => {
       handleLogoutFinal();
-    }, 12 * 60 * 60 * 1000); // 12 hours in milliseconds
+    }, 12 * 60 * 60 * 1000);
     return () => clearTimeout(logoutAfter12Hours);
   }, []);
 
   const handleLogoutFinal = async () => {
-    console.log('Logout');
-    if (!checked) {
-      Alert.alert('Select a Reason');
-      return;
-    }
     try {
-      // Retrieve stored values
+      await AsyncStorage.removeItem('startTime');
+
+      setElapsedTime(0);
+      setBreakTime(0);
+      setTimerActive(false);
+      setBreakTimerActive(false);
+
       const attId = await AsyncStorage.getItem('atdncId');
       const token = await AsyncStorage.getItem('jwtToken');
-      const totalWorkTime =
-        elapsedTime !== undefined ? String(elapsedTime) : '0';
+      const totalWorkTime = elapsedTime !== undefined ? String(elapsedTime) : '0';
       const totalBreakTime = breakTime !== undefined ? String(breakTime) : '0';
-      console.log('Stored User Info:', attId);
-      console.log('totalWorkTime:', totalWorkTime);
-      console.log('breakTime:', totalBreakTime);
-      console.log('tokenLogout:', token);
-      console.log('reason:', checked);
-      // Store total work time if available
-      if (elapsedTime !== undefined) {
-        await AsyncStorage.setItem('totalWorkTime', totalWorkTime);
-      }
 
-      // Validate logout reason
       if (!checked) {
-        Alert.alert('Error', 'Please select a reason');
+        Alert.alert('Select a Reason');
         return;
       }
 
-      // Construct FormData
       const formData = {
         attendanceId: attId,
         logoutReason: checked,
@@ -148,25 +155,24 @@ const Profile = () => {
         totalBreakInSec: totalBreakTime,
       };
 
-      console.log('FormData:', formData);
-
-      // Make API request with token in headers
       const response = await axios.post(
         'https://uatbackend.rdvision.tech/attendance/logout',
         formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Pass JWT token
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         },
       );
 
-      console.log('Logout Response:', response);
-
       if (response.status === 200) {
-        await AsyncStorage.clear(); // Clear AsyncStorage on logout
+        await AsyncStorage.clear();
         setIsAuthenticated(false);
+        setLogoutModal(false);
+        DevSettings.reload();
+        console.log("Logut",response)
+       
       }
     } catch (error) {
       console.error('Logout Error:', error);
@@ -196,7 +202,6 @@ const Profile = () => {
               }}
               style={styles.profileImage}
             />
-            {/* Dot Overlay */}
             <View
               style={[
                 styles.statusDot,
@@ -302,8 +307,7 @@ const Profile = () => {
               />
               <Text style={styles.detailText}>{formatTime(breakTime)}</Text>
             </View>
-            <WorkTimeGraph workHours={elapsedTime / 3600} /> // Convert seconds
-            to hours
+            <WorkTimeGraph workHours={elapsedTime / 3600} />
           </View>
         </View>
         <BestSellingClosers />
@@ -486,22 +490,22 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   statusContainer: {
-    alignSelf: 'flex-end', // Aligns to the right dynamically
-    backgroundColor: '#52BF56', // Fixed background color
+    alignSelf: 'flex-end',
+    backgroundColor: '#52BF56',
     paddingVertical: 3,
     paddingHorizontal: 10,
-    borderRadius: 15, // Makes it look smoother
-    marginRight: 30, // Adds some spacing from the edge
-    marginTop: -5, // Adds space from the previous element
+    borderRadius: 15,
+    marginRight: 30,
+    marginTop: -5,
   },
   statusContainerInActive: {
-    alignSelf: 'flex-end', // Aligns to the right dynamically
-    backgroundColor: '#b5838d', // Fixed background color
+    alignSelf: 'flex-end',
+    backgroundColor: '#b5838d',
     paddingVertical: 3,
     paddingHorizontal: 10,
-    borderRadius: 15, // Makes it look smoother
-    marginRight: 30, // Adds some spacing from the edge
-    marginTop: -5, // Adds space from the previous element
+    borderRadius: 15,
+    marginRight: 30,
+    marginTop: -5,
     width: '99%',
   },
   statusText: {
@@ -543,21 +547,21 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   imageContainer: {
-    position: 'relative', // Needed for absolute positioning of the dot
+    position: 'relative',
   },
   profileImage: {
     width: 60,
     height: 60,
-    borderRadius: 20, // Circular image
+    borderRadius: 20,
   },
   statusDot: {
     position: 'absolute',
-    bottom: 0, // Position at the bottom of the image
-    right: 0, // Position at the right of the image
+    bottom: 0,
+    right: 0,
     width: 12,
     height: 12,
-    borderRadius: 6, // Circular dot
+    borderRadius: 6,
     borderWidth: 2,
-    borderColor: 'white', // Add a white border for better visibility
+    borderColor: 'white',
   },
 });

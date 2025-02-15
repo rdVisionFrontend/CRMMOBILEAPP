@@ -66,7 +66,7 @@ const Stage2 = () => {
         },
       );
 
-      console.log('Stage 3 Data:', response.data);
+      console.log('Stage 3 Data:', response);
       setSomeDataArray(response.data);
     } catch (error) {
       console.error(
@@ -213,44 +213,7 @@ const Stage2 = () => {
     <>
       {stage2 && (
         <ScrollView style={{position: 'relative'}}>
-          <View style={styles.filterContainer}>
-            <View style={styles.row}>
-              <Image
-                source={{
-                  uri: 'https://cdn-icons-png.flaticon.com/128/566/566737.png',
-                }}
-                style={styles.icon}
-              />
-              <Picker
-                selectedValue={selectedStage}
-                onValueChange={itemValue => {
-                  setSelectedStage(itemValue);
-                  setCurrentPage(1); // Reset to first page
-                }}
-                style={styles.picker}
-                itemStyle={styles.pickerItem}>
-                <Picker.Item
-                  style={styles.labelText}
-                  label="All"
-                  value={'All'}
-                />
-                <Picker.Item
-                  style={styles.labelText}
-                  label="Follow"
-                  value={'Follow'}
-                />
-                <Picker.Item
-                  style={styles.labelText}
-                  label="Intersted"
-                  value={'Intersted'}
-                />
-                <Picker.Item
-                  style={styles.labelText}
-                  label="Place With Other"
-                  value={'Place_With_Other'}
-                />
-              </Picker>
-            </View>
+          <View style={styles.filterContainer}>            
             <View
               style={{
                 flexDirection: 'row',
@@ -259,7 +222,7 @@ const Stage2 = () => {
                 width: '80%',
                 gap: 20,
               }}>
-              <Text>Select Page:</Text>
+              <Text>Select Item:</Text>
               {[2, 4, 6, 8, 10].map(item => (
                 <Text
                   key={item}

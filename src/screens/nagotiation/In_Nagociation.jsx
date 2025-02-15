@@ -107,6 +107,8 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',    
     backgroundColor: '#fff',
+   
+
   },
   wrapper: {
     padding: 10,
@@ -117,6 +119,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     gap: 30,
+    
   },
   button: {
     paddingVertical: 10,
@@ -135,8 +138,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 10,
     borderWidth: 0.5,
-    borderColor: '#ddd',
+    borderColor: 'red',
     width: '100%',
+    height:'85%'
+
   },
   loadingText: {
     textAlign: 'center',

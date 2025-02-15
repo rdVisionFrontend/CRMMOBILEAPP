@@ -7,13 +7,13 @@ import {
   Alert,
   Image,
   TouchableOpacity,
-
+  ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
 import apiInstance from '../../api';
 import {useAuth} from '../Authorization/AuthContext';
-
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const Login = ({navigation}) => {
   const [email, setEmail] = useState('rajanprajapati743@gmail.com');
@@ -28,9 +28,6 @@ const Login = ({navigation}) => {
 
   const {setIsAuthenticated} = useAuth();
 
- 
-  
-
   const handleRequestOtp = () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
@@ -38,7 +35,7 @@ const Login = ({navigation}) => {
     }
     setLoading(true);
     apiInstance
-      .post(`/auth/generateOtp`, { email, password })
+      .post(`/auth/generateOtp`, {email, password})
       .then(response => {
         console.log('OTP generated:', response.data);
         // Extract the message from the response
@@ -65,13 +62,15 @@ const Login = ({navigation}) => {
         password,
         logInOtp: otp,
       });
-      console.log('Login Success', response);    
-      storeUserData(response).then(res=>{
-        setIsAuthenticated(true);  
-      }).catch(err=>{
-        setIsAuthenticated(false)
-        console.log("Error During Login",err)
-      })
+      console.log('Login Success', response);
+      storeUserData(response)
+        .then(res => {
+          setIsAuthenticated(true);
+        })
+        .catch(err => {
+          setIsAuthenticated(false);
+          console.log('Error During Login', err);
+        });
 
       const sessionDuration = 60 * 60; // 1 hour in seconds
       await AsyncStorage.setItem(
@@ -87,148 +86,190 @@ const Login = ({navigation}) => {
     }
   };
 
-
-  const storeUserData = async (response) => {
+  const storeUserData = async response => {
     try {
-        await AsyncStorage.setItem('jwtToken', response.data.jwtToken);
-        await AsyncStorage.setItem('refreshToken', response.data.refreshToken);
-        await AsyncStorage.setItem('atdncId', response.data.attendanceId.toString());
-        await AsyncStorage.setItem('UserInfo', JSON.stringify(response.data)); // Ensure it's a string
-        await AsyncStorage.setItem('user', JSON.stringify(response.data.user)); 
-      
-        
-        Alert.alert('Login successfully!');
+      await AsyncStorage.setItem('jwtToken', response.data.jwtToken);
+      await AsyncStorage.setItem('refreshToken', response.data.refreshToken);
+      await AsyncStorage.setItem(
+        'atdncId',
+        response.data.attendanceId.toString(),
+      );
+      await AsyncStorage.setItem('UserInfo', JSON.stringify(response.data)); // Ensure it's a string
+      await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+
+      Alert.alert('Login successfully!');
     } catch (error) {
-        console.error('Error storing user data:', error);
-        Alert.alert('Failed to store user data.');
+      console.error('Error storing user data:', error);
+      Alert.alert('Failed to store user data.');
     }
-  }
+  };
+  const handleBackForm = () => {
+    setRequestOtpForm(true);
+    setOtpSent(false);
+  };
 
   return (
-    <>    
-        <View style={styles.container}>
-          <Text style={styles.LoginText}>
-            {otpSent ? 'Verify Otp' : 'Login'}
-          </Text>
-          <View style={styles.circle}></View>
-          <View style={styles.circle2}></View>
-
-          <View style={styles.overlay}>
-            {/* Login Icon */}
-
-            {/* Email and Password Input */}
-            {reqOtpForm && (
-              <View style={{padding: 10}}>
-                <View style={styles.emailContainer}>
-                  {/* Email Icon */}
-                  <Image
-                    source={{
-                      uri: 'https://cdn-icons-png.flaticon.com/128/646/646094.png',
-                    }}
-                    style={styles.emailIcon}
-                  />
-                  {/* Email Input */}
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter your email"
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                  />
-                </View>
-
-                {/* Password Input */}
-                <View style={styles.passwordContainer}>
-                  <Image
-                    source={{
-                      uri: 'https://cdn-icons-png.flaticon.com/128/2889/2889676.png',
-                    }}
-                    style={styles.PasswordIcon}
-                  />
-                  <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!showPassword} // Toggle secureTextEntry
-                  />
-                  <TouchableOpacity
-                    style={styles.eyeIcon}
-                    onPress={() => setShowPassword(!showPassword)}>
-                    <Image
-                      source={
-                        showPassword
-                          ? {
-                              uri: 'https://cdn-icons-png.flaticon.com/128/709/709612.png',
-                            }
-                          : {
-                              uri: 'https://cdn-icons-png.flaticon.com/128/2767/2767146.png',
-                            }
-                      }
-                      style={{height: 20, width: 20}}
-                    />
-                  </TouchableOpacity>
-                </View>
-                <TouchableOpacity
-                  style={styles.otpBtn}
-                  onPress={handleRequestOtp}
-                  disabled={loading}>
-                  <Text
-                    style={{textAlign: 'center', color: '#fff', fontSize: 20, fontWeight:600}}>
-                    {loading ? 'Requesting...' : 'Request OTP'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {/* OTP Input */}
+    <>
+      <View style={styles.container}>
+        <View
+          style={[
+            styles.header,
+            {position: 'absolute', top: 50, left: 40, zIndex: 10},
+          ]}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
             {otpSent && (
-              <View style={{position: 'relative'}}>
+              <TouchableOpacity onPress={handleBackForm}>
+                <AntDesign
+                  name="arrowleft"
+                  size={24}
+                  color="white"
+                  style={{marginRight: 10}}
+                />
+              </TouchableOpacity>
+            )}
+            <Text style={styles.LoginText}>
+              {otpSent ? 'Verify Otp' : 'Login'}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.circle}></View>
+        <View style={styles.circle2}></View>
+
+        <View style={styles.overlay}>
+          {/* Login Icon */}
+
+          {/* Email and Password Input */}
+          {reqOtpForm && (
+            <View style={{padding: 10}}>
+              <View style={styles.emailContainer}>
+                {/* Email Icon */}
                 <Image
                   source={{
-                    uri: 'https://cdn-icons-png.flaticon.com/128/159/159478.png',
+                    uri: 'https://cdn-icons-png.flaticon.com/128/646/646094.png',
                   }}
-                  style={{
-                    position: 'absolute',
-                    left: 12,
-                    top: '20%',
-                    transform: [{translateY: -10}],
-                    width: 20,
-                    height: 20,
-                    zIndex: 20,
-                  }}
+                  style={styles.emailIcon}
                 />
+                {/* Email Input */}
                 <TextInput
                   style={styles.input}
-                  placeholder="Enter OTP"
-                  keyboardType="number-pad"
-                  value={otp}
-                  onChangeText={setOtp}
+                  placeholder="Enter your email"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+
+              {/* Password Input */}
+              <View style={styles.passwordContainer}>
+                <Image
+                  source={{
+                    uri: 'https://cdn-icons-png.flaticon.com/128/2889/2889676.png',
+                  }}
+                  style={styles.PasswordIcon}
+                />
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword} // Toggle secureTextEntry
                 />
                 <TouchableOpacity
-                  style={styles.otpBtn}
-                  onPress={handleFinalLogin}
-                  disabled={loading}>
-                  <Text
-                    style={{textAlign: 'center', color: '#fff', fontSize: 20, fontWeight:600}}>
-                    {loading ? 'Wait...' : 'Login'}
-                  </Text>
+                  style={styles.eyeIcon}
+                  onPress={() => setShowPassword(!showPassword)}>
+                  <Image
+                    source={
+                      showPassword
+                        ? {
+                            uri: 'https://cdn-icons-png.flaticon.com/128/709/709612.png',
+                          }
+                        : {
+                            uri: 'https://cdn-icons-png.flaticon.com/128/2767/2767146.png',
+                          }
+                    }
+                    style={{height: 20, width: 20}}
+                  />
                 </TouchableOpacity>
               </View>
-            )}
-
-            {/* Resend OTP */}
-            {resendOtp && (
-              <Text
+              <TouchableOpacity
+                style={styles.otpBtn}
                 onPress={handleRequestOtp}
+                disabled={loading}>
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    color: '#fff',
+                    fontSize: 15,
+                    fontWeight: '600',
+                  }}>
+                  {loading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    'Request OTP'
+                  )}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* OTP Input */}
+          {otpSent && (
+            <View style={{position: 'relative'}}>
+              <Image
+                source={{
+                  uri: 'https://cdn-icons-png.flaticon.com/128/159/159478.png',
+                }}
+                style={{
+                  position: 'absolute',
+                  left: 12,
+                  top: '20%',
+                  transform: [{translateY: -10}],
+                  width: 20,
+                  height: 20,
+                  zIndex: 20,
+                }}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter OTP"
+                keyboardType="number-pad"
+                value={otp}
+                onChangeText={setOtp}
+              />
+              <TouchableOpacity
+                style={styles.otpBtn}
+                onPress={handleFinalLogin}
+                disabled={loading}>
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    color: '#fff',
+                    fontSize: 15,
+                    fontWeight: 600,
+                  }}>
+                  {loading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    'Login'
+                  )}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Resend OTP */}
+          {resendOtp && (
+            <TouchableOpacity onPress={handleRequestOtp}>
+              <Text              
                 style={{color: '#1d3557', textAlign: 'center', marginTop: 20}}>
                 Resend OTP
               </Text>
-            )}
-          </View>
+            </TouchableOpacity>
+          )}
         </View>
-   
+      </View>
     </>
   );
 };
@@ -251,18 +292,14 @@ const styles = StyleSheet.create({
     backdropFilter: 'blur(10px)',
     borderRadius: 15,
     paddingVertical: 50,
-    zIndex:10
+    zIndex: 10,
   },
   emailContainer: {
     position: 'relative',
     width: '100%',
   },
   LoginText: {
-    position: 'absolute',
-    top: 50,
-    left: 60,
-    zIndex: 10,
-    fontSize: 35,
+    fontSize: 25,
     fontWeight: 600,
     color: '#fff',
   },
@@ -314,7 +351,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     color: '#415a77',
     paddingHorizontal: 5,
-    paddingVertical:10, 
+    paddingVertical: 10,
   },
 
   passwordContainer: {
@@ -335,7 +372,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     marginLeft: 40,
     shadowColor: '#000',
-   
   },
   eyeIcon: {
     padding: 10,
