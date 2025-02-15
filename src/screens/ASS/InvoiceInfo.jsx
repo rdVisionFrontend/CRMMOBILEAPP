@@ -1,92 +1,92 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
+import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import InvoiceInfoTab from './InvoiceInfoTab';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 const InvoiceInfo = () => {
-  const {userData} = useSelector(state => state.crmUser);
+  const { userData } = useSelector(state => state.crmUser);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [invoiceData, setInvoiceData] = useState(null);
-  const [invoiceDataTab,setInvoiceDataTab] = useState([])
+  const [invoiceDataTab, setInvoiceDataTab] = useState([])
 
   useEffect(() => {
     fetchInvoiceData();
     fetchInvoices()
   }, []);
 
-  
 
-const fetchInvoiceData = async () => {
-  setLoading(true);
-  try {
-    // Retrieve user data and token from AsyncStorage
-    const user = await AsyncStorage.getItem('user');
-    const token = await AsyncStorage.getItem('jwtToken');
-  
 
-    if (!user || !token) {
-      throw new Error('User data or token not found');
-    }
+  const fetchInvoiceData = async () => {
+    setLoading(true);
+    try {
+      // Retrieve user data and token from AsyncStorage
+      const user = await AsyncStorage.getItem('user');
+      const token = await AsyncStorage.getItem('jwtToken');
 
-    const userData = JSON.parse(user);
 
-    const response = await axios.get(`https://uatbackend.rdvision.tech/invoice/invoideCOunt/${
-        userData.roleDto.roleName === 'Closer' ? userData.userId : 0
-      }`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+      if (!user || !token) {
+        throw new Error('User data or token not found');
       }
-    );
 
-    console.log('Invoice Data:', response.data); // Log response to verify structure
-    setInvoiceData(response.data);
-  } catch (err) {
-    setError('Failed to fetch invoice data');
-    console.error('Fetch Error:', err);
-  } finally {
-    setLoading(false);
-  }
-};
+      const userData = JSON.parse(user);
 
+      const response = await axios.get(`https://uatbackend.rdvision.tech/invoice/invoideCOunt/${userData.roleDto.roleName === 'Closer' ? userData.userId : 0
+        }`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-
-const fetchInvoices = async () => {
-  try {
-    // Retrieve the token from AsyncStorage
-    const token = await AsyncStorage.getItem("jwtToken");
-    const user = await AsyncStorage.getItem('user');
-    const userData = JSON.parse(user);
-
-    if (!token) {
-      console.error("No authentication token found");
-      setError("Authentication token missing");
-      return;
+      console.log('Invoice Data:', response.data); // Log response to verify structure
+      setInvoiceData(response.data);
+    } catch (err) {
+      setError('Failed to fetch invoice data');
+      console.error('Fetch Error:', err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // Make API request with the token in headers
-    const response = await axios.get(
-      `https://uatbackend.rdvision.tech/invoice/invoideCOunt/invoice/getAssInvoice/${userData.userId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`, // Include token in request
-          "Content-Type": "application/json",
-        },
+
+
+  const fetchInvoices = async () => {
+    try {
+      // Retrieve the token from AsyncStorage
+      const token = await AsyncStorage.getItem("jwtToken");
+      const user = await AsyncStorage.getItem('user');
+      const userData = JSON.parse(user);
+
+      if (!token) {
+        console.error("No authentication token found");
+        setError("Authentication token missing");
+        return;
       }
-    );
 
-    console.log("Invoices:", response.data);
-    setInvoiceDataTab(response.data);
-  } catch (error) {
-    console.error("Error fetching invoices:", error);
-    setError("Failed to fetch invoices");
-  }
-};
+      // Make API request with the token in headers
+      const response = await axios.get(
+        `https://uatbackend.rdvision.tech/invoice/invoideCOunt/invoice/getAssInvoice/${userData.userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include token in request
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Invoices:", response.data);
+      setInvoiceDataTab(response.data);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      setError("Failed to fetch invoices");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -96,58 +96,80 @@ const fetchInvoices = async () => {
           style={[
             styles.card,
             {
-              backgroundColor: '#90e0ef',
+
+              gap: 10,
+              backgroundColor: '#FCF8F3',
               justifyContent: 'center',
               alignItems: 'center',
             },
           ]}>
-          <Text style={{textAlign:'center', fontWeight: 600 , fontSize:16 }}>Total      Invoices</Text>
-          <Text style={styles.textNumber}>{invoiceData?.totalInvoices || 'N/A'}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <View style={{justifyContent:'center',alignItems:'center'}}>
+              <FontAwesome6 size={18} name='file-invoice'  />
+              <Text style={{ fontWeight: 600, fontSize: 12}}>Total Invoices</Text>
+            </View>
+            <Text style={styles.textNumber}>{invoiceData?.totalInvoices || 'N/A'}</Text>
+          </View>
+
         </View>
-        {/* Second Card */}
+
         <View
           style={[
             styles.card,
             {
-                backgroundColor: '#c38e70',
+              gap: 10,
+              backgroundColor: '#FCFAEE',
               justifyContent: 'center',
               alignItems: 'center',
             },
           ]}>
-          <Text style={{textAlign:'center', fontWeight:600 ,fontSize:16}}>Paid     Invoices</Text>
-          <Text style={styles.textNumber}>{invoiceData && invoiceData.totalPaidInvoices}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <View style={{justifyContent:'center',alignItems:'center'}}>
+              <FontAwesome6 size={18} name='file-invoice-dollar'  />
+              <Text style={{ fontWeight: 600, fontSize: 12}}>Paid Invoices</Text>
+            </View>
+            <Text style={styles.textNumber}>{invoiceData && invoiceData.totalPaidInvoices}</Text>
+          </View>
         </View>
-        {/* Third Card */}
         <View
           style={[
             styles.card,
             {
-          
-              backgroundColor: '#ffccd5',
+              backgroundColor: '#FCFAEE',
               justifyContent: 'center',
               alignItems: 'center',
             },
           ]}>
-          <Text style={{textAlign:'center', fontWeight:600 ,fontSize:16}}>Pending Invoices</Text>
-          <Text style={styles.textNumber}>{invoiceData && invoiceData.totalPendingInvoices}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <View style={{justifyContent:'center', alignItems:'center'}}>
+              <FontAwesome6 name='file-invoice-dollar' size={20}/>
+            <Text style={{ fontWeight: 600, fontSize: 12 }}>Pending Invoices</Text>
+            </View>
+            <Text style={styles.textNumber}>{invoiceData && invoiceData.totalPendingInvoices}</Text>
+          </View>
+
         </View>
-        {/* Fourth Card */}
         <View
           style={[
             styles.card,
             {
-              backgroundColor: '#805b10',
+              backgroundColor: '#FEF9F2',
               justifyContent: 'center',
               alignItems: 'center',
             },
           ]}>
-          <Text style={{fontSize:16}}>Awaiting Tracking</Text>
-          <Text style={styles.textNumber}>
-            {invoiceData && invoiceData.totalAwaitingPaidInvoices}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <View style={{justifyContent:'center', alignItems: 'center'}}>
+            <FontAwesome6 name='circle-notch' size={20} />
+            <Text style={{ fontSize: 12, fontWeight: 600 }}>Awaiting Tracking</Text>
+            </View>
+            <Text style={styles.textNumber}>
+              {invoiceData && invoiceData.totalAwaitingPaidInvoices}
+            </Text>
+          </View>
         </View>
       </View>
-      <InvoiceInfoTab/>
+      <InvoiceInfoTab />
     </View>
   );
 };
@@ -162,30 +184,31 @@ const styles = StyleSheet.create({
     paddingTop: 20, // Push content to the top
   },
   cardRow: {
-    flexDirection: 'row',
+    flexDirection: 'row', flexWrap: 'wrap',
     justifyContent: 'space-evenly',
     width: '100%',
-    position:'fixed'
+    position: 'fixed',
+    gap: 10
   },
   card: {
-    width: '22%', // Slightly less than 25% to allow spacing
-    height: 100,
+    width: '45%', // Slightly less than 25% to allow spacing
+    height: 50,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   textNumber: {
     textAlign: 'center',
-    marginTop: 2,   
+    marginTop: 4,
     paddingHorizontal: 0, // Remove extra horizontal padding
     paddingVertical: 0, // Remove extra vertical padding
     borderRadius: 50, // Half the size of width/height for a perfect circle
-    fontSize: 16,
-    width: 30, // Set a fixed width for the circle
-    height: 30, // Equal height to match the width
-    lineHeight: 30, // Center the text vertically
-    backgroundColor:'#013a63',
-    color:'#fff'
+    fontSize: 12,
+    width: 20, // Set a fixed width for the circle
+    height: 20, // Equal height to match the width
+    lineHeight: 20, // Center the text vertically
+    backgroundColor: '#013a63',
+    color: '#fff'
   },
-  
+
 });

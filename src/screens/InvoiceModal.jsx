@@ -9,27 +9,26 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import apiInstance from '../../api';
-import {useAuth} from '../Authorization/AuthContext';
-import {useSelector} from 'react-redux';
-import {Modal} from 'react-native';
-import {TextInput} from 'react-native';
-import {Picker} from '@react-native-picker/picker';
-import AntDesign from 'react-native-vector-icons/AntDesign'
+import { useAuth } from '../Authorization/AuthContext';
+import { useSelector } from 'react-redux';
+import { Modal } from 'react-native';
+import { TextInput } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
-const InvoiceModal = ({data, closeModal}) => {
-  const {width, height} = Dimensions.get('window'); // Get full screen dimensions
+const InvoiceModal = ({ data, closeModal }) => {
+  const { width, height } = Dimensions.get('window'); // Get full screen dimensions
   const [loading, setLoading] = useState(false);
   const [orderdetails, setOrderDetails] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const {apicall, raiseInoice, setRaiseInvoice} = useAuth();
+  const { apicall, raiseInoice, setRaiseInvoice } = useAuth();
   const [addressData, setAddressData] = useState([]);
   const [selectedCurrency, setSelectedCurrency] = useState();
   const [products, setProducts] = useState([]);
   const [error, setError] = useState();
   const [productStates, setProductStates] = useState({}); // State to store input values for each product
-  const {userData} = useSelector(state => state.crmUser);
+  const { userData } = useSelector(state => state.crmUser);
   const [sameAsShipping, setSameAsShipping] = useState(false);
   const [name, setName] = useState();
   const [house, setHouse] = useState();
@@ -40,14 +39,18 @@ const InvoiceModal = ({data, closeModal}) => {
   const [country, setCountry] = useState();
   const [search, setSearch] = useState('');
 
- 
-
-  console.log('invoice data', data);
+  console.log('invoice', data);
   useEffect(() => {
     fatchaddedproduct();
     fetchAddressDetails();
-    fetchProducts();   
-    
+    fetchProducts();
+    if (raiseInoice) {
+      fetchAddressDetails();
+      // closeModal();
+    }
+    if (apicall) {
+      fetchAddressDetails();
+    }
   }, []);
 
   const filteredProducts = products.filter(product =>
@@ -85,7 +88,7 @@ const InvoiceModal = ({data, closeModal}) => {
     const response = await apiInstance.delete(
       `/order/deleteProductOrder/${productOrderId}`,
     );
-    if (response) {
+    if (response.data === 'deleted') {
       console.log('deleetd');
       fatchaddedproduct();
     }
@@ -96,7 +99,8 @@ const InvoiceModal = ({data, closeModal}) => {
         `/address/getAddress/${data.uniqueQueryId}`,
       );
       setAddressData(response.data.dto);
-      console.log('Addredd 2', response);      
+      console.log('Addredd 2', response);
+      fatchaddedproduct();
       setRaiseInvoice(false);
     } catch (err) {
       console.error('Error fetching address details:', err);
@@ -141,8 +145,14 @@ const InvoiceModal = ({data, closeModal}) => {
     try {
       const response = await apiInstance.post('/order/addToOrder', orderData);
       Alert.alert('Added to order successfully!');
+      fatchaddedproduct();
       console.log('qty,price updated', response);
-      fatchaddedproduct(); 
+
+      if (response.data.success.message == 'success') {
+        fetchAddressDetails();
+        fatchaddedproduct();
+      }
+
       setModalVisible(false);
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -183,15 +193,27 @@ const InvoiceModal = ({data, closeModal}) => {
 
   return (
     <ScrollView>
-      <View style={[styles.container, {width: width, height: height}]}>
-        <Text style={{fontSize: 20}}>Raise Invoice</Text>
-       
-         <TouchableOpacity style={{position:'absolute' ,top:0 ,right:45}} onPress={closeModal}>
-         <AntDesign name='closecircle' size={25}/>
+      <View style={[styles.container, { width: width, height: height }]}>
+        <Text style={{ fontSize: 20 }}>Raise Invoice</Text>
+
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 10,
+          }}>
+          {/* <TouchableOpacity disabled={true}>
+            <Text style={styles.emailButton}>
+              Update
+            </Text>
+          </TouchableOpacity> */}
+          <TouchableOpacity onPress={closeModal}>
+            <Text style={styles.closeButtonTop}>Close</Text>
           </TouchableOpacity>
-          
-      
-        <View style={{width: '96%', paddingVertical: 5}}>
+        </View>
+        <View style={{ width: '100%', paddingVertical: 5 }}>
           <View
             style={{
               display: 'flex',
@@ -199,16 +221,17 @@ const InvoiceModal = ({data, closeModal}) => {
               justifyContent: 'space-between',
               gap: 5,
             }}>
-            <View style={{borderWidth: 1, padding: 5, width: '45%'}}>
+            <View style={{ borderWidth: 1, padding: 5, width: '45%' }}>
               <Text>Customer details</Text>
-              <View style={{display: 'flex', flexDirection: 'row'}}>
-                <Text style={{fontWeight: 'bold'}}>Name :</Text>
-                <Text style={{paddingHorizontal: 11}}>
-                  {data.senderName || data.firstName}
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
+                <Text style={{ fontWeight: 'bold' }}>Name :</Text>
+                <Text style={{ paddingHorizontal: 11 }}>
+                  
+                  {/* {data && data.senderName || data && data.firstName} */}
                 </Text>
               </View>
-              <View style={{display: 'flex', flexDirection: 'row'}}>
-                <Text style={{fontWeight: 'bold'}}>Email :</Text>
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
+                <Text style={{ fontWeight: 'bold' }}>Email :</Text>
                 <Text
                   style={{
                     paddingHorizontal: 11,
@@ -218,22 +241,16 @@ const InvoiceModal = ({data, closeModal}) => {
                   {data.senderEmail || data.email}
                 </Text>
               </View>
-              <View style={{display: 'flex', flexDirection: 'row'}}>
-                <Text style={{fontWeight: 'bold'}}>Mobile :</Text>
-                <Text style={{paddingHorizontal: 11}}>
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
+                <Text style={{ fontWeight: 'bold' }}>Mobile :</Text>
+                <Text style={{ paddingHorizontal: 11 }}>
                   {data.senderMobile || data.mobileNumber}
                 </Text>
               </View>
             </View>
-            <View
-              style={{
-                borderWidth: 1,
-                padding: 5,
-                width: '45%',
-                marginRight: 25,
-              }}>
+            <View style={{ borderWidth: 1, padding: 5, width: '45%', marginRight: 25 }}>
               <Text>Address details</Text>
-              <View style={{display: 'flex', flexDirection: 'column'}}>
+              <View style={{ display: 'flex', flexDirection: 'column' }}>
                 <Text
                   style={{
                     paddingHorizontal: 11,
@@ -253,30 +270,28 @@ const InvoiceModal = ({data, closeModal}) => {
                       source={{
                         uri: 'https://cdn-icons-png.flaticon.com/128/1865/1865269.png',
                       }}
-                      style={{width: 20, height: 20}} // Adjust size as needed
+                      style={{ width: 20, height: 20 }} // Adjust size as needed
                     />
-                    <View style={{width: '95%'}}>
-                      <Text style={{flexWrap: 'wrap'}}>
-                        {addressData.houseNumber}, {addressData.landmark},{' '}
+                    <View>
+                      <Text>
+                        {addressData.houseNumber}, {addressData.landmark},
                         {addressData.city}, {addressData.state},{' '}
                         {addressData.zipCode}, {addressData.country}
                       </Text>
                     </View>
                   </View>
-                ) : (
-                  <Text>No address</Text>
-                )}
+                ) : (<Text>No address</Text>)}
               </View>
             </View>
           </View>
         </View>
         {/* all added product */}
-        <View style={{width: '91%'}}>
+        <View style={{ width: '80%' }}>
           <View style={styles.tableHeader}>
             <Text style={styles.headerCell}>Name</Text>
             <Text style={styles.headerCell}>Brand</Text>
             <Text style={styles.headerCell}>Size</Text>
-            <Text style={styles.headerCell}>QTY</Text>
+            <Text style={styles.headerCell}>Quantity</Text>
             <Text style={styles.headerCell}>Price</Text>
             <Text style={styles.headerCell}>Action</Text>
           </View>
@@ -308,7 +323,7 @@ const InvoiceModal = ({data, closeModal}) => {
                       source={{
                         uri: 'https://cdn-icons-png.flaticon.com/128/6861/6861362.png',
                       }}
-                      style={{width: 20, height: 20}} // Adjust size as needed
+                      style={{ width: 20, height: 20 }} // Adjust size as needed
                     />
                   </TouchableOpacity>
                 </View>
@@ -319,7 +334,7 @@ const InvoiceModal = ({data, closeModal}) => {
               ),
             )
           ) : (
-            <Text style={{textAlign: 'center', marginTop: 10}}>
+            <Text style={{ textAlign: 'center', marginTop: 10 }}>
               No products found
             </Text>
           )}
@@ -330,13 +345,15 @@ const InvoiceModal = ({data, closeModal}) => {
         <View style={styles.container}>
           {/* Open Modal Button */}
           <TouchableOpacity
-              style={{backgroundColor:'#0096c7', paddingVertical:6,borderRadius:2}}
-              onPress={()=>setModalVisible(true)}
-              disabled={loading}>
-              <Text style={{textAlign:'center', color:'#fff', fontWeight:600 }}>Add Product</Text>
-            </TouchableOpacity>
-          
-        
+            style={styles.openButton}
+            onPress={() => setModalVisible(true)}>
+            <Text style={styles.buttonText}>Add Product</Text>
+          </TouchableOpacity>
+          {/* <TouchableOpacity
+        style={styles.openButton}
+        onPress={() => setModalVisible(true)}>
+        <Text style={styles.buttonText}>Add Address</Text>
+      </TouchableOpacity> */}
 
           {/* Modal Component */}
           <Modal
@@ -386,7 +403,7 @@ const InvoiceModal = ({data, closeModal}) => {
                   <FlatList
                     data={filteredProducts} // Use filtered products based on the search query
                     keyExtractor={item => item.productId.toString()}
-                    renderItem={({item}) => (
+                    renderItem={({ item }) => (
                       <View style={styles.card}>
                         <Text style={styles.productName}>{item.name}</Text>
 
@@ -413,9 +430,9 @@ const InvoiceModal = ({data, closeModal}) => {
                         />
 
                         <TouchableOpacity
-                          style={{backgroundColor: 'green', padding: 5}}
+                          style={{ backgroundColor: 'green', padding: 5 }}
                           onPress={() => handleAddProduct(item.productId)}>
-                          <Text style={{textAlign: 'center', color: '#fff'}}>
+                          <Text style={{ textAlign: 'center', color: '#fff' }}>
                             Add
                           </Text>
                         </TouchableOpacity>
@@ -435,7 +452,7 @@ const InvoiceModal = ({data, closeModal}) => {
           </Modal>
 
           {/* Adrress form */}
-          <View style={{marginRight: 20}}>
+          <View style={{ marginRight: 20 }}>
             <Text style={styles.title}>Shipping to</Text>
             <TextInput
               style={styles.input}
@@ -506,10 +523,10 @@ const InvoiceModal = ({data, closeModal}) => {
 
             {/* Submit Button */}
             <TouchableOpacity
-              style={{backgroundColor:'#02c39a', paddingVertical:6,borderRadius:2}}
+              style={styles.SubmitButton}
               onPress={handleshipSubmit}
               disabled={loading}>
-              <Text style={{textAlign:'center', color:'#fff', fontWeight:600 }}>SUBMIT</Text>
+              <Text style={styles.buttonTextSubmit}>Submit</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -522,11 +539,47 @@ export default InvoiceModal;
 
 const styles = StyleSheet.create({
   container: {
-    alignContent: 'center',
-    width: '95%',
-    position:'relative'
-  }, 
+    backgroundColor: '#ffff',
+    paddingHorizontal: 10,
+    width: '99%',
+    justifyContent: 'start',
+    alignItems: 'center',
+    marginRight: 5
 
+  },
+  SubmitButton: {
+    backgroundColor: 'green',
+    borderRadius: 5,
+  },
+  buttonTextSubmit: {
+    color: '#fff',
+    textAlign: 'center',
+    paddingVertical: 8,
+    fontWeight: 600,
+  },
+  closeButton: {
+    backgroundColor: '#da5552',
+    color: '#fff',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  closeButtonTop: {
+    backgroundColor: '#da5552',
+    color: '#fff',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    paddingVertical: 10,
+  },
+  emailButton: {
+    backgroundColor: '#006400',
+    color: '#fff',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    paddingVertical: 10,
+  },
   tableHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -535,7 +588,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    width:'100%'
   },
   tableBody: {
     flexDirection: 'row',
@@ -545,7 +597,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    width:'100%'
   },
 
   openButton: {
@@ -560,7 +611,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  modalOverlay: {    
+  modalOverlay: {
+    flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)', // Transparent background
     justifyContent: 'center',
     alignItems: 'center',
@@ -584,7 +636,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     elevation: 3, // For shadow effect
     shadowColor: '#000',
-    shadowOffset: {width: 1, height: 2},
+    shadowOffset: { width: 1, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
@@ -647,7 +699,5 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     width: '48%',
   },
-  headerCell:{
-    width:40
-  },
+
 });
