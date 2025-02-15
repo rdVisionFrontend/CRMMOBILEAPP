@@ -1,24 +1,22 @@
-import { StyleSheet, Text, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import {StyleSheet, Text, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {useSelector} from 'react-redux';
 import InvoiceInfoTab from './InvoiceInfoTab';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 const InvoiceInfo = () => {
-  const { userData } = useSelector(state => state.crmUser);
+  const {userData} = useSelector(state => state.crmUser);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [invoiceData, setInvoiceData] = useState(null);
-  const [invoiceDataTab, setInvoiceDataTab] = useState([])
+  const [invoiceDataTab, setInvoiceDataTab] = useState([]);
 
   useEffect(() => {
     fetchInvoiceData();
-    fetchInvoices()
+    fetchInvoices();
   }, []);
-
-
 
   const fetchInvoiceData = async () => {
     setLoading(true);
@@ -27,21 +25,22 @@ const InvoiceInfo = () => {
       const user = await AsyncStorage.getItem('user');
       const token = await AsyncStorage.getItem('jwtToken');
 
-
       if (!user || !token) {
         throw new Error('User data or token not found');
       }
 
       const userData = JSON.parse(user);
 
-      const response = await axios.get(`https://uatbackend.rdvision.tech/invoice/invoideCOunt/${userData.roleDto.roleName === 'Closer' ? userData.userId : 0
+      const response = await axios.get(
+        `https://uatbackend.rdvision.tech/invoice/invoideCOunt/${
+          userData.roleDto.roleName === 'Closer' ? userData.userId : 0
         }`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       console.log('Invoice Data:', response.data); // Log response to verify structure
@@ -54,18 +53,16 @@ const InvoiceInfo = () => {
     }
   };
 
-
-
   const fetchInvoices = async () => {
     try {
       // Retrieve the token from AsyncStorage
-      const token = await AsyncStorage.getItem("jwtToken");
+      const token = await AsyncStorage.getItem('jwtToken');
       const user = await AsyncStorage.getItem('user');
       const userData = JSON.parse(user);
 
       if (!token) {
-        console.error("No authentication token found");
-        setError("Authentication token missing");
+        console.error('No authentication token found');
+        setError('Authentication token missing');
         return;
       }
 
@@ -75,16 +72,16 @@ const InvoiceInfo = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`, // Include token in request
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
-      console.log("Invoices:", response.data);
+      console.log('Invoices:', response.data);
       setInvoiceDataTab(response.data);
     } catch (error) {
-      console.error("Error fetching invoices:", error);
-      setError("Failed to fetch invoices");
+      console.error('Error fetching invoices:', error);
+      setError('Failed to fetch invoices');
     }
   };
 
@@ -96,76 +93,117 @@ const InvoiceInfo = () => {
           style={[
             styles.card,
             {
-
-              gap: 10,
-              backgroundColor: '#FCF8F3',
-              justifyContent: 'center',
-              alignItems: 'center',
+              backgroundColor: '#caf0f8',
+              justifyContent: 'flex-start',
+              alignItems: 'left',
+              paddingHorizontal: 12,
             },
           ]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <View style={{justifyContent:'center',alignItems:'center'}}>
-              <FontAwesome6 size={18} name='file-invoice'  />
-              <Text style={{ fontWeight: 600, fontSize: 12}}>Total Invoices</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: 4,
+            }}>
+            <View style={{}}>
+              <Text style={{fontWeight: 600, fontSize: 12}}>
+                Total Invoices
+              </Text>
+              <Text style={styles.textNumber}>
+                {invoiceData?.totalInvoices || 'N/A'}
+              </Text>
             </View>
-            <Text style={styles.textNumber}>{invoiceData?.totalInvoices || 'N/A'}</Text>
+            <FontAwesome6 size={18} name="file-invoice" />
           </View>
-
         </View>
+
+        {/* second card */}
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: '#ece4db',
+              justifyContent: 'flex-start',
+              alignItems: 'left',
+              paddingHorizontal: 12,
+            },
+          ]}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: 4,
+            }}>
+            <View style={{}}>
+              <Text style={{fontWeight: 600, fontSize: 12}}>Paid Invoices</Text>
+              <Text style={styles.textNumber}>
+                {invoiceData && invoiceData.totalPaidInvoices}
+              </Text>
+            </View>
+            <FontAwesome6 size={18} name="file-invoice-dollar" />
+          </View>
+        </View>
+        {/* third card */}
 
         <View
           style={[
             styles.card,
             {
-              gap: 10,
-              backgroundColor: '#FCFAEE',
-              justifyContent: 'center',
-              alignItems: 'center',
+              backgroundColor: '#ece4db',
+              justifyContent: 'flex-start',
+              alignItems: 'left',
+              paddingHorizontal: 12,
             },
           ]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <View style={{justifyContent:'center',alignItems:'center'}}>
-              <FontAwesome6 size={18} name='file-invoice-dollar'  />
-              <Text style={{ fontWeight: 600, fontSize: 12}}>Paid Invoices</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: 4,
+            }}>
+            <View style={{}}>
+              <Text style={{fontWeight: 600, fontSize: 12}}>
+                Pending Invoices
+              </Text>
+              <Text style={styles.textNumber}>
+                {invoiceData && invoiceData.totalPendingInvoices}
+              </Text>
             </View>
-            <Text style={styles.textNumber}>{invoiceData && invoiceData.totalPaidInvoices}</Text>
+            <FontAwesome6 name="file-invoice-dollar" size={20} />
           </View>
         </View>
-        <View
-          style={[
-            styles.card,
-            {
-              backgroundColor: '#FCFAEE',
-              justifyContent: 'center',
-              alignItems: 'center',
-            },
-          ]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <View style={{justifyContent:'center', alignItems:'center'}}>
-              <FontAwesome6 name='file-invoice-dollar' size={20}/>
-            <Text style={{ fontWeight: 600, fontSize: 12 }}>Pending Invoices</Text>
-            </View>
-            <Text style={styles.textNumber}>{invoiceData && invoiceData.totalPendingInvoices}</Text>
-          </View>
 
-        </View>
+        {/* fourth card */}
+
         <View
           style={[
             styles.card,
             {
-              backgroundColor: '#FEF9F2',
-              justifyContent: 'center',
-              alignItems: 'center',
+              backgroundColor: '#caf0f8',
+              justifyContent: 'flex-start',
+              alignItems: 'left',
+              paddingHorizontal: 12,
             },
           ]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <View style={{justifyContent:'center', alignItems: 'center'}}>
-            <FontAwesome6 name='circle-notch' size={20} />
-            <Text style={{ fontSize: 12, fontWeight: 600 }}>Awaiting Tracking</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: 4,
+            }}>
+            <View style={{}}>
+              <Text style={{fontSize: 12, fontWeight: 600}}>
+                Awaiting Tracking
+              </Text>
+              <Text style={styles.textNumber}>
+                {invoiceData && invoiceData.totalAwaitingPaidInvoices}
+              </Text>
             </View>
-            <Text style={styles.textNumber}>
-              {invoiceData && invoiceData.totalAwaitingPaidInvoices}
-            </Text>
+            <FontAwesome6 name="circle-notch" size={20} />
           </View>
         </View>
       </View>
@@ -184,11 +222,12 @@ const styles = StyleSheet.create({
     paddingTop: 20, // Push content to the top
   },
   cardRow: {
-    flexDirection: 'row', flexWrap: 'wrap',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-evenly',
     width: '100%',
     position: 'fixed',
-    gap: 10
+    gap: 10,
   },
   card: {
     width: '45%', // Slightly less than 25% to allow spacing
@@ -208,7 +247,7 @@ const styles = StyleSheet.create({
     height: 20, // Equal height to match the width
     lineHeight: 20, // Center the text vertically
     backgroundColor: '#013a63',
-    color: '#fff'
+    color: '#fff',
+    marginLeft: 8,
   },
-
 });
