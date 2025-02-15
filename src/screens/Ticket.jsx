@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -8,15 +8,14 @@ import {
   Image,
   Alert,
   Linking,
-  Button,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Modal from 'react-native-modal';
+import {useFocusEffect} from '@react-navigation/native'; // Import useFocusEffect
 import CountryFlagTable from './Flag';
 import Email from './Email';
-import {useDispatch, useSelector} from 'react-redux';
 import Nodata from './NoData';
 import apiInstance from '../../api';
 import StatustModal from './StatustModal';
@@ -32,26 +31,25 @@ const Ticket = () => {
   const [emailModal, setEmailModal] = useState(false);
   const [invoiceModal, setInvoiceModal] = useState(false);
   const [statusmodal, setStatusModal] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState(null); // To store selected status
+  const [selectedStatus, setSelectedStatus] = useState(null);
   const [emailData, setEmailData] = useState();
   const [statusData, setStatusData] = useState();
   const [invoiceData, setInvoiceData] = useState();
   const [tokenLoacal, setTokenLocal] = useState(null);
   const [loading, setLoading] = useState(false);
-  const {user} = useSelector(state => state.crmUser);
-
-  const dispatch = useDispatch();
 
   const toggleModal = message => {
     setquerry(message);
     setIsModalVisible(!isModalVisible);
   };
 
-  useEffect(() => {
-    // console.log("Refresh Tiket")
-    fetchTicket();
-    loadTicketFromLocalstorage();
-  }, [statusmodal, emailModal, dispatch]);
+  // Fetch tickets when the screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      fetchTicket();
+      loadTicketFromLocalstorage();
+    }, [statusmodal, emailModal]),
+  );
 
   const loadTicketFromLocalstorage = async () => {
     try {
@@ -63,7 +61,6 @@ const Ticket = () => {
       }
       if (storedIds) {
         setReadTicket(JSON.parse(storedIds));
-        // console.log("Load:",JSON.parse(storedIds))
       } else {
         console.log('No ticket IDs found in local storage');
       }
@@ -75,12 +72,11 @@ const Ticket = () => {
   const fetchTicket = async () => {
     try {
       setLoading(true);
-      // Make API call with token in headers
       const response = await apiInstance.get(
         '/third_party_api/ticket/getAllNewTickets',
       );
       console.log('Tickets:', response.data);
-      setTicketData(response.data); // Update ticket data in state
+      setTicketData(response.data);
     } catch (error) {
       console.error('Error fetching tickets:', error);
       Alert.alert('Error', 'Failed to fetch tickets. Please try again later.');
@@ -125,27 +121,28 @@ const Ticket = () => {
       case 'hang_up':
         return 'pink';
       default:
-        return '#0fc4f4'; // Default color
+        return '#0fc4f4';
     }
   };
-  // making mobile number
+
   const formatMobile = mobile => {
     if (mobile && mobile.length >= 4) {
-      const firstTwo = mobile && mobile.slice(0, 2); // First two digits
-      const lastTwo = mobile && mobile.slice(-3); // Last two digits
-      const hiddenPart = '*'.repeat(mobile.length - 4); // Replace the rest with X
+      const firstTwo = mobile && mobile.slice(0, 2);
+      const lastTwo = mobile && mobile.slice(-3);
+      const hiddenPart = '*'.repeat(mobile.length - 4);
       return `${firstTwo}${hiddenPart}${lastTwo}`;
     }
     return 'Invalid Number';
   };
+
   const formateEmail = email => {
     if (email && email.length >= 4) {
-      const firstTwo = email.slice(0, 2); // First two digits
-      const lastTwo = email.slice(-2); // Last two digits
-      const hiddenPart = '#'.repeat(email.length - 15); // Replace the rest with X
+      const firstTwo = email.slice(0, 2);
+      const lastTwo = email.slice(-2);
+      const hiddenPart = '#'.repeat(email.length - 15);
       return `${firstTwo}${hiddenPart}${lastTwo}`;
     }
-    return 'Invalid Number'; // Fallback for invalid numbers
+    return 'Invalid Number';
   };
 
   const openEmailModal = item => {
@@ -173,7 +170,6 @@ const Ticket = () => {
     setInvoiceData(item);
     setStatusModal(false);
   };
-  // open dialer pad
 
   const openCallLog = mobileNumber => {
     const phoneNumber = `tel:${mobileNumber}`;
@@ -183,19 +179,14 @@ const Ticket = () => {
     });
   };
 
-  // for copy amil and phone
-
   const copyToClipboard = text => {
     Clipboard.setString(text);
   };
 
-  // open whatsapp
   const openWhatsApp = () => {
-    const phoneNumber = '7460033731'; // Replace with the desired phone number
-    const message = 'Hello, I need help!'; // Optional message
-
+    const phoneNumber = '7460033731';
+    const message = 'Hello, I need help!';
     const url = `whatsapp://send?phone=${phoneNumber}&text=${message}`;
-
     Linking.openURL(url)
       .then(supported => {
         if (!supported) {
@@ -207,7 +198,6 @@ const Ticket = () => {
       .catch(err => console.error('Error opening WhatsApp: ', err));
   };
 
-  // open ticket histroy
   const [ticketHisModal, setTicketHisModal] = useState(false);
   const [selectedTicketInfo, setSelectedTicketInfo] = useState();
   const [modalVisible, setModalVisible] = useState(false);
@@ -219,6 +209,7 @@ const Ticket = () => {
     fetchTicket();
     setSelectedTicketInfo(ticketId);
   };
+
   const closeTicketJourney = () => {
     setTicketHisModal(false);
   };
@@ -234,10 +225,9 @@ const Ticket = () => {
                 <View
                   style={[
                     styles.header,
-                    {backgroundColor: getStatusColor(item.ticketstatus)}, // Dynamic background color
+                    {backgroundColor: getStatusColor(item.ticketstatus)},
                   ]}>
                   <Text style={styles.indexText}>{index + 1}</Text>
-
                   {readTicket &&
                     readTicket.some(ele => ele === item.uniqueQueryId) && (
                       <Image
@@ -247,7 +237,6 @@ const Ticket = () => {
                         style={styles.DoneIcon}
                       />
                     )}
-
                   <View
                     style={{
                       display: 'flex',
@@ -293,8 +282,6 @@ const Ticket = () => {
                         </Text>
                       </TouchableOpacity>
                     </View>
-
-                    {/* Main item which toggles the dropdown menu */}
                     <TouchableOpacity
                       style={{
                         borderWidth: 1,
@@ -319,7 +306,6 @@ const Ticket = () => {
                           : `${item.ticketstatus}`}
                       </Text>
                     </TouchableOpacity>
-
                     <View
                       style={{
                         display: 'flex',
@@ -328,7 +314,6 @@ const Ticket = () => {
                         justifyContent: 'center',
                         alignItems: 'center',
                       }}>
-                      {/* Ticket history */}
                       <TouchableOpacity
                         onPress={() => openTicketHistroy(item.uniqueQueryId)}>
                         <Image
@@ -338,7 +323,6 @@ const Ticket = () => {
                           style={styles.icon}
                         />
                       </TouchableOpacity>
-                      {/* WhatsApp */}
                       <TouchableOpacity onPress={() => openWhatsApp()}>
                         <Image
                           source={{
@@ -347,7 +331,6 @@ const Ticket = () => {
                           style={styles.icon}
                         />
                       </TouchableOpacity>
-                      {/* Call */}
                       <TouchableOpacity
                         onPress={() => openCallLog(item.senderMobile)}>
                         <Image
@@ -357,8 +340,6 @@ const Ticket = () => {
                           style={styles.icon}
                         />
                       </TouchableOpacity>
-
-                      {/* Email */}
                       <TouchableOpacity onPress={() => openEmailModal(item)}>
                         <Image
                           source={{
@@ -367,10 +348,7 @@ const Ticket = () => {
                           style={styles.icon}
                         />
                       </TouchableOpacity>
-                      {/* Invoice Icon */}
-                      <TouchableOpacity
-                        // onPress={toggleModal}
-                        onPress={() => InvoiceCreate(item)}>
+                      <TouchableOpacity onPress={() => InvoiceCreate(item)}>
                         <Image
                           source={{
                             uri: 'https://cdn-icons-png.flaticon.com/128/5270/5270107.png',
@@ -380,6 +358,16 @@ const Ticket = () => {
                       </TouchableOpacity>
                     </View>
                   </View>
+                  {expanded === item.uniqueQueryId && (
+                    <View style={styles.content}>                     
+                      <Text style={styles.contentText}>
+                        Email: {formateEmail(item.senderEmail)}
+                      </Text>
+                      <Text style={styles.contentText}>
+                        Mobile: {formatMobile(item.senderMobile)}
+                      </Text>
+                    </View>
+                  )}
                 </View>
               </View>
             ))
@@ -391,7 +379,6 @@ const Ticket = () => {
         </View>
       </ScrollView>
 
-      {/* Email Modal */}
       {emailModal && <Email data={emailData} closeModal={closeEmailModal} />}
       <View style={{flex: 1, position: 'absolute', top: 0, left: 5}}>
         {invoiceModal && (
@@ -399,7 +386,6 @@ const Ticket = () => {
         )}
       </View>
 
-      {/* Status Modal */}
       {statusmodal && (
         <StatustModal
           data={statusData}
@@ -408,21 +394,6 @@ const Ticket = () => {
         />
       )}
 
-      {/* {invoiceModal && (
-        <View style={{flex: 1, width: '100%'}}>
-          <Modal isVisible={invoiceModal}>
-            <View>
-              <TicketInvoiceModal
-                data={invoiceData}
-                closeModal={closeEmailModal}
-              />
-              <Button title="Close" onPress={() => setInvoiceModal(false)} />
-            </View>
-          </Modal>
-        </View>
-      )} */}
-
-      {/* Ticket History Modal */}
       <TicketHistoryModal
         ticketId={selectedTicketInfo}
         isVisible={modalVisible}
@@ -457,28 +428,28 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -6,
     left: -6,
-    borderRadius: 50, // Ensures a rounded shape
+    borderRadius: 50,
     height: 25,
     width: 25,
-    textAlign: 'center', // Horizontally centers the text
-    lineHeight: 25, // Vertically centers the text
+    textAlign: 'center',
+    lineHeight: 25,
     backgroundColor: '#ffd8be',
-    color: 'black', // Optional: sets text color
-    fontWeight: 'bold', // Optional: makes the text bold
-    fontSize: 12, // Optional: adjusts text size
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 12,
   },
   DoneIcon: {
     position: 'absolute',
     top: -10,
     right: -10,
-    borderRadius: 50, // Ensures a rounded shape
+    borderRadius: 50,
     height: 30,
     width: 30,
-    textAlign: 'center', // Horizontally centers the text
-    lineHeight: 25, // Vertically centers the text
-    color: 'black', // Optional: sets text color
-    fontWeight: 'bold', // Optional: makes the text bold
-    fontSize: 12, // Optional: adjusts text size
+    textAlign: 'center',
+    lineHeight: 25,
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 12,
   },
   headerText: {
     fontSize: 16,
@@ -542,7 +513,7 @@ const styles = StyleSheet.create({
   modalOverlay: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#303036', // Semi-transparent background
+    backgroundColor: '#303036',
   },
   modalContent: {
     width: '80%',
@@ -550,7 +521,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     alignItems: 'center',
-    elevation: 5, // For shadow effect on Android
+    elevation: 5,
   },
   modalText: {
     fontSize: 16,
