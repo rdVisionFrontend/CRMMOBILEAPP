@@ -340,7 +340,6 @@ const AbcTicket = () => {
         </View>
       )}
 
-
       {/* Modals */}
       <Modal
         visible={invoiceModal} // Control visibility based on `invoiceModal` state
@@ -397,12 +396,10 @@ const AbcTicket = () => {
               shadowOpacity: 0.25,
               shadowRadius: 4,
             }}>
-             <Email data={emailData} closeModal={closeEmailModal} />
+            <Email data={emailData} closeModal={closeEmailModal} />
           </View>
         </View>
       </Modal>
-
-     
 
       <TicketHistoryModal
         ticketId={selectedTicketInfo}
@@ -410,23 +407,25 @@ const AbcTicket = () => {
         closeTicketHisModal={() => setModalVisible(false)}
       />
 
-      <Modal
+      {/* <Modal
         visible={invoiceModal}
         transparent={true}
         animationType="slide"
         onRequestClose={closeEmailModal}>
         <View style={styles.modalOverlay}>
-
-          <View >
-            {/* <StatusModal closeModal={closeEmailModal} data={statusmodaldata} /> */}
+          <View>
+           
             <InvoiceModal data={data} closeModal={closeEmailModal} />
 
-          <View>
-            <StatusModal closeModal={closeEmailModal} data={statusmodaldata} />
-
+            <View>
+              <StatusModal
+                closeModal={closeEmailModal}
+                data={statusmodaldata}
+              />
+            </View>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
     </View>
   );
 };
