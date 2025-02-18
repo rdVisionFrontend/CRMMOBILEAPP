@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import moment from 'moment-timezone';
-import Svg, { Line, Circle } from 'react-native-svg';
+import Svg, { Line, Circle, Text as SvgText } from 'react-native-svg';
 
 // Analog Clock Component
-// Analog Clock Component with Numbers
 const AnalogClock = ({ timezone, isIndianClock }) => {
   const [time, setTime] = useState(moment.tz(timezone));
 
@@ -27,36 +26,64 @@ const AnalogClock = ({ timezone, isIndianClock }) => {
     <View style={[styles.clockContainer, { backgroundColor: isIndianClock ? '#FFD1DC' : '#B2DFFC' }]}>
       <Svg height="100" width="100" viewBox="0 0 100 100">
         {/* Clock Circle */}
-        <Circle cx="50" cy="50" r="45" stroke="black" strokeWidth="2" fill="white" />
-        {/* Clock Numbers */}
+        <Circle cx="50" cy="50" r="45" stroke="black" strokeWidth="1" fill="white" />
+
+        {/* Clock Numbers (1 to 12) */}
         {Array.from({ length: 12 }).map((_, index) => {
           const angle = (index + 1) * 30; // 30° per number
           const x = 50 + 38 * Math.sin((angle * Math.PI) / 180); // X position
           const y = 50 - 38 * Math.cos((angle * Math.PI) / 180); // Y position
           return (
-            <Text key={index} x={x} y={y} fontSize="8" fill="black" textAnchor="middle" alignmentBaseline="middle">
+            <SvgText
+              key={index}
+              x={x}
+              y={y + 3} // Adjust Y position for better alignment
+              fontSize="8"
+              fill="black"
+              textAnchor="middle"
+              alignmentBaseline="middle"
+            >
               {index + 1}
-            </Text>
+            </SvgText>
           );
         })}
 
+        {/* Central Dot */}
+        <Circle cx="50" cy="50" r="3" fill="black" />
+
         {/* Hour Hand */}
-        <Line x1="50" y1="50" x2={50 + 20 * Math.sin((hourAngle * Math.PI) / 180)}
-              y2={50 - 20 * Math.cos((hourAngle * Math.PI) / 180)}
-              stroke="black" strokeWidth="4" />
+        <Line
+          x1="50"
+          y1="50"
+          x2={50 + 20 * Math.sin((hourAngle * Math.PI) / 180)}
+          y2={50 - 20 * Math.cos((hourAngle * Math.PI) / 180)}
+          stroke="black"
+          strokeWidth="4"
+        />
+
         {/* Minute Hand */}
-        <Line x1="50" y1="50" x2={50 + 30 * Math.sin((minuteAngle * Math.PI) / 180)}
-              y2={50 - 30 * Math.cos((minuteAngle * Math.PI) / 180)}
-              stroke="black" strokeWidth="3" />
+        <Line
+          x1="50"
+          y1="50"
+          x2={50 + 30 * Math.sin((minuteAngle * Math.PI) / 180)}
+          y2={50 - 30 * Math.cos((minuteAngle * Math.PI) / 180)}
+          stroke="black"
+          strokeWidth="3"
+        />
+
         {/* Second Hand */}
-        <Line x1="50" y1="50" x2={50 + 35 * Math.sin((secondAngle * Math.PI) / 180)}
-              y2={50 - 35 * Math.cos((secondAngle * Math.PI) / 180)}
-              stroke="red" strokeWidth="2" />
+        <Line
+          x1="50"
+          y1="50"
+          x2={50 + 35 * Math.sin((secondAngle * Math.PI) / 180)}
+          y2={50 - 35 * Math.cos((secondAngle * Math.PI) / 180)}
+          stroke="red"
+          strokeWidth="2"
+        />
       </Svg>
     </View>
   );
 };
-
 
 // Digital Clock Component
 const DigitalClock = ({ timezone, country, isIndianClock }) => {
@@ -110,9 +137,10 @@ const TimezoneClocks = () => {
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '##fff',
+    backgroundColor: '#fff',
     flex: 1,
     padding: 20,
   },
@@ -122,7 +150,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     marginBottom: 20,
-    
   },
   clockWrapper: {
     flexDirection: 'row',
@@ -145,7 +172,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 15,
     alignItems: 'center',
-    marginTop:5,    
+    marginTop: 5,
     elevation: 4,
   },
   digitalTime: {
