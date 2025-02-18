@@ -6,12 +6,13 @@ import {
   StyleSheet,
   Modal,
   FlatList,
-  Image, 
+  Image,
   LayoutAnimation,
   Platform,
   UIManager,
   Linking,
   Alert,
+  Button,
 } from 'react-native';
 import {useAuth} from '../../Authorization/AuthContext';
 import TicketInvoiceModal from '../TicketRaiseInvoiceModal/TicketInvoiceModal';
@@ -22,6 +23,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import InvoiceModal from '../InvoiceModal';
 import Email from './EmailModal';
+import EmailCompose from '../EmailCompose/EmailScreen';
 
 // Enable LayoutAnimation for Android
 if (
@@ -369,7 +371,6 @@ const AbcTicket = () => {
         onRequestClose={closeEmailModal}>
         <View
           style={{
-       
             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -386,7 +387,6 @@ const AbcTicket = () => {
               shadowOpacity: 0.25,
               shadowRadius: 4,
             }}>
-           
             <TicketInvoiceModal data={data} closeModal={closeEmailModal} />
           </View>
         </View>
@@ -399,14 +399,14 @@ const AbcTicket = () => {
         onRequestClose={closeEmailModal}>
         <View
           style={{
-           
             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            flex: 1,
           }}>
           <View
             style={{
-              width: '110%',
+              width: '100%',
               backgroundColor: '#fff',
               borderRadius: 10,
               padding: 20,
@@ -417,7 +417,16 @@ const AbcTicket = () => {
               shadowRadius: 4,
             }}>
             {/* <Email data={emailData} closeModal={closeEmailModal} /> */}
-            <Email data={emailData} closeModal={closeEmailModal} />
+            <EmailCompose data={emailData} />
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => {
+                console.log('Closing modal');
+                setEmailModal(false);
+              }}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -428,8 +437,6 @@ const AbcTicket = () => {
         closeTicketHisModal={() => setModalVisible(false)}
       />
 
-      
-
       <Modal
         visible={statusmodal}
         transparent={true}
@@ -437,12 +444,12 @@ const AbcTicket = () => {
         onRequestClose={closeEmailModal}>
         <View
           style={{
-            marginTop:10,
+            marginTop: 10,
             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            
-            width:'100%'
+
+            width: '100%',
           }}>
           <View
             style={{
@@ -589,6 +596,17 @@ const styles = StyleSheet.create({
   disabledText: {
     color: '#888',
   },
+  closeButtonText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  closeButton:{
+    backgroundColor:'#ee6055',
+    paddingVertical:8,
+    borderRadius:10,
+    marginHorizontal:30
+  }
 });
 
 export default AbcTicket;
