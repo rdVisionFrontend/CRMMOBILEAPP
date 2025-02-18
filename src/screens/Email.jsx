@@ -96,7 +96,7 @@ const Email = ({data, closeModal}) => {
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'center',
-          alignItems: 'center',
+          alignItems: 'center', 
           gap: 5,
           paddingVertical: 20,
         }}>
