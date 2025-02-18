@@ -9,22 +9,23 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from '../Authorization/AuthContext';
+import {useAuth} from '../Authorization/AuthContext';
 import BestSellingClosers from '../screens/BestSellingCloser';
 import LiveCalendar from '../screens/LiveClander';
-import { LineChart } from 'react-native-chart-kit';
+import {LineChart} from 'react-native-chart-kit';
 import WorkTimeGraph from './WorktimeGraph';
-import { RadioButton } from 'react-native-paper';
+import {RadioButton} from 'react-native-paper';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
-import { DevSettings } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {DevSettings} from 'react-native';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const { isAuthenticated, setIsAuthenticated } = useAuth();
+  const {isAuthenticated, setIsAuthenticated} = useAuth();
   const [elapsedTime, setElapsedTime] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -53,12 +54,13 @@ const Profile = () => {
     await AsyncStorage.setItem('startTime', startTime.toString());
     setTimerActive(true);
   };
+  // console.log('profile User', user);
 
   useEffect(() => {
     let breakTimer;
     if (onBreak && breakTimerActive) {
       breakTimer = setInterval(() => {
-        setBreakTime((prevTime) => prevTime + 1);
+        setBreakTime(prevTime => prevTime + 1);
       }, 1000);
     } else {
       clearInterval(breakTimer);
@@ -102,7 +104,7 @@ const Profile = () => {
     let timer;
     if (isAuthenticated && timerActive) {
       timer = setInterval(() => {
-        setElapsedTime((prevTime) => prevTime + 1);
+        setElapsedTime(prevTime => prevTime + 1);
       }, 1000);
     } else {
       clearInterval(timer);
@@ -110,7 +112,7 @@ const Profile = () => {
     return () => clearInterval(timer);
   }, [isAuthenticated, timerActive]);
 
-  const formatTime = (seconds) => {
+  const formatTime = seconds => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainingSeconds = seconds % 60;
@@ -118,7 +120,9 @@ const Profile = () => {
     if (hours > 0) {
       return `${hours} hr ${String(minutes).padStart(2, '0')} min`;
     } else {
-      return `${String(minutes).padStart(2, '0')} min ${String(remainingSeconds).padStart(2, '0')} sec`;
+      return `${String(minutes).padStart(2, '0')} min ${String(
+        remainingSeconds,
+      ).padStart(2, '0')} sec`;
     }
   };
 
@@ -131,7 +135,10 @@ const Profile = () => {
   useEffect(() => {
     const autoLogoutTimer = setTimeout(() => {
       handleLogoutFinal();
-      Alert.alert('Session Expired', 'You have been automatically logged out after 12 hours.');
+      Alert.alert(
+        'Session Expired',
+        'You have been automatically logged out after 12 hours.',
+      );
     }, 12 * 60 * 60 * 1000); // 12 hours in milliseconds
 
     return () => clearTimeout(autoLogoutTimer);
@@ -148,7 +155,8 @@ const Profile = () => {
 
       const attId = await AsyncStorage.getItem('atdncId');
       const token = await AsyncStorage.getItem('jwtToken');
-      const totalWorkTime = elapsedTime !== undefined ? String(elapsedTime) : '0';
+      const totalWorkTime =
+        elapsedTime !== undefined ? String(elapsedTime) : '0';
       const totalBreakTime = breakTime !== undefined ? String(breakTime) : '0';
 
       if (!checked) {
@@ -192,25 +200,36 @@ const Profile = () => {
       <ScrollView style={styles.scrollView}>
         {/* Profile Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.statusContainerLogout} onPress={handleLogout}>
-            <Image
+          <TouchableOpacity
+            style={styles.statusContainerLogout}
+            onPress={handleLogout}>
+            <AntDesign
+              size={20}
+              name="poweroff"
+              style={{color: 'red', fontWeight: 900}}
+            />
+
+            {/* <Image
               source={{
                 uri: 'https://cdn-icons-png.flaticon.com/128/18844/18844589.png',
               }}
               style={styles.icon}
-            />
+            /> */}
           </TouchableOpacity>
           <View style={styles.imageContainer}>
             <Image
               source={{
-                uri: 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png',
+                uri: user?.imageData
+                  ? `data:image/png;base64,${user.imageData}`
+                  : 'https://cdn-icons-png.flaticon.com/128/1077/1077114.png',
               }}
-              style={styles.profileImage}
+              style={styles.profileImage}             
             />
+
             <View
               style={[
                 styles.statusDot,
-                { backgroundColor: user?.onBreak ? 'red' : 'green' },
+                {backgroundColor: user?.onBreak ? 'red' : 'green'},
               ]}
             />
           </View>
@@ -248,7 +267,9 @@ const Profile = () => {
                 }}
                 style={styles.icon}
               />
-              <Text style={styles.detailText}>{user?.phoneNumber || 'N/A'}</Text>
+              <Text style={styles.detailText}>
+                {user?.phoneNumber || 'N/A'}
+              </Text>
             </View>
             <View style={styles.detailRow}>
               <Image
@@ -257,7 +278,9 @@ const Profile = () => {
                 }}
                 style={styles.icon}
               />
-              <Text style={styles.detailText}>{user?.roleDto.roleName || 'N/A'}</Text>
+              <Text style={styles.detailText}>
+                {user?.roleDto.roleName || 'N/A'}
+              </Text>
             </View>
             <View style={styles.detailRow}>
               <Image
@@ -293,7 +316,9 @@ const Profile = () => {
                     borderRadius: 8,
                     boxShadow: '4px 5px 6px rgba(0,0,0,0.4)',
                   }}>
-                  <Text style={{ color: '#fff', fontWeight: 600 }}>Take Break</Text>
+                  <Text style={{color: '#fff', fontWeight: 600}}>
+                    Take Break
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -311,7 +336,7 @@ const Profile = () => {
         </View>
         <BestSellingClosers />
         <LiveCalendar />
-        <Text style={{ marginBottom: 20 }}></Text>
+        <Text style={{marginBottom: 20}}></Text>
       </ScrollView>
       {/* Live Take break Modal */}
       <Modal
@@ -329,11 +354,15 @@ const Profile = () => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
-              <Text style={styles.detailText}>Work Time: {formatTime(elapsedTime)}</Text>
-              <Text style={styles.detailText}>Break Start: {formatTime(breakTime)}</Text>
+              <Text style={styles.detailText}>
+                Work Time: {formatTime(elapsedTime)}
+              </Text>
+              <Text style={styles.detailText}>
+                Break Start: {formatTime(breakTime)}
+              </Text>
             </View>
 
-            <View style={{ alignContent: 'center', paddingVertical: 20 }}>
+            <View style={{alignContent: 'center', paddingVertical: 20}}>
               <View
                 style={{
                   backgroundColor: '#fff',
@@ -351,8 +380,10 @@ const Profile = () => {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.closeButton} onPress={handleEndBreak}>
-              <Text style={{ fontWeight: '600', color: '#fff' }}>End Break</Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={handleEndBreak}>
+              <Text style={{fontWeight: '600', color: '#fff'}}>End Break</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -365,8 +396,9 @@ const Profile = () => {
         onRequestClose={() => setLogoutModal(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContentLogout}>
-            <Text style={{ fontWeight: 800, fontSize: 25 }}>Logout</Text>
-            <View style={{ display: 'flex', flexDirection: 'column', width: '95%' }}>
+            <Text style={{fontWeight: 800, fontSize: 25}}>Logout</Text>
+            <View
+              style={{display: 'flex', flexDirection: 'column', width: '95%'}}>
               <RadioButton.Item
                 label="Half Day"
                 value="Half_Day"
@@ -377,7 +409,9 @@ const Profile = () => {
               <RadioButton.Item
                 label="Senior Instruction"
                 value="Senior_Instruction"
-                status={checked === 'Senior_Instruction' ? 'checked' : 'unchecked'}
+                status={
+                  checked === 'Senior_Instruction' ? 'checked' : 'unchecked'
+                }
                 onPress={() => setChecked('Senior_Instruction')}
               />
 
@@ -395,11 +429,15 @@ const Profile = () => {
                 justifyContent: 'center',
                 gap: 10,
               }}>
-              <TouchableOpacity style={styles.closeButton} onPress={handleEndBreak}>
-                <Text style={{ fontWeight: '600', color: '#fff' }}>Cancel</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={handleEndBreak}>
+                <Text style={{fontWeight: '600', color: '#fff'}}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.LogoutBtn} onPress={handleLogoutFinal}>
-                <Text style={{ fontWeight: '600', color: '#fff' }}>Logout</Text>
+              <TouchableOpacity
+                style={styles.LogoutBtn}
+                onPress={handleLogoutFinal}>
+                <Text style={{fontWeight: '600', color: '#fff'}}>Logout</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -512,7 +550,8 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 60,
     height: 60,
-    borderRadius: 20,
+    borderRadius: 50,
+  
   },
   statusDot: {
     position: 'absolute',
