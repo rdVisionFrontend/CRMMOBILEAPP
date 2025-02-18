@@ -91,27 +91,30 @@ const InvoiceInfoTab = () => {
               </View>
             </View>
             <View style={styles.gradientContainer}>
-              <LinearGradient colors={['#E8F9FF', '#D1F8EF']} style={{borderRadius: 10,margin: 5}}>
-                {item.orderDto.productOrders[0].product.map((product, index) => (
-                  <View key={index} style={styles.productDetailContainer}>
-                    <View style={[styles.row, styles.borderBottom]}>
-                      <Text style={[styles.tableHeader, { flex: 1 }]}>Product Name:</Text>
-                      <Text style={[styles.tableCell, { flex: 2 }]}>{product.name}</Text>
+              <LinearGradient colors={['#E8F9FF', '#D1F8EF']} style={{ borderRadius: 10, margin: 5 }}>
+                {item.orderDto?.productOrders?.[0]?.product?.length > 0 ? (
+                  item.orderDto.productOrders[0].product.map((product, index) => (
+                    <View key={index} style={styles.productDetailContainer}>
+                      <View style={[styles.row, styles.borderBottom]}>
+                        <Text style={[styles.tableHeader, { flex: 1 }]}>Product Name:</Text>
+                        <Text style={[styles.tableCell, { flex: 2 }]}>{product.name}</Text>
+                      </View>
+                      <View style={[styles.row, styles.borderBottom]}>
+                        <Text style={[styles.tableHeader, { flex: 1 }]}>Quantity:</Text>
+                        <Text style={[styles.tableCell, { flex: 2 }]}>{item.orderDto.productOrders[0]?.quantity || 0}</Text>
+                      </View>
+                      <View style={[styles.row, styles.borderBottom]}>
+                        <Text style={[styles.tableHeader, { flex: 1 }]}>Price:</Text>
+                        <Text style={[styles.tableCell, { flex: 2 }]}>{item.orderDto.productOrders[0]?.totalAmount || 0}</Text>
+                      </View>
                     </View>
-                    <View style={[styles.row, styles.borderBottom]}>
-                      <Text style={[styles.tableHeader, { flex: 1 }]}>Quantity:</Text>
-                      <Text style={[styles.tableCell, { flex: 2 }]}>
-                        {item.orderDto.productOrders[0].quantity || 0}
-                      </Text>
-                    </View>
-                    <View style={[styles.row, styles.borderBottom]}>
-                      <Text style={[styles.tableHeader, { flex: 1 }]}>Price:</Text>
-                      <Text style={[styles.tableCell, { flex: 2 }]}>
-                        {item.orderDto.productOrders[0].totalAmount || 0}
-                      </Text>
-                    </View>
-                  </View>
-                ))}
+                  ))
+                ) : (
+                  <Text style={{ padding: 10, textAlign: 'center', color: 'gray' }}>
+                    No products available
+                  </Text>
+                )}
+
               </LinearGradient>
             </View>
 

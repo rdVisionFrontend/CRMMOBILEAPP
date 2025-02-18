@@ -126,6 +126,10 @@ const Email = ({data, closeModal}) => {
 
   return (
     <View style={[styles.container, {width: width, height: height}]}>
+      <View>
+        <Text style={{fontWeight: 'bold',marginTop: 10}}>Email: {(data.email || data.senderEmailAlt)}</Text>
+        <Text style={{fontWeight: 'bold'}}>Name: {data.firstName+ " " +(data.lastNamre || " ")}</Text>
+      </View>
       <View style={styles.footer}>
         {/* Dropdown for ticket status */}
 
@@ -240,6 +244,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 20, // Adjust gap between elements
     width: '100%',
+    marginTop: 10
   },
   closeButton: {
     backgroundColor: '#da5552',
@@ -248,6 +253,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 20,
     paddingVertical: 10,
+    borderRadius:5,
+    fontWeight: 'bold'
   },
   emailButton: {
     backgroundColor: '#006400',
@@ -256,6 +263,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 20,
     paddingVertical: 10,
+    borderRadius: 5,
+    fontWeight: 'bold'
   },
   picker: {
     width: 200, // Adjust the width of the picker

@@ -535,7 +535,9 @@ const Stage2 = () => {
           </View>
         </ScrollView>
       )}
+      <View style={{flex: 1, position: 'absolute', top: -100, left: -20,backgroundColor: '#E1F7F5' }}>
       {emailmodal && <Email closeModal={closeEmailModal} data={emaildata} />}
+      </View>
       {/* {statusmodal && (
         <StatusModal closeModal={closeStatusModal} data={emaildata} />
       )} */}
