@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -13,17 +13,17 @@ import {
   Modal,
 } from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
-import {Picker} from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiInstance from '../../../api';
-import GetAllEmail from './GetAllEmail';
 
-const EmailCompose = ({autoClose, email, body}) => {
-  const {width} = useWindowDimensions(); // Get dynamic width
+
+const EmailCompose = ({ autoClose, email, body }) => {
+  const { width, height } = useWindowDimensions(); // Get dynamic width and height
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({});
   const [attachments, setAttachments] = useState([]);
-  const [isInboxModalVisible, setIsInboxModalVisible] = useState(false); // State for modal visibility
+  const [isInboxModalVisible, setIsInboxModalVisible] = useState(false);
 
   useEffect(() => {
     fetchToken();
@@ -51,16 +51,16 @@ const EmailCompose = ({autoClose, email, body}) => {
   const [isCustomSubject, setIsCustomSubject] = useState(false);
 
   const handleInputChange = (field, value) => {
-    setEmailData({...emailData, [field]: value});
+    setEmailData({ ...emailData, [field]: value });
   };
 
   const handleSubjectChange = value => {
     if (value === 'custom') {
       setIsCustomSubject(true);
-      setEmailData({...emailData, subject: ''});
+      setEmailData({ ...emailData, subject: '' });
     } else {
       setIsCustomSubject(false);
-      setEmailData({...emailData, subject: value});
+      setEmailData({ ...emailData, subject: value });
     }
   };
 
@@ -95,7 +95,6 @@ const EmailCompose = ({autoClose, email, body}) => {
 
     setLoading(true);
 
-    // Create FormData
     const formData = new FormData();
     formData.append('toEmail', emailData.toEmail);
     formData.append('subject', emailData.subject);
@@ -110,9 +109,6 @@ const EmailCompose = ({autoClose, email, body}) => {
       });
     });
 
-    // Log the FormData for debugging
-    console.log('Form Data:', formData);
-
     try {
       const response = await apiInstance.post('/send', formData, {
         headers: {
@@ -120,8 +116,6 @@ const EmailCompose = ({autoClose, email, body}) => {
         },
       });
 
-      // Log the response to inspect
-      console.log('Response from API:', response);
       Alert.alert('Success', 'Email sent successfully');
       setEmailData({
         toEmail: email || '',
@@ -141,11 +135,11 @@ const EmailCompose = ({autoClose, email, body}) => {
   };
 
   const handleInbox = () => {
-    setIsInboxModalVisible(true); // Open the modal
+    setIsInboxModalVisible(true);
   };
 
   const closeInboxModal = () => {
-    setIsInboxModalVisible(false); // Close the modal
+    setIsInboxModalVisible(false);
   };
 
   return (
@@ -159,31 +153,24 @@ const EmailCompose = ({autoClose, email, body}) => {
           justifyContent: 'space-between',
           alignItems: 'center',
         }}>
-        <Text style={[styles.title, {fontSize: width * 0.05}]}>
+        <Text style={[styles.title, { fontSize: width * 0.05 }]}>
           Compose Email
         </Text>
-        <TouchableOpacity
-          onPress={handleInbox}
-          style={{backgroundColor: 'gray', padding: 5, borderRadius: 5}}>
-          <Text style={{fontSize: 16}}>Inbox ➡️</Text>
-        </TouchableOpacity>
       </View>
 
-      {/* To Email */}
       <TextInput
         placeholder="To Email"
         value={emailData.toEmail}
         onChangeText={text => handleInputChange('toEmail', text)}
-        style={styles.input}
+        style={[styles.input, { fontSize: width * 0.04 }]}
         keyboardType="email-address"
       />
 
-      {/* Subject */}
-      <Text style={styles.label}>Subject</Text>
+      <Text style={[styles.label, { fontSize: width * 0.04 }]}>Subject</Text>
       <Picker
         selectedValue={isCustomSubject ? 'custom' : emailData.subject}
         onValueChange={handleSubjectChange}
-        style={styles.picker}>
+        style={[styles.picker, { fontSize: width * 0.04 }]}>
         <Picker.Item label="Select a subject" value="" />
         {predefinedSubjects.map((subject, index) => (
           <Picker.Item key={index} label={subject} value={subject} />
@@ -196,33 +183,30 @@ const EmailCompose = ({autoClose, email, body}) => {
           placeholder="Enter your subject"
           value={emailData.subject}
           onChangeText={text => handleInputChange('subject', text)}
-          style={styles.input}
+          style={[styles.input, { fontSize: width * 0.04 }]}
         />
       )}
 
-      {/* Body */}
-      <Text style={styles.label}>Body</Text>
+      <Text style={[styles.label, { fontSize: width * 0.04 }]}>Body</Text>
       <TextInput
         multiline
         numberOfLines={6}
         placeholder="Write your email..."
         value={emailData.body}
         onChangeText={text => handleInputChange('body', text)}
-        style={styles.bodyInput}
+        style={[styles.bodyInput, { fontSize: width * 0.04 }]}
       />
 
-      {/* Attachments */}
       <TouchableOpacity onPress={handleFileSelection} style={styles.button}>
-        <Text style={styles.buttonText}>Attach Files</Text>
+        <Text style={[styles.buttonText, { fontSize: width * 0.04 }]}>Attach Files</Text>
       </TouchableOpacity>
 
-      {/* Show Attachments */}
       {attachments.length > 0 && (
         <View style={styles.attachmentsContainer}>
           {attachments.map((file, index) => (
             <View key={index} style={styles.attachment}>
               {file.type.includes('image') ? (
-                <Image source={{uri: file.uri}} style={styles.imagePreview} />
+                <Image source={{ uri: file.uri }} style={styles.imagePreview} />
               ) : (
                 <Text style={styles.attachmentText}>📎 {file.name}</Text>
               )}
@@ -236,44 +220,24 @@ const EmailCompose = ({autoClose, email, body}) => {
         </View>
       )}
 
-      {/* Send Button */}
       <TouchableOpacity onPress={handleSubmit} style={styles.sendButton}>
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>Send Email</Text>
+          <Text style={[styles.buttonTextSend, { fontSize: width * 0.04 }]}>Send Email</Text>
         )}
       </TouchableOpacity>
 
-      {/* Inbox Modal */}
-      <Modal
-        visible={isInboxModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={closeInboxModal}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Inbox</Text>
-            <ScrollView>
-              <GetAllEmail />
-            </ScrollView>
-            <TouchableOpacity
-              onPress={closeInboxModal}
-              style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    width: '100%',
+    padding: '5%',
     backgroundColor: '#f9f9f9',
+    width:'100%'
   },
   title: {
     fontWeight: 'bold',
@@ -283,18 +247,18 @@ const styles = StyleSheet.create({
   picker: {
     backgroundColor: '#e0e1dd',
     borderRadius: 10,
+    marginBottom: 15,
   },
   label: {
-    fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
   },
   input: {
-    borderBottomWidth: 1,
+    borderWidth: 1,
     marginBottom: 15,
     paddingVertical: 8,
-    fontSize: 16,
-    width: '100%',
+   
+    borderRadius: 5,
   },
   bodyInput: {
     borderWidth: 1,
@@ -303,16 +267,21 @@ const styles = StyleSheet.create({
     minHeight: 100,
     marginBottom: 15,
     textAlignVertical: 'top',
-    width: '100%',
+   
   },
   button: {
     backgroundColor: '#007bff',
     padding: 10,
     borderRadius: 5,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   buttonText: {
     color: '#fff',
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  buttonTextSend: {
+    color: '#000',
     textAlign: 'center',
     fontSize: 16,
   },
@@ -341,10 +310,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   sendButton: {
-    backgroundColor: '#dc3545',
+    backgroundColor: '#7bf1a8',
     padding: 12,
     borderRadius: 5,
-    marginTop: 10,
+    marginTop: 20,
     marginBottom: 60,
   },
   modalContainer: {

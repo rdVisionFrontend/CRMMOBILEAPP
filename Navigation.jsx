@@ -25,7 +25,8 @@ import Note from './src/screens/Note';
 import Clock from './src/screens/Clock';
 import Login from './src/screens/Login';
 import { useAuth } from './src/Authorization/AuthContext';
-import EmailScreen from './src/screens/EmailCompose/EmailScreen';
+import EmailView from './src/screens/EmailCompose/EmailView';
+
 
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
@@ -208,7 +209,7 @@ const DrawerNavigator = () => (
     />
     <Drawer.Screen
       name="Inbox"
-      component={EmailScreen}
+      component={EmailView}
       options={{
         headerShown: true,
         headerStyle: { backgroundColor: '#b1a7a6' },
