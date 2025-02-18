@@ -138,7 +138,7 @@ const Email = ({data, closeModal}) => {
       </View>
 
       <ScrollView>
-        <Text style={{fontSize: 15, fontWeight: 'bold', marginVertical: 10}}>
+        <Text style={{fontSize: 15, fontWeight: 'bold', marginVertical: 10, marginLeft: 20}}>
           Products:
         </Text>
         <View style={styles.cardContainer}>
@@ -178,7 +178,7 @@ const Email = ({data, closeModal}) => {
               </View>
             ))}
         </View>
-        <Text style={{fontSize: 15, fontWeight: 'bold', marginTop: 10}}>
+        <Text style={{fontSize: 15, fontWeight: 'bold', marginTop: 10,marginLeft: 20}}>
           Your Message :
         </Text>
         <View>
@@ -209,6 +209,7 @@ const Email = ({data, closeModal}) => {
 
 const styles = StyleSheet.create({
   container: {
+    
     width: '100%',
     marginTop: 10,
   },
@@ -222,6 +223,7 @@ const styles = StyleSheet.create({
     padding: 2,
     borderRadius: 5,
     width: '90%',
+    marginLeft: 20
   },
   card: {
     width: '25%',
@@ -265,9 +267,10 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     height: 100,
     width: '90%',
+    marginLeft: 20
   },
   footer: {
-    marginTop: 5,
+    marginTop: 15,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -280,6 +283,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 100,
     paddingVertical: 10,
+    borderRadius: 5
   },
   emailButton: {
     backgroundColor: '#006400',
@@ -288,6 +292,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 100,
     paddingVertical: 10,
+    borderRadius:5
   },
 });
 
