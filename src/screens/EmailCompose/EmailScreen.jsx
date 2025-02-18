@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -13,19 +13,19 @@ import {
   Modal,
 } from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
-import { Picker } from '@react-native-picker/picker';
+import {Picker} from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiInstance from '../../../api';
 
-
-const EmailCompose = ({ autoClose, email, body }) => {
-  const { width, height } = useWindowDimensions(); // Get dynamic width and height
+const EmailCompose = ({data, email, body}) => {
+  const {width, height} = useWindowDimensions(); // Get dynamic width and height
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({});
   const [attachments, setAttachments] = useState([]);
   const [isInboxModalVisible, setIsInboxModalVisible] = useState(false);
 
   useEffect(() => {
+    console.log('Email', data);
     fetchToken();
   }, []);
 
@@ -51,16 +51,16 @@ const EmailCompose = ({ autoClose, email, body }) => {
   const [isCustomSubject, setIsCustomSubject] = useState(false);
 
   const handleInputChange = (field, value) => {
-    setEmailData({ ...emailData, [field]: value });
+    setEmailData({...emailData, [field]: value});
   };
 
   const handleSubjectChange = value => {
     if (value === 'custom') {
       setIsCustomSubject(true);
-      setEmailData({ ...emailData, subject: '' });
+      setEmailData({...emailData, subject: ''});
     } else {
       setIsCustomSubject(false);
-      setEmailData({ ...emailData, subject: value });
+      setEmailData({...emailData, subject: value});
     }
   };
 
@@ -153,24 +153,24 @@ const EmailCompose = ({ autoClose, email, body }) => {
           justifyContent: 'space-between',
           alignItems: 'center',
         }}>
-        <Text style={[styles.title, { fontSize: width * 0.05 }]}>
+        <Text style={[styles.title, {fontSize: width * 0.05}]}>
           Compose Email
         </Text>
       </View>
 
       <TextInput
         placeholder="To Email"
-        value={emailData.toEmail}
+        value={emailData.toEmail || data.email || data.senderEmail} // Fallback to data.email if emailData.toEmail is empty
         onChangeText={text => handleInputChange('toEmail', text)}
-        style={[styles.input, { fontSize: width * 0.04 }]}
+        style={[styles.input, {fontSize: width * 0.04}]}
         keyboardType="email-address"
       />
 
-      <Text style={[styles.label, { fontSize: width * 0.04 }]}>Subject</Text>
+      <Text style={[styles.label, {fontSize: width * 0.04}]}>Subject</Text>
       <Picker
         selectedValue={isCustomSubject ? 'custom' : emailData.subject}
         onValueChange={handleSubjectChange}
-        style={[styles.picker, { fontSize: width * 0.04 }]}>
+        style={[styles.picker, {fontSize: width * 0.04}]}>
         <Picker.Item label="Select a subject" value="" />
         {predefinedSubjects.map((subject, index) => (
           <Picker.Item key={index} label={subject} value={subject} />
@@ -183,22 +183,24 @@ const EmailCompose = ({ autoClose, email, body }) => {
           placeholder="Enter your subject"
           value={emailData.subject}
           onChangeText={text => handleInputChange('subject', text)}
-          style={[styles.input, { fontSize: width * 0.04 }]}
+          style={[styles.input, {fontSize: width * 0.04}]}
         />
       )}
 
-      <Text style={[styles.label, { fontSize: width * 0.04 }]}>Body</Text>
+      <Text style={[styles.label, {fontSize: width * 0.04}]}>Body</Text>
       <TextInput
         multiline
         numberOfLines={6}
         placeholder="Write your email..."
-        value={emailData.body}
+        value={emailData.body || data.comment ||data.subject}
         onChangeText={text => handleInputChange('body', text)}
-        style={[styles.bodyInput, { fontSize: width * 0.04 }]}
+        style={[styles.bodyInput, {fontSize: width * 0.04}]}
       />
 
       <TouchableOpacity onPress={handleFileSelection} style={styles.button}>
-        <Text style={[styles.buttonText, { fontSize: width * 0.04 }]}>Attach Files</Text>
+        <Text style={[styles.buttonText, {fontSize: width * 0.04}]}>
+          Attach Files
+        </Text>
       </TouchableOpacity>
 
       {attachments.length > 0 && (
@@ -206,7 +208,7 @@ const EmailCompose = ({ autoClose, email, body }) => {
           {attachments.map((file, index) => (
             <View key={index} style={styles.attachment}>
               {file.type.includes('image') ? (
-                <Image source={{ uri: file.uri }} style={styles.imagePreview} />
+                <Image source={{uri: file.uri}} style={styles.imagePreview} />
               ) : (
                 <Text style={styles.attachmentText}>📎 {file.name}</Text>
               )}
@@ -224,11 +226,11 @@ const EmailCompose = ({ autoClose, email, body }) => {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={[styles.buttonTextSend, { fontSize: width * 0.04 }]}>Send Email</Text>
+          <Text style={[styles.buttonTextSend, {fontSize: width * 0.04}]}>
+            Send Email
+          </Text>
         )}
       </TouchableOpacity>
-
-      
     </ScrollView>
   );
 };
@@ -237,7 +239,7 @@ const styles = StyleSheet.create({
   container: {
     padding: '5%',
     backgroundColor: '#f9f9f9',
-    width:'100%'
+    width: '100%',
   },
   title: {
     fontWeight: 'bold',
@@ -257,7 +259,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 15,
     paddingVertical: 8,
-   
+
     borderRadius: 5,
   },
   bodyInput: {
@@ -267,7 +269,6 @@ const styles = StyleSheet.create({
     minHeight: 100,
     marginBottom: 15,
     textAlignVertical: 'top',
-   
   },
   button: {
     backgroundColor: '#007bff',

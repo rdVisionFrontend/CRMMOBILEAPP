@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Modal from 'react-native-modal';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import CountryFlagTable from './Flag';
 import Email from './Email';
 import Nodata from './NoData';
@@ -22,8 +22,9 @@ import apiInstance from '../../api';
 import StatustModal from './StatustModal';
 import TicketInvoiceModal from '../screens/TicketRaiseInvoiceModal/TicketInvoiceModal';
 import TicketHistoryModal from './TicketHistroyModal';
+import EmailScreen from '../screens/EmailCompose/EmailScreen';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
 const Ticket = () => {
   const [ticketData, setTicketData] = useState([]);
@@ -217,8 +218,8 @@ const Ticket = () => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+    <View style={{flex: 1}}>
+      <ScrollView contentContainerStyle={{flexGrow: 1}}>
         <View style={styles.container}>
           <Text>{loading ? 'Loading...' : ''}</Text>
           {ticketData && ticketData.length > 0 ? (
@@ -227,7 +228,7 @@ const Ticket = () => {
                 <View
                   style={[
                     styles.header,
-                    { backgroundColor: getStatusColor(item.ticketstatus) },
+                    {backgroundColor: getStatusColor(item.ticketstatus)},
                   ]}>
                   <Text style={styles.indexText}>{index + 1}</Text>
                   {readTicket &&
@@ -255,7 +256,7 @@ const Ticket = () => {
                         justifyContent: 'center',
                         alignItems: 'flex-start',
                       }}>
-                      <Text style={{ fontSize: width * 0.03 }}>
+                      <Text style={{fontSize: width * 0.03}}>
                         {new Date(item.queryTime).toLocaleString('en-US', {
                           day: '2-digit',
                           month: 'short',
@@ -266,7 +267,7 @@ const Ticket = () => {
                         })}
                       </Text>
                       <View
-                        style={{ display: 'flex', flexDirection: 'row', gap: 4 }}>
+                        style={{display: 'flex', flexDirection: 'row', gap: 4}}>
                         <Text
                           onPress={() => toggleAccordion(item.uniqueQueryId)}
                           style={styles.headerText}>
@@ -381,8 +382,27 @@ const Ticket = () => {
         </View>
       </ScrollView>
 
-      {emailModal && <Email data={emailData} closeModal={closeEmailModal} />}
-      <View style={{ flex: 1, position: 'absolute', top: 0, left: 5 }}>
+      {/* {emailModal && <Email data={emailData} closeModal={closeEmailModal} />} */}
+      {/* {emailModal && <EmailScreen />} */}
+      <Modal
+        visible={emailModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeEmailModal}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <EmailScreen data={emailData} />
+            {/* Close Button for Modal */}
+            <TouchableOpacity
+              onPress={closeEmailModal}
+              style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <View style={{flex: 1, position: 'absolute', top: 0, left: 5}}>
         {invoiceModal && (
           <TicketInvoiceModal data={invoiceData} closeModal={closeEmailModal} />
         )}
@@ -486,6 +506,30 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    width:'100%'
+  },
+  modalContainer: {
+    width: '95%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  closeButton: {
+    backgroundColor: '#dc3545',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
 
