@@ -1,13 +1,12 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
 import InvoiceInfoTab from './InvoiceInfoTab';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 const InvoiceInfo = () => {
-  const {userData} = useSelector(state => state.crmUser);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [invoiceData, setInvoiceData] = useState(null);
@@ -28,9 +27,7 @@ const InvoiceInfo = () => {
       if (!user || !token) {
         throw new Error('User data or token not found');
       }
-
       const userData = JSON.parse(user);
-
       const response = await axios.get(
         `https://uatbackend.rdvision.tech/invoice/invoideCOunt/${
           userData.roleDto.roleName === 'Closer' ? userData.userId : 0
