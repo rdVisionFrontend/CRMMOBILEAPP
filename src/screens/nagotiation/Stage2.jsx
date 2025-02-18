@@ -20,12 +20,11 @@ import axios from 'axios';
 
 const Stage2 = () => {
   const [selectedStage, setSelectedStage] = useState('All');
-  const [selectedItem, setSelectedItem] = useState(4); // Default items per page
+  const [selectedItem, setSelectedItem] = useState(10); // Default items per page
   const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
   const [expandedCardId, setExpandedCardId] = useState(null); // Track expanded card
   const [someDataArray, setSomeDataArray] = useState([]);
-  const [localdate, setLocalDate] = useState('');
-  const [localtime, setLocalTime] = useState('');
+
   const [emailmodal, setEmailModal] = useState(false);
   const [statusmodal, setStatusModal] = useState(false);
   const [emaildata, setEmailData] = useState();
@@ -130,6 +129,7 @@ const Stage2 = () => {
   };
 
   const closeEmailModal = () => {
+    fetchStage2Data()
     setEmailModal(false);
     setStage2(true);
     setVisibleModal(false);
@@ -209,6 +209,31 @@ const Stage2 = () => {
   };
   const closeTicketJourney = () => {
     setTicketHisModal(false);
+  };
+
+
+  // open whtsapp
+  const openWhatsApp = mobileNumber => {
+    if (!mobileNumber) {
+      Alert.alert('Error', 'No mobile number available.');
+      return;
+    }
+    const url = `whatsapp://send?phone=${mobileNumber}`;
+    Linking.openURL(url).catch(() => {
+      Alert.alert('Error', 'WhatsApp is not installed on this device.');
+    });
+  };
+// open call log
+  const openCallLog = (mobileNumber) => {
+    if (!mobileNumber) {
+      Alert.alert("Error", "No mobile number available.");
+      return;
+    }
+  
+    const url = `tel:${mobileNumber}`;
+    Linking.openURL(url).catch(() => {
+      Alert.alert("Error", "Calling is not supported on this device.");
+    });
   };
 
   return (
@@ -349,7 +374,7 @@ const Stage2 = () => {
                         <Text
                           onPress={() => toggleAccordion(index)}
                           style={{fontSize: 16}}>
-                          {item.senderName}
+                          {item.senderName || (item.firstName+" "+(item.lastName||""))}
                         </Text>
                         <View style={{flexDirection: 'row', gap: 10}}>
                           <TouchableOpacity
@@ -364,7 +389,7 @@ const Stage2 = () => {
                               style={{width: 24, height: 24}}
                             />
                           </TouchableOpacity>
-                          <TouchableOpacity onPress={() => openWhatsApp()}>
+                          <TouchableOpacity onPress={() => openWhatsApp(item.mobileNumber || item.senderMobile)}>
                             <Image
                               source={{
                                 uri: 'https://cdn-icons-png.flaticon.com/128/15707/15707820.png',
@@ -373,7 +398,7 @@ const Stage2 = () => {
                             />
                           </TouchableOpacity>
                           <TouchableOpacity
-                            onPress={() => openCallLog(item.senderMobile)}>
+                            onPress={() => openCallLog(item.senderMobile || item.mobileNumber)}>
                             <Image
                               source={{
                                 uri: 'https://cdn-icons-png.flaticon.com/128/455/455705.png',
@@ -540,9 +565,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f7f3',
     borderRadius: 5,
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     gap: 4,
     marginVertical: 2,
+    width: '80%',
   },
   row: {
     flexDirection: 'row',

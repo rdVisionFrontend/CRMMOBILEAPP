@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
-  Image, 
+  Image,
 } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -95,34 +95,45 @@ const Invoice = () => {
               <Text style={styles.expandedText}>Product Details</Text>
 
               {/* Loop through productOrders and display each product's details */}
-              {item.orderDto.productOrders[0].product.map((product, index) => (
-                <View
-                  key={index}
-                  style={[styles.productDetailContainer, {width: '100%'}]}>
-                  <View style={[styles.row, {borderBottomWidth: 1}]}>
-                    <Text style={[styles.tableHeader, {flex: 1}]}>
-                      Product Name:
-                    </Text>
-                    <Text style={[styles.tableCell, {flex: 2}]}>
-                      {product.name}
-                    </Text>
+              {item.orderDto.productOrders?.[0]?.product?.map(
+                (product, index) => (
+                  <View
+                    key={index}
+                    style={[styles.productDetailContainer, {width: '100%'}]}>
+                    <View style={[styles.row, {borderBottomWidth: 1}]}>
+                      <Text style={[styles.tableHeader, {flex: 1}]}>
+                        Product Name:
+                      </Text>
+                      <Text style={[styles.tableCell, {flex: 2}]}>
+                        {product.name || 'N/A'}
+                      </Text>
+                    </View>
+                    <View style={[styles.row, {borderBottomWidth: 1}]}>
+                      <Text style={[styles.tableHeader, {flex: 1}]}>
+                        Quantity:
+                      </Text>
+                      <Text style={[styles.tableCell, {flex: 2}]}>
+                        {item.orderDto.productOrders[0]?.quantity || 0}
+                      </Text>
+                    </View>
+                    <View style={[styles.row, {borderBottomWidth: 1}]}>
+                      <Text style={[styles.tableHeader, {flex: 1}]}>
+                        Price:
+                      </Text>
+                      <Text style={[styles.tableCell, {flex: 2}]}>
+                        {item.orderDto.productOrders[0]?.totalAmount || 0}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={[styles.row, {borderBottomWidth: 1}]}>
-                    <Text style={[styles.tableHeader, {flex: 1}]}>
-                      Quantity:
-                    </Text>
-                    <Text style={[styles.tableCell, {flex: 2}]}>
-                      {item.orderDto.productOrders[0].quantity || 0}
-                    </Text>
-                  </View>
-                  <View style={[styles.row, {borderBottomWidth: 1}]}>
-                    <Text style={[styles.tableHeader, {flex: 1}]}>Price:</Text>
-                    <Text style={[styles.tableCell, {flex: 2}]}>
-                      {item.orderDto.productOrders[0].totalAmount || 0}
-                    </Text>
-                  </View>
-                </View>
-              ))}
+                ),
+              )}
+
+              {/* If no products are found */}
+              {!item.orderDto.productOrders?.[0]?.product?.length && (
+                <Text style={{textAlign: 'center', color: 'red'}}>
+                  No products available
+                </Text>
+              )}
             </View>
           )}
         </View>
@@ -192,14 +203,14 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: '#ddd',
-    borderRadius: 10
+    borderRadius: 10,
   },
   expandedText: {
     fontSize: 16,
     color: '#000',
     marginVertical: 2,
     textAlign: 'center',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   productSection: {
     marginVertical: 5,
@@ -218,7 +229,6 @@ const styles = StyleSheet.create({
   productDetailContainer: {
     padding: 10,
     width: '100%',
-    
   },
   row: {
     flexDirection: 'row',

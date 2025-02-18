@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,38 +9,30 @@ import {
   Animated,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Calendar} from 'react-native-calendars';
+import { Calendar } from 'react-native-calendars';
 import moment from 'moment';
 import apiInstance from '../../api';
+import { useAuth } from '../Authorization/AuthContext';
 
 const LiveCalendar = () => {
   const [calendarData, setCalendarData] = useState([]);
-  const [calendarDataUploaded, setCalendarDataUploaded] = useState([]); 
+  const [calendarDataUploaded, setCalendarDataUploaded] = useState([]);
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedEvents, setSelectedEvents] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [live, setLive] = useState(false);
-  const [showclander, setShowCalnader] = useState(true);
+  const { calApiCalander } = useAuth();
+  const [showCalendar, setShowCalendar] = useState(true);
+  const [rerenderKey, setRerenderKey] = useState(0);
 
   const scrollViewRef = useRef(null);
 
   useEffect(() => {
-    let isMounted = true; // Prevents state update after unmount
-
     const fetchTokenAndData = async () => {
       try {
         const storedToken = await AsyncStorage.getItem('jwtToken');
         const storedUser = await AsyncStorage.getItem('user');
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-
-        if (isMounted) {
-          setToken(storedToken);
-          setUser(parsedUser);
-        }
 
         if (parsedUser) {
           await fetchData(parsedUser.userId);
@@ -51,10 +43,27 @@ const LiveCalendar = () => {
       }
     };
     fetchTokenAndData();
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  useEffect(() => {
+    setRerenderKey(prevKey => prevKey + 1);
+    const fetchDataAsync = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem('jwtToken');
+        const storedUser = await AsyncStorage.getItem('user');
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+
+        if (parsedUser) {
+          await fetchUploadedData(parsedUser.userId);
+          await fetchData(parsedUser.userId);
+        }
+      } catch (error) {
+        console.error('Error fetching token/user:', error);
+      }
+    };
+
+    fetchDataAsync();
+  }, [calApiCalander]);
 
   const fetchData = async userId => {
     try {
@@ -63,7 +72,6 @@ const LiveCalendar = () => {
       );
       setCalendarData(response.data.response);
       console.log('Live Events:', response.data.response);
-      setLive(true);
     } catch (error) {
       console.error('Error fetching calendar data:', error);
     }
@@ -90,7 +98,7 @@ const LiveCalendar = () => {
       const type = item.hasOwnProperty('comments') ? 'live' : 'uploaded';
 
       if (!markedDates[date]) {
-        markedDates[date] = {dots: []};
+        markedDates[date] = { dots: [] };
       }
 
       markedDates[date].dots.push({
@@ -107,8 +115,8 @@ const LiveCalendar = () => {
       selected: true,
       selectedColor: '#2196F3',
       customStyles: {
-        container: {backgroundColor: '#2196F3', borderRadius: 8},
-        text: {color: 'white', fontWeight: 'bold'},
+        container: { backgroundColor: '#2196F3', borderRadius: 8 },
+        text: { color: 'white', fontWeight: 'bold' },
       },
     };
 
@@ -131,7 +139,7 @@ const LiveCalendar = () => {
 
     // Scroll to the top of the ScrollView
     if (scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({x: 0, y: 0, animated: true});
+      scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true });
     }
   };
 
@@ -148,70 +156,32 @@ const LiveCalendar = () => {
     todayBackgroundColor: '#2196F3',
   };
 
-  return (
-    <View style={styles.container}>
-      <Text
-        style={{
-          fontWeight: 700,
-          fontSize: 20,
-          paddingTop: 24,
-          marginLeft: 10,
-        }}>
-        Calander
-        <Text
-          style={{fontSize: 15, marginLeft: 10}}
-          onPress={() => setShowCalnader(!showclander)}>
-          {`${showclander ? '(Hide)' : '(View)'}`}
-        </Text>
-      </Text>
-      {showclander && (
-        <Calendar
-          markingType={'multi-dot'}
-          markedDates={events}
-          onDayPress={handleDayPress}
-          theme={theme}
-          style={styles.calendar}
-          current={moment().format('YYYY-MM-DD')}
-        />
-      )}
+  const EventModal = ({ isModalVisible, selectedDate, selectedEvents, onClose }) => {
+    return (
       <Modal
         animationType="fade"
         transparent={true}
         visible={isModalVisible}
-        onRequestClose={() => setIsModalVisible(false)}>
+        onRequestClose={onClose}>
         <View style={styles.modalContainer}>
           <View style={styles.card}>
-            {/* Close Button (X) */}
-            <TouchableOpacity
-              onPress={() => setIsModalVisible(false)}
-              style={styles.closeButton}>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
 
-            {/* Modal Title */}
             <Text style={styles.modalTitle}>Events on {selectedDate}</Text>
 
             {selectedEvents.length > 0 ? (
-              <ScrollView
-                ref={scrollViewRef}
-                style={styles.eventsContainer}
-                contentContainerStyle={{paddingBottom: 20}}>
+              <ScrollView ref={scrollViewRef} style={styles.eventsContainer}>
                 {selectedEvents.map((event, index) => (
                   <View key={index} style={styles.eventCard}>
                     <Text style={styles.eventTitle}>
-                      {event.hasOwnProperty('comments')
-                        ? 'Live Followup'
-                        : 'Uploaded Followup'}
+                      {event.hasOwnProperty('comments') ? 'Live Followup' : 'Uploaded Followup'}
                     </Text>
-                    {/* <View style={{marginLeft: 10, marginTop: 5, height:20}}>
-                      <BlinkingCircle />
-                    </View> */}
                     <View style={styles.eventDetails}>
                       <Text style={styles.eventText}>➤ {event.comments}</Text>
                       <Text style={styles.eventText}>➤ {event.date}</Text>
-                      <Text style={styles.eventText}>
-                        ➤ {event['no of tickets']}
-                      </Text>
+                      <Text style={styles.eventText}>➤ {event['no of tickets']}</Text>
                     </View>
                   </View>
                 ))}
@@ -222,6 +192,41 @@ const LiveCalendar = () => {
           </View>
         </View>
       </Modal>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text
+        style={{
+          fontWeight: '700',
+          fontSize: 20,
+          paddingTop: 24,
+          marginLeft: 10,
+        }}>
+        Calendar
+        <Text
+          style={{ fontSize: 15, marginLeft: 10 }}
+          onPress={() => setShowCalendar(!showCalendar)}>
+          {`${showCalendar ? '(Hide)' : '(View)'}`}
+        </Text>
+      </Text>
+      {showCalendar && (
+        <Calendar
+          markingType={'multi-dot'}
+          markedDates={events}
+          onDayPress={handleDayPress}
+          theme={theme}
+          style={styles.calendar}
+          current={moment().format('YYYY-MM-DD')}
+        />
+      )}
+      <EventModal
+        isModalVisible={isModalVisible}
+        selectedDate={selectedDate}
+        selectedEvents={selectedEvents}
+        onClose={() => setIsModalVisible(false)}
+      />
     </View>
   );
 };
@@ -267,7 +272,7 @@ const BlinkingCircle = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {backgroundColor: '#fff', width: '100%'},
+  container: { backgroundColor: '#fff', width: '100%' },
   calendar: {
     borderRadius: 10,
     elevation: 3,
@@ -276,9 +281,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e9ecef',
     padding: 5,
   },
-  eventsContainer: {marginTop: 20, paddingHorizontal: 5},
-  eventItem: {padding: 15, borderRadius: 8, marginBottom: 10},
-  eventTitle: {color: 'white', fontSize: 18, fontWeight: '500'},
+  eventsContainer: { marginTop: 20, paddingHorizontal: 5 },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -305,9 +308,16 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   closeText: {
-    fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
+    color: '#ffffff',
+    height: 25,
+    width: 25,
+    backgroundColor: 'red',
+    borderRadius: 15,
+    paddingTop: 2,
+    textAlign: 'center',
+    lineHeight: 18,
+    fontSize: 10,
   },
   modalTitle: {
     fontSize: 20,
@@ -315,14 +325,10 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 10,
     textAlign: 'center',
-    color:'#001d3d'
-  },
-  eventsContainer: {
-    maxHeight: 300,
-    width: '100%',
+    color: '#001d3d',
   },
   eventCard: {
-    backgroundColor: '#FFF2F2', // Vibrant warm contrast
+    backgroundColor: '#FFF2F2',
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
@@ -349,7 +355,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 20,
   },
-  
 });
 
 export default LiveCalendar;

@@ -9,10 +9,11 @@ export const AuthProvider = ({ children }) => {
   const [apicall,setApiCall] = useState(false)
   const [raiseInoice,setRaiseInvoice] = useState(true)
   const [takingBreak, setTakingBreak] = useState(false)
+  const [calApiCalander,setCallApiCalander] = useState(false)
 
 
   return (
-    <AuthContext.Provider value={{isAuthenticated, setIsAuthenticated,apicall,setApiCall,raiseInoice,setRaiseInvoice ,takingBreak, setTakingBreak}}>
+    <AuthContext.Provider value={{calApiCalander,setCallApiCalander,isAuthenticated, setIsAuthenticated,apicall,setApiCall,raiseInoice,setRaiseInvoice ,takingBreak, setTakingBreak}}>
       {children}
     </AuthContext.Provider>
   );

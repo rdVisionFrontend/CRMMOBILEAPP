@@ -25,6 +25,7 @@ import Note from './src/screens/Note';
 import Clock from './src/screens/Clock';
 import Login from './src/screens/Login';
 import { useAuth } from './src/Authorization/AuthContext';
+import EmailScreen from './src/screens/EmailCompose/EmailScreen';
 
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
@@ -40,30 +41,7 @@ const openGmail = () => {
   }
 };
 
-const EmailScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <TouchableOpacity
-      onPress={openGmail}
-      style={{ borderWidth: 1, padding: 10, borderRadius: 2 }}>
-      <View
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 10,
-        }}>
-        <Image
-          source={{
-            uri: 'https://cdn-icons-png.flaticon.com/128/5968/5968534.png',
-          }}
-          style={{ width: 20, height: 20 }}
-        />
-        <Text>OPEN GMAIL</Text>
-      </View>
-    </TouchableOpacity>
-  </View>
-);
+
 
 const DrawerNavigator = () => (
   <Drawer.Navigator
@@ -229,7 +207,7 @@ const DrawerNavigator = () => (
       }}
     />
     <Drawer.Screen
-      name="Email"
+      name="Inbox"
       component={EmailScreen}
       options={{
         headerShown: true,
@@ -238,7 +216,7 @@ const DrawerNavigator = () => (
         drawerIcon: ({ focused, size }) => (
           <Image
             source={{
-              uri: 'https://cdn-icons-png.flaticon.com/128/5968/5968534.png',
+              uri: 'https://cdn-icons-png.flaticon.com/128/10350/10350208.png',
             }}
             style={{
               width: 20,

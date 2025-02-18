@@ -7,13 +7,13 @@ import {
   TouchableOpacity,
   ActivityIndicator, // Import ActivityIndicator
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 
 const TodaySalesRepost = () => {
-  const { userData } = useSelector(state => state.crmUser);
+  const {userData} = useSelector(state => state.crmUser);
   const [todaySale, setToDaySale] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState(null); // To track which card is expanded
@@ -49,7 +49,9 @@ const TodaySalesRepost = () => {
 
   const formatDate = dateArray => {
     const [year, month, day] = dateArray;
-    return `${day < 10 ? `0${day}` : day}-${month < 10 ? `0${month}` : month}-${year}`;
+    return `${day < 10 ? `0${day}` : day}-${
+      month < 10 ? `0${month}` : month
+    }-${year}`;
   };
 
   const handleCardPress = index => {
@@ -78,29 +80,51 @@ const TodaySalesRepost = () => {
               return (
                 <View style={{alignItems: 'center'}}>
                   <View style={styles.card} key={index}>
-                  <TouchableOpacity onPress={() => handleCardPress(index)}>
-                    <View style={styles.cardRow}>
-                      <Text style={styles.nameText}>{ele.customerName}</Text>
-                      <Text style={styles.addressText}>{ele.address?.landmark}</Text>
-                      <Text style={styles.dateText}>{formatDate(ele.invoiceCreateDate)}</Text>
-                    </View>
-                  </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleCardPress(index)}>
+                      <View style={styles.cardRow}>
+                        <Text style={styles.nameText}>{ele.customerName}</Text>
+                        <Text style={styles.addressText}>
+                          {ele.address?.landmark}
+                        </Text>
+                        <Text style={styles.dateText}>
+                          {formatDate(ele.invoiceCreateDate)}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
 
-                  {isExpanded && (
-                    <View style={styles.expandedContent}>
-                      <DetailRow label="Doses" value={ele.orderDto.productOrders[0].product.map(product => product.strength).join(', ')} />
-                      <DetailRow label="Amount" value={`INR ${ele.orderDto.totalPayableAmount}`} />
-                      <DetailRow
-                        label="Address"
-                        value={`${ele.address?.city}, ${ele.address?.state}, ${ele.address?.country}, ${ele.address?.zipCode}`}
-                      />
+                    {isExpanded && (
+                      <View style={styles.expandedContent}>
+                        <DetailRow
+                          label="Doses"
+                          value={
+                            ele.orderDto.productOrders?.[0]?.product
+                              ? ele.orderDto.productOrders[0].product
+                                  .map(product => product.strength)
+                                  .join(', ')
+                              : 'N/A'
+                          }
+                        />
+                        <DetailRow
+                          label="Amount"
+                          value={`INR ${ele.orderDto.totalPayableAmount}`}
+                        />
+                        <DetailRow
+                          label="Address"
+                          value={`${ele.address?.city}, ${ele.address?.state}, ${ele.address?.country}, ${ele.address?.zipCode}`}
+                        />
 
-                      {ele.orderDto.productOrders[0].product.map((product, index) => (
-                        <ProductDetails key={index} product={product} order={ele.orderDto.productOrders[0]} />
-                      ))}
-                    </View>
-                  )}
-                </View>
+                        {ele.orderDto.productOrders?.[0]?.product?.map(
+                          (product, index) => (
+                            <ProductDetails
+                              key={index}
+                              product={product}
+                              order={ele.orderDto.productOrders[0]}
+                            />
+                          ),
+                        )}
+                      </View>
+                    )}
+                  </View>
                 </View>
               );
             })
@@ -114,18 +138,20 @@ const TodaySalesRepost = () => {
 };
 
 // Reusable Header Item Component
-const HeaderItem = ({ title }) => (
+const HeaderItem = ({title}) => (
   <View style={styles.headerItem}>
     <Text style={styles.headerText}>{title}</Text>
     <Image
-      source={{ uri: 'https://cdn-icons-png.flaticon.com/128/14034/14034783.png' }}
+      source={{
+        uri: 'https://cdn-icons-png.flaticon.com/128/14034/14034783.png',
+      }}
       style={styles.headerIcon}
     />
   </View>
 );
 
 // Reusable Detail Row Component
-const DetailRow = ({ label, value }) => (
+const DetailRow = ({label, value}) => (
   <View style={styles.detailRow}>
     <Text style={styles.detailLabel}>{label}:</Text>
     <Text style={styles.detailValue}>{value}</Text>
@@ -133,7 +159,7 @@ const DetailRow = ({ label, value }) => (
 );
 
 // Reusable Product Details Component
-const ProductDetails = ({ product, order }) => (
+const ProductDetails = ({product, order}) => (
   <View style={styles.productDetailContainer}>
     <DetailRow label="Product Name" value={product.name} />
     <DetailRow label="Quantity" value={order.quantity || 0} />
@@ -182,13 +208,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#fff',
     shadowColor: '#000',
-    elevation: 10
+    elevation: 10,
   },
   cardRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
   },
   nameText: {
     width: '42%',
@@ -202,7 +228,7 @@ const styles = StyleSheet.create({
     width: '42%',
     color: '#2f195f',
     fontWeight: '600',
-    paddingRight: 5
+    paddingRight: 5,
   },
   expandedContent: {
     padding: 10,
@@ -229,7 +255,7 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#CDF5FD',
     marginTop: 10,
-    borderRadius: 10
+    borderRadius: 10,
   },
   noDataText: {
     textAlign: 'center',

@@ -29,6 +29,7 @@ const Login = ({navigation}) => {
   const {setIsAuthenticated} = useAuth();
 
   const handleRequestOtp = () => {
+    setResendOtp(false)
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
       return;
@@ -43,7 +44,9 @@ const Login = ({navigation}) => {
         Alert.alert('Success', message); // Pass the message as a string
         setOtpSent(true);
         setRequestOtpForm(false);
-        setResendOtp(true);
+        setTimeout(() => {
+          setResendOtp(true);
+        }, [100000]);
       })
       .catch(error => {
         console.log('Error:', error);
@@ -261,9 +264,23 @@ const Login = ({navigation}) => {
 
           {/* Resend OTP */}
           {resendOtp && (
-            <TouchableOpacity onPress={handleRequestOtp}>
-              <Text              
-                style={{color: '#1d3557', textAlign: 'center', marginTop: 20}}>
+            <TouchableOpacity
+              style={{
+                height: 40,
+                backgroundColor: '#edede9',
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderRadius: 20, // Optional, for rounded corners
+                marginTop: 20,
+                marginHorizontal: '10%', // Responsive margin
+              }}
+              onPress={handleRequestOtp}>
+              <Text
+                style={{
+                  color: '#1d3557',
+                  textAlign: 'center',
+                  fontSize: 16, // Make the font responsive by using a percentage or scaling
+                }}>
                 Resend OTP
               </Text>
             </TouchableOpacity>
@@ -341,7 +358,8 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
   input: {
-    height: 50,
+    height: 40,
+    lineHeight: 20,
     borderColor: '#ccc',
     borderWidth: 1,
     paddingLeft: 40, // Space for the icon
@@ -365,7 +383,8 @@ const styles = StyleSheet.create({
   },
   passwordInput: {
     flex: 1,
-    height: 50,
+    height: 40,
+    lineHeight: 20,
     paddingLeft: 10,
     fontSize: 18,
     color: '#415a77',
@@ -380,7 +399,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 50,
+    height: 40,
     backgroundColor: '#0088FF',
     textAlign: 'center',
     borderRadius: 40,

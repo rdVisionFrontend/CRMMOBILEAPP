@@ -13,10 +13,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {Picker} from '@react-native-picker/picker'; // Import Picker
 import DateTimePicker from '@react-native-community/datetimepicker';
-import apiInstance from '../../api';
-import {useSelector} from 'react-redux';
+import {useAuth} from '../Authorization/AuthContext';
 
-const Email = ({data,closeModal }) => {
+const Email = ({data, closeModal}) => {
   const {width, height} = Dimensions.get('window'); // Get full screen dimensions
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState(null);
@@ -27,8 +26,7 @@ const Email = ({data,closeModal }) => {
   const [show, setShow] = useState(false);
   const [mode, setMode] = useState('date');
   const [selectedDate, setSelectedDate] = useState(null);
-  const [callId, setCallId] = useState(0);
- 
+  const {calApiCalander, setCallApiCalander} = useAuth();
 
   useEffect(() => {
     fetchToken();
@@ -46,39 +44,47 @@ const Email = ({data,closeModal }) => {
     }
   };
   const updateTicketResponse = async () => {
-    console.log("Try to updated asdas")
-    try {    
+    console.log('Try to updated asdas');
+    try {
       const storedUser = await AsyncStorage.getItem('user');
       const userData = JSON.parse(storedUser);
       const formattedDateTime = selectedDate
         ? selectedDate.toISOString().replace('Z', '')
         : null;
-        console.log(formattedDateTime)
-        const apiPath = data.uniqueQueryId.length < 15 ? "third_party_api/ticket" : "upload"; 
-        console.log("PAth",apiPath)    
-        console.log("uniqueQueryId",data.uniqueQueryId)    
-        const queryParam = formattedDateTime ? `&followUpDateTime=${formattedDateTime}` : "";
+      console.log(formattedDateTime);
+      const apiPath =
+        data.uniqueQueryId.length < 15 ? 'third_party_api/ticket' : 'upload';
+      console.log('PAth', apiPath);
+      console.log('uniqueQueryId', data.uniqueQueryId);
+      const queryParam = formattedDateTime
+        ? `&followUpDateTime=${formattedDateTime}`
+        : '';
       setLoading(true);
       const url = `https://uatbackend.rdvision.tech/${apiPath}/updateTicketResponse/${data.uniqueQueryId}?userId=${userData.userId}&ticketStatus=${selectedOption}&comment=${text}${queryParam}`;
       console.log(url, token);
-      const response = await axios.post(url,{} ,{
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+      const response = await axios.post(
+        url,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
       console.log('Response:', response.data);
       setLoading(false);
       Alert.alert('Status Updated');
+
+      console.log("date:",queryParam)
+      setCallApiCalander(!calApiCalander);
       closeModal();
     } catch (error) {
-      console.log( 'Error:', error.response , );
+      console.log('Error:', error.response);
       setLoading(false);
       Alert.alert('Error', 'Failed to update status. Please try again.');
     }
   };
-
-
 
   const statuses = [
     'New',

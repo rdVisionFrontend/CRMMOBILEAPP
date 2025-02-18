@@ -24,7 +24,7 @@ const InvoiceModal = ({data, closeModal}) => {
   const [loading, setLoading] = useState(false);
   const [orderdetails, setOrderDetails] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const {apicall, raiseInoice, setRaiseInvoice} = useAuth(); 
+  const {apicall, raiseInoice, setRaiseInvoice} = useAuth();
   const [addressData, setAddressData] = useState([]);
   const [selectedCurrency, setSelectedCurrency] = useState();
   const [products, setProducts] = useState([]);
@@ -50,7 +50,7 @@ const InvoiceModal = ({data, closeModal}) => {
       fetchAddressDetails();
       // closeModal();
     }
-    if (apicall) { 
+    if (apicall) {
       fetchAddressDetails();
     }
   }, []);
@@ -195,10 +195,15 @@ const InvoiceModal = ({data, closeModal}) => {
 
   return (
     <ScrollView>
-      <View style={styles.container}>
-        <Text style={{fontSize: 20, fontWeight: 'bold',marginBottom: 10}}>Create Invoice</Text>
-       
-        <View style={{width: '100%', }}>
+      <View style={styles.mainContainer}>
+        <Text style={{fontSize: 20, fontWeight: 'bold', marginBottom: 10}}>
+          Create Invoice
+        </Text>
+        <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+          <Text style={styles.closeButtonText}>X</Text>
+        </TouchableOpacity>
+
+        <View style={{width: '100%'}}>
           <View
             style={{
               display: 'flex',
@@ -206,8 +211,17 @@ const InvoiceModal = ({data, closeModal}) => {
               justifyContent: 'space-between',
               gap: 5,
             }}>
-            <View style={{borderRadius: 10, padding: 10, width: '48%',backgroundColor: '#DFF5FF'}}>
-              <Text style={{fontSize: 15, textAlign: 'center', fontWeight: 500}}>Customer details</Text>
+            <View
+              style={{
+                borderRadius: 10,
+                padding: 10,
+                width: '48%',
+                backgroundColor: '#DFF5FF',
+              }}>
+              <Text
+                style={{fontSize: 15, textAlign: 'center', fontWeight: 500}}>
+                Customer details
+              </Text>
               <View style={{display: 'flex', flexDirection: 'row'}}>
                 <Text style={{fontWeight: 'bold'}}>Name :</Text>
                 <Text style={{paddingHorizontal: 11}}>
@@ -238,7 +252,7 @@ const InvoiceModal = ({data, closeModal}) => {
                 padding: 10,
                 width: '48%',
                 marginRight: 25,
-                backgroundColor: '#F6F5F5'
+                backgroundColor: '#F6F5F5',
               }}>
               <Text>Address details</Text>
               <View style={{display: 'flex', flexDirection: 'column'}}>
@@ -279,7 +293,7 @@ const InvoiceModal = ({data, closeModal}) => {
           </View>
         </View>
         {/* all added product */}
-        <View style={{width: '98%',marginTop: 10, }}>
+        <View style={{width: '98%', marginTop: 10}}>
           <View style={styles.tableHeader}>
             <Text style={styles.headerCell}>Name</Text>
             <Text style={styles.headerCell}>Brand</Text>
@@ -342,11 +356,6 @@ const InvoiceModal = ({data, closeModal}) => {
             onPress={() => setModalVisible(true)}>
             <Text style={styles.buttonText}>Add Product</Text>
           </TouchableOpacity>
-          {/* <TouchableOpacity
-          style={styles.openButton}
-          onPress={() => setModalVisible(true)}>
-          <Text style={styles.buttonText}>Add Address</Text>
-        </TouchableOpacity> */}
 
           {/* Modal Component */}
           <Modal
@@ -456,7 +465,7 @@ const InvoiceModal = ({data, closeModal}) => {
 
             {/* Billing Address - Only shown if not same as shipping */}
             {!sameAsShipping && (
-              <View>
+              <ScrollView>
                 <Text style={styles.title}>Shipping Address</Text>
                 <TextInput
                   style={styles.input}
@@ -511,29 +520,14 @@ const InvoiceModal = ({data, closeModal}) => {
                     onChangeText={text => setCountry(text)}
                   />
                 </View>
-              </View>
+                <TouchableOpacity
+                  style={[styles.SubmitButton, loading && {opacity: 0.5}]}
+                  onPress={handleshipSubmit}
+                  disabled={loading}>
+                  <Text style={styles.buttonTextSubmit}>Submit</Text>
+                </TouchableOpacity>
+              </ScrollView>
             )}
-
-            {/* Submit Button */}
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 10,
-                marginTop: 10,
-              }}>
-              <TouchableOpacity
-                style={[styles.SubmitButton, loading && {opacity: 0.5}]}
-                onPress={handleshipSubmit}
-                disabled={loading}>
-                <Text style={styles.buttonTextSubmit}>Submit</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
       </View>
@@ -544,12 +538,10 @@ const InvoiceModal = ({data, closeModal}) => {
 export default InvoiceModal;
 
 const styles = StyleSheet.create({
-  container: {
-    
-    alignItems: 'center',    
-   
-  
-  
+  mainContainer: {
+    backgroundColor: '#caf0f8',
+    alignItems: 'center',
+    position:'relative'
   },
   SubmitButton: {
     backgroundColor: '#52b788',
@@ -558,20 +550,22 @@ const styles = StyleSheet.create({
     width: 100,
   },
   closeButton: {
-    backgroundColor: '#ef233c',
-    paddingHorizontal: 4,
-    paddingVertical: 10,
-    width: 100,
+    backgroundColor: '#ef233c',  
+    width: 20,
+    height:20,
     borderRadius: 5,
-    
+    position:'absolute',
+    top:2,
+    right:10,
+    borderRadius:50
   },
   closeButtonText: {
     textAlign: 'center',
-    fontWeight: 800
+    fontWeight: 800,
   },
   buttonTextSubmit: {
     textAlign: 'center',
-    fontWeight: 800
+    fontWeight: 800,
   },
 
   tableHeader: {

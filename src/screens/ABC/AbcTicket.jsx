@@ -447,7 +447,7 @@ const AbcTicket = () => {
           <View
             style={{
               width: '110%',
-              backgroundColor: '#fff',
+              backgroundColor: 'black',
               borderRadius: 10,
               padding: 20,
               elevation: 5,

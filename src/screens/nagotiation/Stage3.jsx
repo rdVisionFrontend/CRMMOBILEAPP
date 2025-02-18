@@ -209,6 +209,31 @@ const Stage2 = () => {
     setTicketHisModal(false);
   };
 
+
+  // open whtsapp
+  const openWhatsApp = mobileNumber => {
+    if (!mobileNumber) {
+      Alert.alert('Error', 'No mobile number available.');
+      return;
+    }
+    const url = `whatsapp://send?phone=${mobileNumber}`;
+    Linking.openURL(url).catch(() => {
+      Alert.alert('Error', 'WhatsApp is not installed on this device.');
+    });
+  };
+// open call log
+  const openCallLog = (mobileNumber) => {
+    if (!mobileNumber) {
+      Alert.alert("Error", "No mobile number available.");
+      return;
+    }
+  
+    const url = `tel:${mobileNumber}`;
+    Linking.openURL(url).catch(() => {
+      Alert.alert("Error", "Calling is not supported on this device.");
+    });
+  };
+
   return (
     <>
       {stage2 && (
@@ -346,7 +371,7 @@ const Stage2 = () => {
                               style={{width: 20, height: 20, marginRight: 5}}
                             />
                           </TouchableOpacity>
-                          <TouchableOpacity onPress={() => openWhatsApp()}>
+                          <TouchableOpacity onPress={() => openWhatsApp(item.senderMobile || item.mobileNumber)}>
                             <Image
                               source={{
                                 uri: 'https://cdn-icons-png.flaticon.com/128/15707/15707820.png',
@@ -355,7 +380,7 @@ const Stage2 = () => {
                             />
                           </TouchableOpacity>
                           <TouchableOpacity
-                            onPress={() => openCallLog(item.senderMobile)}>
+                            onPress={() => openCallLog(item.senderMobile || item.mobileNumber)}>
                             <Image
                               source={{
                                 uri: 'https://cdn-icons-png.flaticon.com/128/455/455705.png',

@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,13 @@ import {
   Image,
   Alert,
   Linking,
+  Dimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Modal from 'react-native-modal';
-import {useFocusEffect} from '@react-navigation/native'; // Import useFocusEffect
+import { useFocusEffect } from '@react-navigation/native';
 import CountryFlagTable from './Flag';
 import Email from './Email';
 import Nodata from './NoData';
@@ -21,6 +22,8 @@ import apiInstance from '../../api';
 import StatustModal from './StatustModal';
 import TicketInvoiceModal from '../screens/TicketRaiseInvoiceModal/TicketInvoiceModal';
 import TicketHistoryModal from './TicketHistroyModal';
+
+const { width, height } = Dimensions.get('window');
 
 const Ticket = () => {
   const [ticketData, setTicketData] = useState([]);
@@ -43,7 +46,6 @@ const Ticket = () => {
     setIsModalVisible(!isModalVisible);
   };
 
-  // Fetch tickets when the screen is focused
   useFocusEffect(
     useCallback(() => {
       fetchTicket();
@@ -215,8 +217,8 @@ const Ticket = () => {
   };
 
   return (
-    <View style={{flex: 1}}>
-      <ScrollView contentContainerStyle={{flexGrow: 1}}>
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
           <Text>{loading ? 'Loading...' : ''}</Text>
           {ticketData && ticketData.length > 0 ? (
@@ -225,7 +227,7 @@ const Ticket = () => {
                 <View
                   style={[
                     styles.header,
-                    {backgroundColor: getStatusColor(item.ticketstatus)},
+                    { backgroundColor: getStatusColor(item.ticketstatus) },
                   ]}>
                   <Text style={styles.indexText}>{index + 1}</Text>
                   {readTicket &&
@@ -253,7 +255,7 @@ const Ticket = () => {
                         justifyContent: 'center',
                         alignItems: 'flex-start',
                       }}>
-                      <Text style={{fontSize: 12}}>
+                      <Text style={{ fontSize: width * 0.03 }}>
                         {new Date(item.queryTime).toLocaleString('en-US', {
                           day: '2-digit',
                           month: 'short',
@@ -264,7 +266,7 @@ const Ticket = () => {
                         })}
                       </Text>
                       <View
-                        style={{display: 'flex', flexDirection: 'row', gap: 4}}>
+                        style={{ display: 'flex', flexDirection: 'row', gap: 4 }}>
                         <Text
                           onPress={() => toggleAccordion(item.uniqueQueryId)}
                           style={styles.headerText}>
@@ -359,7 +361,7 @@ const Ticket = () => {
                     </View>
                   </View>
                   {expanded === item.uniqueQueryId && (
-                    <View style={styles.content}>                     
+                    <View style={styles.content}>
                       <Text style={styles.contentText}>
                         Email: {formateEmail(item.senderEmail)}
                       </Text>
@@ -380,7 +382,7 @@ const Ticket = () => {
       </ScrollView>
 
       {emailModal && <Email data={emailData} closeModal={closeEmailModal} />}
-      <View style={{flex: 1, position: 'absolute', top: 0, left: 5}}>
+      <View style={{ flex: 1, position: 'absolute', top: 0, left: 5 }}>
         {invoiceModal && (
           <TicketInvoiceModal data={invoiceData} closeModal={closeEmailModal} />
         )}
@@ -415,10 +417,10 @@ const styles = StyleSheet.create({
   },
   item: {
     marginBottom: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: width * 0.03,
   },
   header: {
-    padding: 16,
+    padding: width * 0.04,
     backgroundColor: '#007BFF',
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
@@ -429,103 +431,61 @@ const styles = StyleSheet.create({
     top: -6,
     left: -6,
     borderRadius: 50,
-    height: 25,
-    width: 25,
+    height: width * 0.06,
+    width: width * 0.06,
     textAlign: 'center',
-    lineHeight: 25,
+    lineHeight: width * 0.06,
     backgroundColor: '#ffd8be',
     color: 'black',
     fontWeight: 'bold',
-    fontSize: 12,
+    fontSize: width * 0.03,
   },
   DoneIcon: {
     position: 'absolute',
     top: -10,
     right: -10,
     borderRadius: 50,
-    height: 30,
-    width: 30,
+    height: width * 0.07,
+    width: width * 0.07,
     textAlign: 'center',
-    lineHeight: 25,
+    lineHeight: width * 0.06,
     color: 'black',
     fontWeight: 'bold',
-    fontSize: 12,
+    fontSize: width * 0.03,
   },
   headerText: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'left',
     textTransform: 'capitalize',
   },
-  headerTextTicket: {
-    borderColor: 'black',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 4,
-    fontSize: 12,
-  },
   content: {
-    padding: 16,
+    padding: width * 0.04,
     backgroundColor: '#f0f0f0',
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
   },
   contentText: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     color: '#333',
   },
   icon: {
-    width: 28,
-    height: 28,
+    width: width * 0.07,
+    height: width * 0.07,
     alignSelf: 'center',
     marginBottom: 20,
-  },
-  iconPaste: {
-    width: 15,
-    height: 15,
-    alignSelf: 'center',
-    marginBottom: 20,
-  },
-  dropdown: {
-    position: 'absolute',
-    top: 10,
-    backgroundColor: 'white',
-    borderRadius: 4,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    zIndex: 100,
-  },
-  dropDownText: {
-    backgroundColor: 'lightblue',
-    textAlign: 'left',
-    marginTop: 5,
-    padding: 4,
-    borderRadius: 5,
-    fontSize: 10,
   },
   dropdownButton: {
     borderRadius: 5,
-    fontSize: 12,
+    fontSize: width * 0.03,
     padding: 2,
     color: '#fff',
   },
-  modalOverlay: {
+  noDataContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#303036',
-  },
-  modalContent: {
-    width: '80%',
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-    elevation: 5,
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
   },
 });
 

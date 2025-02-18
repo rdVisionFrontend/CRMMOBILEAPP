@@ -1,4 +1,12 @@
-import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
+import { 
+  StyleSheet, 
+  Text, 
+  View, 
+  TouchableOpacity, 
+  Image, 
+  useWindowDimensions, 
+  ScrollView 
+} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Stage1 from './Stage1';
 import Stage2 from './Stage2';
@@ -7,12 +15,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../Authorization/AuthContext';
 
 const In_Negotiation = ({ navigation }) => {
-  const [stage, setStage] = useState(1); // Tracks the current stage
+  const [stage, setStage] = useState(1);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const { isAuthenticated } = useAuth();
 
-  // Fetch user ID only once
+  const { width, height } = useWindowDimensions();
+
   useEffect(() => {
     const fetchUserId = async () => {
       try {
@@ -29,7 +38,6 @@ const In_Negotiation = ({ navigation }) => {
     fetchUserId();
   }, []);
 
-  // Returns button color based on the stage
   const getStageColor = (stageNum) => {
     switch (stageNum) {
       case 1:
@@ -43,12 +51,10 @@ const In_Negotiation = ({ navigation }) => {
     }
   };
 
-  // Render component based on the selected stage
   const renderStageContent = () => {
     if (loading) {
       return <Text style={styles.loadingText}>Loading...</Text>;
     }
-
     switch (stage) {
       case 1:
         return <Stage1 />;
@@ -63,40 +69,42 @@ const In_Negotiation = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.wrapper}>
-        {/* Stage Buttons */}
-        <View style={styles.buttonContainer}>
-          {[1, 2, 3].map((stageNum) => ( // Removed Stage 4 from the array
-            <TouchableOpacity
-              key={stageNum}
-              style={[
-                styles.button,
-                {
-                  backgroundColor: getStageColor(stageNum),
-                  borderWidth: stage === stageNum ? 2 : 0,
-                  borderColor: stage === stageNum ? 'green' : 'transparent',
-                  justifyContent: 'center',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 5,
-                },
-              ]}
-              onPress={() => setStage(stageNum)} // Updates state without reloading
-            >
-              <Text style={styles.buttonText}>Stage {stageNum}</Text>
-              <Image
-                source={{
-                  uri: 'https://cdn-icons-png.flaticon.com/128/189/189253.png',
-                }}
-                style={{ height: 15, width: 15 }}
-              />
-            </TouchableOpacity>
-          ))}
-        </View>
+      <ScrollView 
+        contentContainerStyle={styles.scrollViewContent} 
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={[styles.wrapper, { width: width * 0.9 }]}>
+          <View style={styles.buttonContainer}>
+            {[1, 2, 3].map((stageNum) => (
+              <TouchableOpacity
+                key={stageNum}
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: getStageColor(stageNum),
+                    borderWidth: stage === stageNum ? 2 : 0,
+                    borderColor: stage === stageNum ? 'green' : 'transparent',
+                    width: width * 0.25,
+                  },
+                ]}
+                onPress={() => setStage(stageNum)}
+              >
+                <Text style={[styles.buttonText, { fontSize: width * 0.04 }]}>
+                  Stage {stageNum}
+                </Text>
+                <Image
+                  source={{ uri: 'https://cdn-icons-png.flaticon.com/128/189/189253.png' }}
+                  style={{ height: width * 0.04, width: width * 0.04 }}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
 
-        {/* Render the content for the active stage */}
-        <View style={styles.stageContent}>{renderStageContent()}</View>
-      </View>
+          <View style={[styles.stageContent, { height: height * 0.7 }]}>
+            {renderStageContent()}
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -105,43 +113,39 @@ export default In_Negotiation;
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',    
+    flex: 1,
     backgroundColor: '#fff',
-   
-
+  },
+  scrollViewContent: {
+    alignItems: 'center',
+    paddingVertical: 20,
   },
   wrapper: {
-    padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    gap: 30,
-    
+    marginBottom: 20,
+    gap:10
   },
   button: {
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 5,
-    marginVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
   },
   buttonText: {
     color: '#1d2d44',
-    fontSize: 14,
     fontWeight: 'bold',
   },
   stageContent: {
-    marginTop: 20,
     padding: 10,
-    borderWidth: 0.5,
-    borderColor: 'red',
     width: '100%',
-    height:'85%'
-
+    
   },
   loadingText: {
     textAlign: 'center',
