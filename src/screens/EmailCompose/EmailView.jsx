@@ -17,7 +17,7 @@ import RenderHtml from 'react-native-render-html';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import moment from 'moment';
-import EmailScreen from './EmailScreen'
+import EmailScreen from './EmailScreen';
 
 const EmailView = () => {
   const [emailList, setEmailList] = useState([]);

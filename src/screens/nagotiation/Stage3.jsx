@@ -17,7 +17,7 @@ import TicketHistoryModal from '../TicketHistroyModal';
 import StatusModal from './StatusModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-
+import EmailScreen from '../EmailCompose/EmailScreen';
 const Stage2 = () => {
   const [selectedStage, setSelectedStage] = useState('All');
   const [selectedItem, setSelectedItem] = useState(4); // Default items per page
@@ -541,7 +541,24 @@ const Stage2 = () => {
         </ScrollView>
       )}
       <View style={{flex: 1, position: 'absolute', top: -100, left: -20,backgroundColor: '#E1F7F5' }}>
-      {emailmodal && <Email closeModal={closeEmailModal} data={emaildata} />}
+      {/* {emailmodal && <Email closeModal={closeEmailModal} data={emaildata} />} */}
+      <Modal
+          visible={emailmodal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={closeEmailModal}>
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContainer}>
+              <EmailScreen data={emaildata} />
+              {/* Close Button for Modal */}
+              <TouchableOpacity
+                onPress={closeEmailModal}
+                style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
       {/* {statusmodal && (
         <StatusModal closeModal={closeStatusModal} data={emaildata} />
@@ -691,5 +708,29 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.3,
     shadowRadius: 4,
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    width: '100%',
+  },
+  modalContainer: {
+    width: '95%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  closeButton: {
+    backgroundColor: '#dc3545',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });

@@ -17,6 +17,7 @@ import TicketHistoryModal from '../TicketHistroyModal';
 import StatusModal from './StatusModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import EmailScreen from '../EmailCompose/EmailScreen';
 
 const Stage2 = () => {
   const [selectedStage, setSelectedStage] = useState('All');
@@ -129,7 +130,7 @@ const Stage2 = () => {
   };
 
   const closeEmailModal = () => {
-    fetchStage2Data()
+    fetchStage2Data();
     setEmailModal(false);
     setStage2(true);
     setVisibleModal(false);
@@ -211,7 +212,6 @@ const Stage2 = () => {
     setTicketHisModal(false);
   };
 
-
   // open whtsapp
   const openWhatsApp = mobileNumber => {
     if (!mobileNumber) {
@@ -223,16 +223,16 @@ const Stage2 = () => {
       Alert.alert('Error', 'WhatsApp is not installed on this device.');
     });
   };
-// open call log
-  const openCallLog = (mobileNumber) => {
+  // open call log
+  const openCallLog = mobileNumber => {
     if (!mobileNumber) {
-      Alert.alert("Error", "No mobile number available.");
+      Alert.alert('Error', 'No mobile number available.');
       return;
     }
-  
+
     const url = `tel:${mobileNumber}`;
     Linking.openURL(url).catch(() => {
-      Alert.alert("Error", "Calling is not supported on this device.");
+      Alert.alert('Error', 'Calling is not supported on this device.');
     });
   };
 
@@ -242,8 +242,8 @@ const Stage2 = () => {
         <ScrollView style={{position: 'relative'}}>
           <View style={styles.filterContainer}>
             <View style={styles.row}>
-              {/* First Picker with Image */}             
-              <View style={styles.pickerWrapper}>               
+              {/* First Picker with Image */}
+              <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={selectedStage}
                   onValueChange={itemValue => {
@@ -374,7 +374,8 @@ const Stage2 = () => {
                         <Text
                           onPress={() => toggleAccordion(index)}
                           style={{fontSize: 16}}>
-                          {item.senderName || (item.firstName+" "+(item.lastName||""))}
+                          {item.senderName ||
+                            item.firstName + ' ' + (item.lastName || '')}
                         </Text>
                         <View style={{flexDirection: 'row', gap: 10}}>
                           <TouchableOpacity
@@ -389,7 +390,12 @@ const Stage2 = () => {
                               style={{width: 24, height: 24}}
                             />
                           </TouchableOpacity>
-                          <TouchableOpacity onPress={() => openWhatsApp(item.mobileNumber || item.senderMobile)}>
+                          <TouchableOpacity
+                            onPress={() =>
+                              openWhatsApp(
+                                item.mobileNumber || item.senderMobile,
+                              )
+                            }>
                             <Image
                               source={{
                                 uri: 'https://cdn-icons-png.flaticon.com/128/15707/15707820.png',
@@ -398,7 +404,11 @@ const Stage2 = () => {
                             />
                           </TouchableOpacity>
                           <TouchableOpacity
-                            onPress={() => openCallLog(item.senderMobile || item.mobileNumber)}>
+                            onPress={() =>
+                              openCallLog(
+                                item.senderMobile || item.mobileNumber,
+                              )
+                            }>
                             <Image
                               source={{
                                 uri: 'https://cdn-icons-png.flaticon.com/128/455/455705.png',
@@ -535,8 +545,32 @@ const Stage2 = () => {
           </View>
         </ScrollView>
       )}
-      <View style={{flex: 1, position: 'absolute', top: -100, left: -20,backgroundColor: '#E1F7F5' }}>
-      {emailmodal && <Email closeModal={closeEmailModal} data={emaildata} />}
+      <View
+        style={{
+          flex: 1,
+          position: 'absolute',
+          top: -100,
+          left: -20,
+          backgroundColor: '#E1F7F5',
+        }}>
+        {/* {emailmodal && <Email closeModal={closeEmailModal} data={emaildata} />} */}
+        <Modal
+          visible={emailmodal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={closeEmailModal}>
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContainer}>
+              <EmailScreen data={emaildata} />
+              {/* Close Button for Modal */}
+              <TouchableOpacity
+                onPress={closeEmailModal}
+                style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
       {/* {statusmodal && (
         <StatusModal closeModal={closeStatusModal} data={emaildata} />
@@ -666,7 +700,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     backgroundColor: '#fff',
     overflow: 'hidden', // Prevents text cut-off
-  
   },
   picker: {
     width: '95%',
@@ -679,6 +712,30 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 10,
     top: '50%',
-    transform: [{ translateY: -10 }],
+    transform: [{translateY: -10}],
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    width: '100%',
+  },
+  modalContainer: {
+    width: '95%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  closeButton: {
+    backgroundColor: '#dc3545',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
