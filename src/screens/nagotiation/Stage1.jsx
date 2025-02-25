@@ -320,8 +320,8 @@ const Stage2 = () => {
                             : item.ticketstatus === 'Place_With_order'
                             ? '#3dccc7'
                             : item.ticketstatus === 'hang_up'
-                            ? '#780000'
-                            : '#ffc2d1', // Default color if no condition matches
+                            ? '#F6DED8'
+                            : '#FEFAE0', // Default color if no condition matches
                       },
                     ]}>
                     <View style={{flexDirection: 'column'}}>
