@@ -106,13 +106,13 @@ const Ticket = () => {
   const getStatusColor = status => {
     switch (status) {
       case 'New':
-        return '#57cc99';
+        return '#d8f3dc';
       case 'Follow':
-        return '#ffb3c1';
+        return '#fcd5ce';
       case 'Sale':
-        return '#7e804b';
+        return '#52b788';
       case 'Not_Pickup':
-        return '#219ebc';
+        return '#a8dadc';
       case 'Wrong_Number':
         return 'red';
       case 'Not_Intersted':
@@ -475,16 +475,17 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: width * 0.04,
-    color: '#fff',
+    color: '#2b2d42',
     fontWeight: 'bold',
     textAlign: 'left',
     textTransform: 'capitalize',
   },
   content: {
     padding: width * 0.04,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#fff',
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
+    marginTop:2
   },
   contentText: {
     fontSize: width * 0.035,
@@ -500,7 +501,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     fontSize: width * 0.03,
     padding: 2,
-    color: '#fff',
+    color: '#2b2d42',
   },
   noDataContainer: {
     flex: 1,

@@ -353,15 +353,29 @@ const Stage2 = () => {
                           ]}>
                           {item.ticketstatus}
                         </Text>
-                        <Text
-                          style={{
-                            fontSize: 11,
-                            marginLeft: 10,
-                            fontWeight: 800,
-                          }}>
-                          {/* {localdate} {localtime} */}
-                          {formatToLocalTime(item.queryTime)}
-                        </Text>
+                        {item.followUpDateTime && item.followUpDateTime?.length > 2 ? (
+                          <Text>
+                            {item.followUpDateTime &&
+                            item.followUpDateTime &&item.followUpDateTime?.length === 5
+                              ? new Date(
+                                  item.followUpDateTime[0],
+                                  item.followUpDateTime[1] - 1, // Month is zero-based in JavaScript
+                                  item.followUpDateTime[2],
+                                  item.followUpDateTime[3],
+                                  item.followUpDateTime[4],
+                                ).toLocaleString()
+                              : 'No Follow-up Date Available'}
+                          </Text>
+                        ) : (
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              marginLeft: 10,
+                              fontWeight: 800,
+                            }}>
+                            {formatToLocalTime(item.queryTime)}
+                          </Text>
+                        )}
                       </View>
                       <View
                         style={{

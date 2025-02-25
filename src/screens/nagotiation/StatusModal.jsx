@@ -15,6 +15,7 @@ import { Picker } from '@react-native-picker/picker'; // Import Picker
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { useSelector } from 'react-redux';
+import { useAuth } from '../../Authorization/AuthContext';
 
 const Email = ({ data, closeModal }) => {
   const { width, height } = Dimensions.get('window'); // Get full screen dimensions
@@ -30,6 +31,7 @@ const Email = ({ data, closeModal }) => {
   const [callId, setCallId] = useState(0);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+  const {calApiCalander, setCallApiCalander} = useAuth();
 
 
   useEffect(() => {
@@ -71,6 +73,7 @@ const Email = ({ data, closeModal }) => {
       });
       console.log('Response:', response.data);
       setLoading(false);
+      setCallApiCalander(!calApiCalander)
       Alert.alert('Status Updated');
       closeModal();
     } catch (error) {

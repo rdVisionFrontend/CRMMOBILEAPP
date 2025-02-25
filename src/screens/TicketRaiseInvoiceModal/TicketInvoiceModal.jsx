@@ -166,6 +166,7 @@ const InvoiceModal = ({data, closeModal, visible}) => {
     try {
       if (!house || !landmark || !city || !zip || !name || !country || !state) {
         Alert.alert('Please fill all fields');
+        return;
       }
       setLoading(true);
       const response = await apiInstance.post('/address/createAddress', {
@@ -189,7 +190,18 @@ const InvoiceModal = ({data, closeModal, visible}) => {
       setLoading(false);
     }
   };
+  const [addproduct, setAddProduct] = useState(true);
+  const [addaddress, setAddAddress] = useState(false);
 
+  const addProduct = () => {
+    setAddAddress(false);
+    setAddProduct(true);
+  };
+
+  const addressForm = () => {
+    setAddProduct(false);
+    setAddAddress(true);
+  };
   return (
     <Modal
       visible={visible} // Control visibility of the modal
@@ -229,55 +241,105 @@ const InvoiceModal = ({data, closeModal, visible}) => {
             </View>
           </View>
 
-          {/* Product List */}
-          <View style={styles.productList}>
-            <Text style={styles.sectionTitle}>Products</Text>
-            <View style={{display:'flex', flexDirection:'row', justifyContent:'space-around' , alignItems:'center', width:'100%', backgroundColor:'#f9dcc4', paddingVertical:5}}>
-              <Text style={{width:50}}>Name</Text>
-              <Text>Brand</Text>
-              <Text>PKg SZ</Text>
-              <Text>QTY</Text>
-              <Text>AMT</Text>
-              <Text>ACT</Text>
-            </View>
-            {orderdetails?.productOrders?.length > 0 ? (
-              orderdetails.productOrders.map((productOrder, index) =>
-                productOrder.product && productOrder.product[0] ? (
-                  <View
-                    key={productOrder.productorderId}
-                    style={styles.productItem}>
-                    <Text style={{width:50}}>{productOrder.product[0].name}</Text>
-                    <Text>{productOrder.product[0].brand}</Text>
-                    <Text>{productOrder.product[0].packagingSize}</Text>
-                    <Text>{productOrder.quantity}</Text>
-                    <Text>{productOrder.totalAmount}</Text>
-                    <TouchableOpacity
-                      onPress={() =>
-                        handleDeleteProduct(productOrder.productorderId)
-                      }>
-                      <Image
-                        source={{
-                          uri: 'https://cdn-icons-png.flaticon.com/128/6861/6861362.png',
-                        }}
-                        style={styles.deleteIcon}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <Text key={index}>Product details not available</Text>
-                ),
-              )
-            ) : (
-              <Text style={styles.noProductsText}>No products found</Text>
-            )}
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 20,
+            }}>
+            
+            <TouchableOpacity
+              onPress={addProduct}
+              style={{
+                backgroundColor: '#fec89a',
+                paddingVertical: 5,
+                paddingHorizontal: 5,
+                borderRadius: 5,
+              }}>
+              <Text>Add Product</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={addressForm}
+              style={{
+                backgroundColor: '#caf0f8',
+                paddingVertical: 5,
+                paddingHorizontal: 5,
+                borderRadius: 5,
+              }}>
+              <Text>
+                {addressData.houseNumber || addressData.landmark
+                  ? 'Edit Address'
+                  : 'Add Address'}
+              </Text>
+            </TouchableOpacity>
           </View>
 
+          {/* Product List */}
+          {addproduct && (
+            <View style={styles.productList}>
+              <Text style={styles.sectionTitle}>Products</Text>
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-around',
+                  alignItems: 'center',
+                  width: '100%',
+                  backgroundColor: '#f9dcc4',
+                  paddingVertical: 5,
+                }}>
+                <Text style={{width: 50}}>Name</Text>
+                <Text>Brand</Text>
+                <Text>PKg SZ</Text>
+                <Text>QTY</Text>
+                <Text>AMT</Text>
+                <Text>ACT</Text>
+              </View>
+              {orderdetails?.productOrders?.length > 0 ? (
+                orderdetails.productOrders.map((productOrder, index) =>
+                  productOrder.product && productOrder.product[0] ? (
+                    <View
+                      key={productOrder.productorderId}
+                      style={styles.productItem}>
+                      <Text style={{width: 50}}>
+                        {productOrder.product[0].name}
+                      </Text>
+                      <Text>{productOrder.product[0].brand}</Text>
+                      <Text>{productOrder.product[0].packagingSize}</Text>
+                      <Text>{productOrder.quantity}</Text>
+                      <Text>{productOrder.totalAmount}</Text>
+                      <TouchableOpacity
+                        onPress={() =>
+                          handleDeleteProduct(productOrder.productorderId)
+                        }>
+                        <Image
+                          source={{
+                            uri: 'https://cdn-icons-png.flaticon.com/128/6861/6861362.png',
+                          }}
+                          style={styles.deleteIcon}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <Text key={index}>Product details not available</Text>
+                  ),
+                )
+              ) : (
+                <Text style={styles.noProductsText}>No products found</Text>
+              )}
+            </View>
+          )}
+
           {/* Add Product Button */}
-          <TouchableOpacity
-            style={styles.addProductButton}
-            onPress={() => setModalVisible(true)}>
-            <Text style={styles.buttonText}>Add Product</Text>
-          </TouchableOpacity>
+          {addproduct && (
+            <TouchableOpacity
+              style={styles.addProductButton}
+              onPress={() => setModalVisible(true)}>
+              <Text style={styles.buttonText}>Add Product</Text>
+            </TouchableOpacity>
+          )}
 
           {/* Add Product Modal */}
           <Modal
@@ -343,60 +405,69 @@ const InvoiceModal = ({data, closeModal, visible}) => {
           </Modal>
 
           {/* Shipping Address Form */}
-          <View style={styles.shippingForm}>
-            <Text style={styles.sectionTitle}>Shipping Address</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Name"
-              value={name}
-              onChangeText={setName}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="House No./ Street"
-              value={house}
-              onChangeText={setHouse}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Landmark"
-              value={landmark}
-              onChangeText={setLandMark}
-            />
-            <View style={styles.row}>
+          {addaddress && (
+            <View style={styles.shippingForm}>
+              <Text style={styles.sectionTitle}>Shipping Address</Text>
               <TextInput
-                style={styles.halfInput}
-                placeholder="City"
-                value={city}
-                onChangeText={setCity}
+                style={styles.input}
+                placeholder="Name"
+                placeholderTextColor="#999" // Set placeholder text color
+                value={name}
+                onChangeText={setName}
               />
               <TextInput
-                style={styles.halfInput}
-                placeholder="Zip Code"
-                value={zip}
-                onChangeText={setZip}
+                style={styles.input}
+                placeholder="House No./ Street"
+                placeholderTextColor="#999"
+                value={house}
+                onChangeText={setHouse}
               />
+              <TextInput
+                style={styles.input}
+                placeholder="Landmark"
+                placeholderTextColor="#999"
+                value={landmark}
+                onChangeText={setLandMark}
+              />
+              <View style={styles.row}>
+                <TextInput
+                  style={styles.halfInput}
+                  placeholder="City"
+                  placeholderTextColor="#999"
+                  value={city}
+                  onChangeText={setCity}
+                />
+                <TextInput
+                  style={styles.halfInput}
+                  placeholder="Zip Code"
+                  placeholderTextColor="#999"
+                  value={zip}
+                  onChangeText={setZip}
+                />
+              </View>
+              <View style={styles.row}>
+                <TextInput
+                  style={styles.halfInput}
+                  placeholder="State"
+                  placeholderTextColor="#999"
+                  value={state}
+                  onChangeText={setState}
+                />
+                <TextInput
+                  style={styles.halfInput}
+                  placeholder="Country"
+                  placeholderTextColor="#999"
+                  value={country}
+                  onChangeText={setCountry}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleshipSubmit}>
+                <Text style={styles.buttonText}>Submit</Text>
+              </TouchableOpacity>
             </View>
-            <View style={styles.row}>
-              <TextInput
-                style={styles.halfInput}
-                placeholder="State"
-                value={state}
-                onChangeText={setState}
-              />
-              <TextInput
-                style={styles.halfInput}
-                placeholder="Country"
-                value={country}
-                onChangeText={setCountry}
-              />
-            </View>
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleshipSubmit}>
-              <Text style={styles.buttonText}>Submit</Text>
-            </TouchableOpacity>
-          </View>
+          )}
         </ScrollView>
       </View>
     </Modal>
@@ -424,8 +495,9 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
+    lineHeight:19
   },
   scrollView: {
     flex: 1,
@@ -484,10 +556,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
   },
-  productList: {
-    maxHeight: 200,
-    overflow: 'hidden',
-  },
+
   addProductButton: {
     backgroundColor: '#52b788',
     padding: 10,
@@ -583,6 +652,55 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     marginTop: 10,
+  },
+  shippingForm: {
+    padding: 20,
+    backgroundColor: '#f9f9f9', // Light background for the form
+    borderRadius: 10,
+    margin: 10,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
+  },
+  input: {
+    backgroundColor: '#fff',
+    color: '#000',
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginBottom: 10,
+    fontSize: 16,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  halfInput: {
+    flex: 1,
+    backgroundColor: '#fff',
+    color: '#000',
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginBottom: 10,
+    fontSize: 16,
+    marginRight: 5,
+  },
+  submitButton: {
+    backgroundColor: '#007bff',
+    padding: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
