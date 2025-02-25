@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {Picker} from '@react-native-picker/picker';
-import Email from './EmailModal';
+import EmailScreen from '../EmailCompose/EmailScreen';
 import Clipboard from '@react-native-clipboard/clipboard';
 import TicketHistoryModal from '../TicketHistroyModal';
 import StatusModal from './StatusModal';
@@ -537,7 +537,24 @@ const Stage2 = () => {
         </ScrollView>
       )}
       <View style={{flex: 1, position: 'absolute', top: -100, left: -20,backgroundColor: '#E1F7F5' }}>
-      {emailmodal && <Email closeModal={closeEmailModal} data={emaildata} />}
+      {/* {emailmodal && <Email closeModal={closeEmailModal} data={emaildata} />} */}
+      <Modal
+        visible={emailmodal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeEmailModal}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <EmailScreen data={emaildata} />
+            {/* Close Button for Modal */}
+            <TouchableOpacity
+              onPress={closeEmailModal}
+              style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       </View>
       {/* {statusmodal && (
         <StatusModal closeModal={closeStatusModal} data={emaildata} />
@@ -681,5 +698,29 @@ const styles = StyleSheet.create({
     left: 10,
     top: '50%',
     transform: [{ translateY: -10 }],
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    width:'100%'
+  },
+  modalContainer: {
+    width: '95%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  closeButton: {
+    backgroundColor: '#dc3545',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });

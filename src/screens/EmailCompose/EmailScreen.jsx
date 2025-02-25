@@ -160,7 +160,8 @@ const EmailCompose = ({data, email, body}) => {
 
       <TextInput
         placeholder="To Email"
-        value={emailData.toEmail || data.email || data.senderEmail} // Fallback to data.email if emailData.toEmail is empty
+        value={emailData.toEmail || data?.email || data?.senderEmail || ''}
+        // Fallback to data.email if emailData.toEmail is empty
         onChangeText={text => handleInputChange('toEmail', text)}
         style={[styles.input, {fontSize: width * 0.04}]}
         keyboardType="email-address"
@@ -192,7 +193,8 @@ const EmailCompose = ({data, email, body}) => {
         multiline
         numberOfLines={6}
         placeholder="Write your email..."
-        value={emailData.body || data.comment ||data.subject}
+        value={emailData.body || data?.comment || data?.subject || ''}
+
         onChangeText={text => handleInputChange('body', text)}
         style={[styles.bodyInput, {fontSize: width * 0.04}]}
       />
