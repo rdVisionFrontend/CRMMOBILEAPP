@@ -8,18 +8,16 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Modal,
+  TextInput,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-
 import {useSelector} from 'react-redux';
-import {Modal} from 'react-native';
-import {TextInput} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import {useAuth} from '../../Authorization/AuthContext';
 import apiInstance from '../../../api';
-import LinearGradient from 'react-native-linear-gradient';
 
-const InvoiceModal = ({data, closeModal}) => {
+const InvoiceModal = ({data, closeModal, visible}) => {
   const {width, height} = Dimensions.get('window'); // Get full screen dimensions
   const [loading, setLoading] = useState(false);
   const [orderdetails, setOrderDetails] = useState([]);
@@ -48,7 +46,6 @@ const InvoiceModal = ({data, closeModal}) => {
     fetchProducts();
     if (raiseInoice) {
       fetchAddressDetails();
-      // closeModal();
     }
     if (apicall) {
       fetchAddressDetails();
@@ -77,7 +74,6 @@ const InvoiceModal = ({data, closeModal}) => {
             `/order/getOrder/${data.uniqueQueryId}`,
           );
           setOrderDetails(response.data.dtoList);
-
           console.log('update product', response);
         } catch (err) {
           console.error('Error fetching order details:', err);
@@ -86,6 +82,7 @@ const InvoiceModal = ({data, closeModal}) => {
       fetchOrderDetails();
     }
   };
+
   const handleDeleteProduct = async productOrderId => {
     const response = await apiInstance.delete(
       `/order/deleteProductOrder/${productOrderId}`,
@@ -95,6 +92,7 @@ const InvoiceModal = ({data, closeModal}) => {
       fatchaddedproduct();
     }
   };
+
   const fetchAddressDetails = async () => {
     try {
       const response = await apiInstance.get(
@@ -163,7 +161,6 @@ const InvoiceModal = ({data, closeModal}) => {
   };
 
   const handleshipSubmit = async () => {
-    // Alert.alert('clicked address');
     console.log(name, house, landmark, city, zip, state, country);
     setLoading(true);
     try {
@@ -194,258 +191,150 @@ const InvoiceModal = ({data, closeModal}) => {
   };
 
   return (
-    <ScrollView>
-      <View style={styles.mainContainer}>
-        <Text style={{fontSize: 20, fontWeight: 'bold', marginBottom: 10}}>
-          Create Invoice
-        </Text>
+    <Modal
+      visible={visible} // Control visibility of the modal
+      animationType="slide" // Slide animation
+      transparent={false} // Make the modal non-transparent
+      onRequestClose={closeModal} // Handle Android back button
+    >
+      <View style={styles.container}>
+        {/* Close Button */}
         <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-          <Text style={styles.closeButtonText}>X</Text>
+          <Text style={styles.closeButtonText}>x</Text>
         </TouchableOpacity>
 
-        <View style={{width: '100%'}}>
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              gap: 5,
-            }}>
-            <View
-              style={{
-                borderRadius: 10,
-                padding: 10,
-                width: '48%',
-                backgroundColor: '#DFF5FF',
-              }}>
-              <Text
-                style={{fontSize: 15, textAlign: 'center', fontWeight: 500}}>
-                Customer details
-              </Text>
-              <View style={{display: 'flex', flexDirection: 'row'}}>
-                <Text style={{fontWeight: 'bold'}}>Name :</Text>
-                <Text style={{paddingHorizontal: 11}}>
-                  {data.senderName || data.firstName}
-                </Text>
-              </View>
-              <View style={{display: 'flex', flexDirection: 'row'}}>
-                <Text style={{fontWeight: 'bold'}}>Email :</Text>
-                <Text
-                  style={{
-                    paddingHorizontal: 11,
-                    flexWrap: 'wrap',
-                    width: '80%',
-                  }}>
-                  {data.senderEmail || data.email}
-                </Text>
-              </View>
-              <View style={{display: 'flex', flexDirection: 'row'}}>
-                <Text style={{fontWeight: 'bold'}}>Mobile :</Text>
-                <Text style={{paddingHorizontal: 11}}>
-                  {data.senderMobile || data.mobileNumber}
-                </Text>
-              </View>
+        {/* Main Content */}
+        <ScrollView style={styles.scrollView}>
+          <Text style={styles.headerText}>Create Invoice</Text>
+
+          {/* Customer Details */}
+          <View style={styles.detailsContainer}>
+            <View style={styles.customerDetails}>
+              <Text style={styles.detailsTitle}>Customer Details</Text>
+              <Text>Name: {data.senderName || data.firstName}</Text>
+              <Text>Email: {data.senderEmail || data.email}</Text>
+              <Text>Mobile: {data.senderMobile || data.mobileNumber}</Text>
             </View>
-            <View
-              style={{
-                borderRadius: 10,
-                padding: 10,
-                width: '48%',
-                marginRight: 25,
-                backgroundColor: '#F6F5F5',
-              }}>
-              <Text>Address details</Text>
-              <View style={{display: 'flex', flexDirection: 'column'}}>
-                <Text
-                  style={{
-                    paddingHorizontal: 11,
-                    textTransform: 'capitalize',
-                    fontWeight: 'bold',
-                  }}>
-                  {data.queryMcatName || data.productEnquiry}
+            <View style={styles.addressDetails}>
+              <Text style={styles.detailsTitle}>Address Details</Text>
+              {addressData ? (
+                <Text>
+                  {addressData.houseNumber}, {addressData.landmark},{' '}
+                  {addressData.city}, {addressData.state}, {addressData.zipCode}
+                  , {addressData.country}
                 </Text>
-                {addressData ? (
+              ) : (
+                <Text>No address</Text>
+              )}
+            </View>
+          </View>
+
+          {/* Product List */}
+          <View style={styles.productList}>
+            <Text style={styles.sectionTitle}>Products</Text>
+            <View style={{display:'flex', flexDirection:'row', justifyContent:'space-around' , alignItems:'center', width:'100%', backgroundColor:'#f9dcc4', paddingVertical:5}}>
+              <Text style={{width:50}}>Name</Text>
+              <Text>Brand</Text>
+              <Text>PKg SZ</Text>
+              <Text>QTY</Text>
+              <Text>AMT</Text>
+              <Text>ACT</Text>
+            </View>
+            {orderdetails?.productOrders?.length > 0 ? (
+              orderdetails.productOrders.map((productOrder, index) =>
+                productOrder.product && productOrder.product[0] ? (
                   <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 5,
-                    }}>
-                    <Image
-                      source={{
-                        uri: 'https://cdn-icons-png.flaticon.com/128/1865/1865269.png',
-                      }}
-                      style={{width: 20, height: 20}} // Adjust size as needed
-                    />
-                    <View style={{width: '100%'}}>
-                      <Text style={{flexWrap: 'nowrap', width: 150}}>
-                        {addressData.houseNumber}, {addressData.landmark},{' '}
-                        {addressData.city}, {addressData.state},{' '}
-                        {addressData.zipCode}, {addressData.country}
-                      </Text>
-                    </View>
+                    key={productOrder.productorderId}
+                    style={styles.productItem}>
+                    <Text style={{width:50}}>{productOrder.product[0].name}</Text>
+                    <Text>{productOrder.product[0].brand}</Text>
+                    <Text>{productOrder.product[0].packagingSize}</Text>
+                    <Text>{productOrder.quantity}</Text>
+                    <Text>{productOrder.totalAmount}</Text>
+                    <TouchableOpacity
+                      onPress={() =>
+                        handleDeleteProduct(productOrder.productorderId)
+                      }>
+                      <Image
+                        source={{
+                          uri: 'https://cdn-icons-png.flaticon.com/128/6861/6861362.png',
+                        }}
+                        style={styles.deleteIcon}
+                      />
+                    </TouchableOpacity>
                   </View>
                 ) : (
-                  <Text>No address</Text>
-                )}
-              </View>
-            </View>
-          </View>
-        </View>
-        {/* all added product */}
-        <View style={{width: '98%', marginTop: 10}}>
-          <View style={styles.tableHeader}>
-            <Text style={styles.headerCell}>Name</Text>
-            <Text style={styles.headerCell}>Brand</Text>
-            <Text style={styles.headerCell}>Size</Text>
-            <Text style={styles.headerCell}>QTY</Text>
-            <Text style={styles.headerCell}>Price</Text>
-            <Text style={styles.headerCell}>Action</Text>
+                  <Text key={index}>Product details not available</Text>
+                ),
+              )
+            ) : (
+              <Text style={styles.noProductsText}>No products found</Text>
+            )}
           </View>
 
-          {orderdetails?.productOrders?.length > 0 ? (
-            orderdetails.productOrders.map((productOrder, index) =>
-              productOrder.product && productOrder.product[0] ? (
-                <View
-                  key={productOrder.productorderId}
-                  style={styles.tableBody}>
-                  <Text style={styles.headerCell}>
-                    {productOrder.product[0].name}
-                  </Text>
-                  <Text style={styles.headerCell}>
-                    {productOrder.product[0].brand}
-                  </Text>
-                  <Text style={styles.headerCell}>
-                    {productOrder.product[0].packagingSize}
-                  </Text>
-                  <Text style={styles.headerCell}>{productOrder.quantity}</Text>
-                  <Text style={styles.headerCell}>
-                    {productOrder.totalAmount}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() =>
-                      handleDeleteProduct(productOrder.productorderId)
-                    }>
-                    <Image
-                      source={{
-                        uri: 'https://cdn-icons-png.flaticon.com/128/6861/6861362.png',
-                      }}
-                      style={{width: 20, height: 20}} // Adjust size as needed
-                    />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View key={index}>
-                  <Text>Product details not available</Text>
-                </View>
-              ),
-            )
-          ) : (
-            <Text style={{textAlign: 'center', marginTop: 10}}>
-              No products found
-            </Text>
-          )}
-        </View>
-        {/* <AddProduct ticketId={data.uniqueQueryId} /> */}
-        {/* Added Product */}
-
-        <View style={styles.container}>
-          {/* Open Modal Button */}
+          {/* Add Product Button */}
           <TouchableOpacity
-            style={styles.openButton}
+            style={styles.addProductButton}
             onPress={() => setModalVisible(true)}>
             <Text style={styles.buttonText}>Add Product</Text>
           </TouchableOpacity>
 
-          {/* Modal Component */}
+          {/* Add Product Modal */}
           <Modal
             animationType="slide"
             transparent={true}
             visible={modalVisible}
-            onRequestClose={() => setModalVisible(false)} // For Android back button
-          >
+            onRequestClose={() => setModalVisible(false)}>
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
                 <View style={styles.modalBody}>
-                  <View>
-                    <View style={styles.inputContainer}>
-                      <Image
-                        source={{
-                          uri: 'https://cdn-icons-png.flaticon.com/128/954/954591.png',
-                        }} // URL of the search icon
-                        style={styles.icon}
-                      />
-                      <TextInput
-                        style={styles.inputSearch}
-                        placeholder="Enter Product Name"
-                        placeholderTextColor="#999"
-                        value={search}
-                        onChangeText={text => setSearch(text)} // Update search query
-                      />
-                    </View>
-                    <Text style={styles.label}>Select Currency</Text>
-
-                    <View style={styles.pickerContainer}>
-                      <Picker
-                        selectedValue={selectedCurrency}
-                        onValueChange={itemValue =>
-                          setSelectedCurrency(itemValue)
-                        }
-                        style={styles.picker}>
-                        <Picker.Item label="Select currency" />
-                        <Picker.Item label="INR - Indian Rupee" value="INR" />
-                        <Picker.Item label="USD - US Dollar" value="USD" />
-                        <Picker.Item label="GBP - British Pound" value="GBP" />
-                        <Picker.Item label="EUR - Euro" value="EUR" />
-                      </Picker>
-                    </View>
-                  </View>
-
-                  {/* FlatList to display filtered products */}
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search Product"
+                    value={search}
+                    onChangeText={setSearch}
+                  />
+                  <Picker
+                    selectedValue={selectedCurrency}
+                    onValueChange={setSelectedCurrency}>
+                    <Picker.Item label="Select Currency" value="" />
+                    <Picker.Item label="INR" value="INR" />
+                    <Picker.Item label="USD" value="USD" />
+                    <Picker.Item label="EUR" value="EUR" />
+                  </Picker>
                   <FlatList
-                    data={filteredProducts} // Use filtered products based on the search query
+                    data={filteredProducts}
                     keyExtractor={item => item.productId.toString()}
                     renderItem={({item}) => (
-                      <View style={styles.card}>
-                        <Text style={styles.productName}>{item.name}</Text>
-
-                        {/* Quantity Input Field */}
+                      <View style={styles.productCard}>
+                        <Text>{item.name}</Text>
                         <TextInput
-                          style={styles.input}
-                          placeholder="Enter Quantity"
+                          style={styles.addProductInput}
+                          placeholder="Quantity"
                           value={productStates[item.productId]?.qty || ''}
-                          keyboardType="numeric"
                           onChangeText={text =>
                             handleInputChange(item.productId, 'qty', text)
                           }
                         />
-
-                        {/* Price Input Field */}
                         <TextInput
-                          style={styles.input}
-                          placeholder="Enter Price"
+                          placeholder="Price"
+                          style={styles.addProductInput}
                           value={productStates[item.productId]?.price || ''}
-                          keyboardType="numeric"
                           onChangeText={text =>
                             handleInputChange(item.productId, 'price', text)
                           }
                         />
-
                         <TouchableOpacity
-                          style={{backgroundColor: 'green', padding: 5}}
+                          style={styles.addButton}
                           onPress={() => handleAddProduct(item.productId)}>
-                          <Text style={{textAlign: 'center', color: '#fff'}}>
-                            Add
-                          </Text>
+                          <Text style={styles.addButtonText}>Add</Text>
                         </TouchableOpacity>
                       </View>
                     )}
                   />
                 </View>
-
-                {/* Close Modal Button */}
                 <TouchableOpacity
-                  style={styles.closeButton}
+                  style={styles.closeModalButton}
                   onPress={() => setModalVisible(false)}>
                   <Text style={styles.buttonText}>Close</Text>
                 </TouchableOpacity>
@@ -453,239 +342,248 @@ const InvoiceModal = ({data, closeModal}) => {
             </View>
           </Modal>
 
-          {/* Adrress form */}
-          <View style={{marginRight: 20}}>
-            <Text style={styles.title}>Shipping to</Text>
+          {/* Shipping Address Form */}
+          <View style={styles.shippingForm}>
+            <Text style={styles.sectionTitle}>Shipping Address</Text>
             <TextInput
               style={styles.input}
-              placeholder="Eg. Jane kapoor"
+              placeholder="Name"
               value={name}
-              onChangeText={text => setName(text)}
+              onChangeText={setName}
             />
-
-            {/* Billing Address - Only shown if not same as shipping */}
-            {!sameAsShipping && (
-              <ScrollView>
-                <Text style={styles.title}>Shipping Address</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="House No./ Street"
-                  value={house}
-                  onChangeText={text => setHouse(text)}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Landmark"
-                  value={landmark}
-                  onChangeText={text => setLandMark(text)}
-                />
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    width: '99%',
-                  }}>
-                  <TextInput
-                    style={styles.input1}
-                    placeholder="City"
-                    value={city}
-                    onChangeText={text => setCity(text)}
-                  />
-                  <TextInput
-                    style={styles.input1}
-                    placeholder="Zip Code"
-                    keyboardType="numeric"
-                    value={zip}
-                    onChangeText={text => setZip(text)}
-                  />
-                </View>
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    width: '99%',
-                  }}>
-                  <TextInput
-                    style={styles.input1}
-                    placeholder="State"
-                    value={state}
-                    onChangeText={text => setState(text)}
-                  />
-                  <TextInput
-                    style={styles.input1}
-                    placeholder="Country"
-                    value={country}
-                    onChangeText={text => setCountry(text)}
-                  />
-                </View>
-                <TouchableOpacity
-                  style={[styles.SubmitButton, loading && {opacity: 0.5}]}
-                  onPress={handleshipSubmit}
-                  disabled={loading}>
-                  <Text style={styles.buttonTextSubmit}>Submit</Text>
-                </TouchableOpacity>
-              </ScrollView>
-            )}
+            <TextInput
+              style={styles.input}
+              placeholder="House No./ Street"
+              value={house}
+              onChangeText={setHouse}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Landmark"
+              value={landmark}
+              onChangeText={setLandMark}
+            />
+            <View style={styles.row}>
+              <TextInput
+                style={styles.halfInput}
+                placeholder="City"
+                value={city}
+                onChangeText={setCity}
+              />
+              <TextInput
+                style={styles.halfInput}
+                placeholder="Zip Code"
+                value={zip}
+                onChangeText={setZip}
+              />
+            </View>
+            <View style={styles.row}>
+              <TextInput
+                style={styles.halfInput}
+                placeholder="State"
+                value={state}
+                onChangeText={setState}
+              />
+              <TextInput
+                style={styles.halfInput}
+                placeholder="Country"
+                value={country}
+                onChangeText={setCountry}
+              />
+            </View>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleshipSubmit}>
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
       </View>
-    </ScrollView>
+    </Modal>
   );
 };
 
-export default InvoiceModal;
-
 const styles = StyleSheet.create({
-  mainContainer: {
-    backgroundColor: '#caf0f8',
-    alignItems: 'center',
-    position:'relative'
-  },
-  SubmitButton: {
-    backgroundColor: '#52b788',
-    paddingHorizontal: 4,
-    paddingVertical: 10,
-    width: 100,
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
   },
   closeButton: {
-    backgroundColor: '#ef233c',  
-    width: 20,
-    height:20,
-    borderRadius: 5,
-    position:'absolute',
-    top:2,
-    right:10,
-    borderRadius:50
-  },
-  closeButtonText: {
-    textAlign: 'center',
-    fontWeight: 800,
-  },
-  buttonTextSubmit: {
-    textAlign: 'center',
-    fontWeight: 800,
-  },
-
-  tableHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#778da9',
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  tableBody: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#fff',
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    width: '100%',
-  },
-  headerCell: {
-    width: 50,
-  },
-
-  openButton: {
-    backgroundColor: 'blue',
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: '#ef233c',
     padding: 10,
-    borderRadius: 5,
-    marginVertical: 5,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Transparent background
+    borderRadius: 50,
+    width: 40,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 1, // Ensure it's above other content
   },
-  modalContent: {
-    width: '100%',
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
-  modalBody: {
-    width: '100%',
+  scrollView: {
+    flex: 1,
   },
-  card: {
-    width: '95%',
-    backgroundColor: '#f5ebe0',
+  headerText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  detailsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
     padding: 10,
-    marginVertical: 8,
-    marginHorizontal: 10,
-    borderRadius: 8,
-    elevation: 3, // For shadow effect
-    shadowColor: '#000',
-    shadowOffset: {width: 1, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
   },
-  productName: {
+  customerDetails: {
+    flex: 1,
+    marginRight: 10,
+    backgroundColor: '#e9ecef',
+    padding: 10,
+    borderRadius: 5,
+  },
+  addressDetails: {
+    flex: 1,
+    marginLeft: 10,
+    backgroundColor: '#fcd5ce',
+    padding: 10,
+    borderRadius: 5,
+  },
+  detailsTitle: {
+    fontSize: 15,
+    fontWeight: 500,
+    marginBottom: 10,
+  },
+  productList: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
   },
-  input: {
-    height: 40,
-    borderColor: '#d8e2dc',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    backgroundColor: '#fff',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  picker: {
-    width: '100%',
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-
-  inputContainer: {
+  productItem: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 10,
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
-  inputSearch: {
-    flex: 1,
-    height: 40,
-    marginLeft: 10,
+  deleteIcon: {
+    width: 20,
+    height: 20,
   },
-  icon: {
-    width: 20, // Set the width of the icon
-    height: 20, // Set the height of the icon
-    resizeMode: 'contain', // Ensure the image scales properly
+  noProductsText: {
+    textAlign: 'center',
+    marginTop: 10,
   },
-  input1: {
-    backgroundColor: 'white',
+  productList: {
+    maxHeight: 200,
+    overflow: 'hidden',
+  },
+  addProductButton: {
+    backgroundColor: '#52b788',
     padding: 10,
     borderRadius: 5,
-    marginBottom: 10,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  addProductInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderRadius: 5,
+    borderColor: 'gray',
+    marginTop: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    height: '95%',
+    overflow: 'hidden',
+    paddingBottom: 150,
+  },
+  modalBody: {
+    width: '100%',
+  },
+  searchInput: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+  },
+  productCard: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  addButton: {
+    backgroundColor: '#52b788',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  closeModalButton: {
+    backgroundColor: '#ef233c',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  shippingForm: {
+    marginBottom: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  halfInput: {
     width: '48%',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    height: 40,
+    marginTop: 10,
+  },
+  submitButton: {
+    backgroundColor: '#52b788',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
   },
 });
+
+export default InvoiceModal;
