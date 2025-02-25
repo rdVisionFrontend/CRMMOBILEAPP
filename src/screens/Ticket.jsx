@@ -402,11 +402,11 @@ const Ticket = () => {
         </View>
       </Modal>
 
-      <View style={{flex: 1, position: 'absolute', top: 0, left: 5}}>
+      
         {invoiceModal && (
-          <TicketInvoiceModal data={invoiceData} closeModal={closeEmailModal} />
+          <TicketInvoiceModal  data={invoiceData} closeModal={closeEmailModal} />
         )}
-      </View>
+    
 
       {statusmodal && (
         <StatustModal

@@ -369,27 +369,9 @@ const AbcTicket = () => {
         transparent={true}
         animationType="slide"
         onRequestClose={closeEmailModal}>
-        <View
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          }}>
-          <View
-            style={{
-              width: '100%',
-              backgroundColor: '#fff',
-              borderRadius: 10,
-              padding: 20,
-              elevation: 5,
-              shadowColor: '#000',
-              shadowOffset: {width: 0, height: 2},
-              shadowOpacity: 0.25,
-              shadowRadius: 4,
-            }}>
+       
             <TicketInvoiceModal data={data} closeModal={closeEmailModal} />
-          </View>
-        </View>
+       
       </Modal>
 
       <Modal
